@@ -19,20 +19,19 @@
 % Version notes
 % 1.0
 
-function Experiment_CPM_Pressure_Fluct(P,O)
+function Experiment_CPM_Pressure_Fluct
 
-if ~nargin
-    clear mex global functions;         %#ok<CLMEX,CLFUNC>
-    P = InstantiateParameters; % load default parameters for comparable projects (should not ever be changed)
-    O = InstantiateOverrides; % load overrides used for testing (e.g., deactivating PTB output or other troubleshooting)
-    
-    addpath(cd);
-    addpath(P.path.experiment)
-    addpath(genpath(P.path.PTB))
-    if ~O.debug.toggleVisual
-        Screen('Preference', 'TextRenderer', 0);
-        %Screen('Preference', 'SkipSyncTests', 1);
-    end
+clear all %#ok<CLALL>
+% clear mex global functions;         %#ok<CLMEX,CLFUNC>
+P = InstantiateParameters; % load default parameters for comparable projects (should not ever be changed)
+O = InstantiateOverrides; % load overrides used for testing (e.g., deactivating PTB output or other troubleshooting)
+
+addpath(cd);
+addpath(P.path.experiment)
+addpath(genpath(P.path.PTB))
+if ~O.debug.toggleVisual
+    Screen('Preference', 'TextRenderer', 0);
+    %Screen('Preference', 'SkipSyncTests', 1);
 end
 
 P.time.stamp = datestr(now,30);
@@ -130,6 +129,7 @@ if P.startSection == 3
     %     fprintf('\nPhasic stimulus at %1.1f kPa\n',phasicPressure);
     [abort]=ShowInstruction(P,O,3,1);
     if abort;QuickCleanup(P);return;end
+    fprintf('\n');
     [abort] = CondPainMod(P,O,tonicPressure_trough,tonicPressure_peak,phasicPressure);
     if abort;QuickCleanup(P);return;end
     
@@ -289,18 +289,19 @@ P.com.lpt.CEDDuration           = 0.005; % wait time between triggers
 if strcmp(P.env.hostname,'stimpc1')
     P.com.lpt.pressureOnsetTHE      = 36; % this covers both CHEPS trigger (4) and SCR/Spike (32)
     if P.devices.arduino
-        P.com.lpt.pressureOnsetSCR      = 32;
+        P.com.lpt.pressureOnset      = 32;
     else % note: without arduino, this is NOT necessary on stimpc setup because there is no separate SCR recording device, just spike; therefore, do it with pressureOnsetTHE
-        P.com.lpt.pressureOnsetSCR      = 0;
+        P.com.lpt.pressureOnset      = 0;
     end
     P.com.lpt.VASOnset          = 128; % we'll figure this out later
     P.com.lpt.ITIOnset          = 128; % we'll figure this out later
     P.com.lpt.cueOnset          = 128; % we'll figure this out later
 else
 %     P.com.lpt.cueOnset      = 1; % bit 1; cue onset
-    P.com.lpt.pressureOnsetSCR  = 1; %4; % bit 3; pressure trigger for SCR
+    P.com.lpt.pressureOnset = 1; %4; % bit 3; pressure trigger for SCR
     P.com.lpt.VASOnset      = 2; %8; % bit 5;
     P.com.lpt.ITIOnset      = 3; %16; % bit 6; white fixation cross
+    P.com.lpt.buttonPress   = 4; % button press
     % Button presses??
 end
 
@@ -541,14 +542,13 @@ for i = 1:length(preExpInts)
         GetSecs;
     end
     
-    SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.cueOnset);
     fprintf('%1.1f kPa stimulus initiated.',preExpInts(i));
     
     stimDuration=CalcStimDuration(P,preExpInts(i),P.presentation.sStimPlateauPreexp);
     
     countedDown=1;
     tStimStart=GetSecs;
-    SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnsetSCR);
+    SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
     
     if P.devices.arduino
         abort = UseCPAR('Init',P.com.arduino); % initialize arduino/CPAR
@@ -675,28 +675,32 @@ countTrial = 1;
 for block = 1:P.presentation.CPM.blocks
     
     % Set tonic stimulus pressure
-    if nargin<1 && P.pain.CPM.tonicStim.condition == 1 % experimental tonic stimulus
+    if nargin<1 && P.pain.CPM.tonicStim.condition(block) == 1 % experimental tonic stimulus
         tonicPressure_trough = P.pain.CPM.tonicStim.pressureTrough;
         tonicPressure_peak = P.pain.CPM.tonicStim.pressurePeak;
         phasicPressure = P.pain.CPM.phasicStim.pressure;
-    elseif nargin >= 1 && P.pain.CPM.tonicStim.condition == 1 % experimental tonic stimulus
+        
+    elseif nargin>= 1 && P.pain.CPM.tonicStim.condition(block) == 1 % experimental tonic stimulus
         if isempty(varargin{1}); tonicPressure_trough = P.pain.CPM.tonicStim.pressureTrough;
         else; tonicPressure_trough = varargin{1}; end
         if isempty(varargin{2}); tonicPressure_peak = P.pain.CPM.tonicStim.pressurePeak;
         else; tonicPressure_peak = varargin{2}; end
         if isempty(varargin{3}); phasicPressure = P.pain.CPM.phasicStim.pressure;
         else; phasicPressure = varargin{3}; end
-    elseif nargin<1 && P.pain.CPM.tonicStim.condition == 0 % control tonic stimulus
+        
+    elseif nargin<1 && P.pain.CPM.tonicStim.condition(block) == 0 % control tonic stimulus
         tonicPressure_trough = P.pain.CPM.tonicStim.pressureTroughControl;
         tonicPressure_peak = P.pain.CPM.tonicStim.pressurePeakControl;
         phasicPressure = P.pain.CPM.phasicStim.pressure; % phasic stimulus the same
-    elseif nargin >= 1 && P.pain.CPM.tonicStim.condition == 0
+        
+    elseif nargin>= 1 && P.pain.CPM.tonicStim.condition(block) == 0
         if isempty(varargin{1}); tonicPressure_trough = P.pain.CPM.tonicStim.pressureTroughControl;
         else; tonicPressure_trough = varargin{1}; end
         if isempty(varargin{2}); tonicPressure_peak = P.pain.CPM.tonicStim.pressurePeakControl;
         else; tonicPressure_peak = varargin{2}; end
         if isempty(varargin{3}); phasicPressure = P.pain.CPM.phasicStim.pressure; % phasic stimulus the same
         else; phasicPressure = varargin{3}; end
+        
     end
 
     trialPressure = [tonicPressure_trough tonicPressure_peak phasicPressure]; % input to UseCPAR and CreateCPARStimulus
@@ -764,7 +768,7 @@ for block = 1:P.presentation.CPM.blocks
         % Start trial
         fprintf('\n=======TRIAL %d of %d=======\n',trial,P.presentation.CPM.trialsPerBlock);
         
-        [abort]=ApplyStimulus(P,O,trialPressure,countTrial,block,trial); % run stimulus
+        [abort]=ApplyStimulus(P,O,trialPressure,block,trial); % run stimulus
         countTrial = countTrial+1;
         if abort; QuickCleanup; break; end
         
@@ -785,47 +789,48 @@ for block = 1:P.presentation.CPM.blocks
         end
         
     end
-    
-end
 
-% Text for finishing a block
-if ~O.debug.toggleVisual
-    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Stimulus block finished. Wait for the next block to start.', 'center', upperHalf, P.style.white);
-    outroTextOn = Screen('Flip',P.display.w);
-else
-    outroTextOn = GetSecs;
-end
-
-% Interblock interval
-if block ~= P.presentation.CPM.blocks
-    while GetSecs < outroTextOn + P.presentation.CPM.blockBetweenTime % wait the time between blocks
-        [abort]=LoopBreaker(P);
-        if abort; break; end
-    end
-    
-elseif block == P.presentation.CPM.blocks % if last block, show end of the experiment screen
-    
+    % Text for finishing a block
     if ~O.debug.toggleVisual
-        [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'This part of the test has ended. Please wait for further instruction.', 'center', upperHalf, P.style.white);
-%         endTextOn = Screen('Flip',P.display.w);
-%     else
-%         endTextOn = GetSecs;
+        [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Stimulus block finished. Wait for the next block to start.', 'center', upperHalf, P.style.white);
+        outroTextOn = Screen('Flip',P.display.w);
+    else
+        outroTextOn = GetSecs;
     end
     
-    fprintf('\n CPM test has ended. ');
-    
-end
+    % Interblock interval
+    if block ~= P.presentation.CPM.blocks
+        while GetSecs < outroTextOn + P.presentation.CPM.blockBetweenTime % wait the time between blocks
+            [abort]=LoopBreaker(P);
+            if abort; break; end
+        end
+        
+    elseif block == P.presentation.CPM.blocks % if last block, show end of the experiment screen
+        
+        if ~O.debug.toggleVisual
+            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'This part of the test has ended. Please wait for further instruction.', 'center', upperHalf, P.style.white);
+            %         endTextOn = Screen('Flip',P.display.w);
+            %     else
+            %         endTextOn = GetSecs;
+        end
+        
+        fprintf('\n CPM test has ended. ');
+        
+    end
+
 
 end
 
-function [abort]=ApplyStimulus(P,O,trialPressure,countTrial,block,trial)
+end
+
+function [abort]=ApplyStimulus(P,O,trialPressure,block,trial)
 
 abort=0;
 
-fprintf('Tonic stimulus initiated... ');
+fprintf(['Tonic stimulus initiated (' num2str(trialPressure(1)) ' to ' num2str(trialPressure(2)) ' kPa)... ']);
 
 countedDown=1;
-SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnsetSCR);
+SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
 
 phasic_on = P.pain.CPM.phasicStim.on(block);
 
@@ -842,7 +847,7 @@ if P.devices.arduino
         % VAS
         fprintf(' VAS... ');
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
-        [abort,P] = tonicStimVASRating(P,O,block);
+        [abort,P] = tonicStimVASRating(P,O,block,trial);
         
         %     if phasic_on
         %         P = phasicStimVASRating(P,O,block);
@@ -854,8 +859,14 @@ if P.devices.arduino
         %         end
         %     end
         
+        while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS+P.presentation.CPM.tonicStim.durationVASBuffer
+            [abort]=LoopBreaker(P);
+            if abort; break; end
+        end
+    
         [abort,trialData] = UseCPAR('Data'); % retrieve data
-        SaveData(P,trialData,countTrial); % save data for this trial
+        SaveData(P,trialData,block,trial); % save data for this trial
+        fprintf(' Saving CPAR data... ')
         
         abort = UseCPAR('Kill');
         
@@ -865,7 +876,7 @@ if P.devices.arduino
 
 else
     
-    while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS
+    while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS+P.presentation.CPM.tonicStim.durationVASBuffer
         [countedDown]=CountDown(GetSecs-tStimStart,countedDown,'.');
         [abort]=LoopBreaker(P);
         if abort; return; end
@@ -891,9 +902,24 @@ function [abort,P]=tonicStimVASRating(P,O,block,trial)
 % end
 % while GetSecs < tBlankOn + 0.5; end
 
-[abort,P] = VASScale_v6_tonic(P,O,trial);
-VAS = P.VAS;
-save(fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '.mat']), 'VAS');
+[abort,conRating,conTime,keyId,response] = onlineScale(P);
+
+VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '.mat']);
+if exist(VASFile,'file')
+    VASData = load(VASFile);
+    VAS = VASData.VAS;
+end
+
+tonicStim.conRating = conRating;
+tonicStim.conTime = conTime;
+tonicStim.keyId = keyId;
+tonicStim.response = response;
+
+VAS(trial).tonicStim = tonicStim;
+
+% Save on every trial
+fprintf(' Saving VAS data... ')
+save(VASFile, 'VAS');
 
 if ~O.debug.toggleVisual
     Screen('Flip',P.display.w);
@@ -902,10 +928,10 @@ end
 end
 
 % Save CPAR data
-function SaveData(P,trialData,countTrial)
+function SaveData(P,trialData,block,countTrial)
 
 try
-    dataFile = fullfile(P.out.dir,P.out.file.CPAR);
+    dataFile = fullfile(P.out.dir,[P.out.file.CPAR '_block' num2str(block) '.mat']);
     if exist(dataFile,'file')
         loadedData = load(dataFile);
         cparData = loadedData.cparData;

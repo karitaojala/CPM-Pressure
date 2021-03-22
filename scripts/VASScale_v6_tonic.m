@@ -1,4 +1,4 @@
-function [abort,P] = VASScale_v6_tonic(P,O,varargin)
+function [abort,P] = VASScale_v6_tonic(P,O,trial)
 
 KbName('UnifyKeyNames');
 
@@ -56,14 +56,17 @@ if ~nargin
     ratingId                    = 1;
     nRating                     = 1;
 else
+    
+    nRating         = trial;%P.currentTrial(1).nRating;
+        
     if O.debug.toggleVisual
         warning('Visuals deactivated, returning NaN.');
-        P.VAS.tonicStim.nRating = NaN;
-        P.VAS.tonicStim.reactionTime = NaN;
-        P.VAS.tonicStim.nRatings = NaN;
-        P.VAS.tonicStim.durRating = NaN;
-        P.VAS.tonicStim.logRatings = NaN;
-        P.VAS.tonicStim.ratingTime = NaN;
+        P.VAS(nRating).tonicStim.nRating = NaN;
+        P.VAS(nRating).tonicStim.reactionTime = NaN;
+        P.VAS(nRating).tonicStim.nRatings = NaN;
+        P.VAS(nRating).tonicStim.durRating = NaN;
+        P.VAS(nRating).tonicStim.logRatings = NaN;
+        P.VAS(nRating).tonicStim.ratingTime = NaN;
         return;
     end
     
@@ -76,7 +79,6 @@ else
     keys            = P.keys;
     scaleType       = 'double';%P.currentTrial(1).trialType;
     ratingId        = 11;%P.currentTrial(P.currentTrial(1).nRating).ratingId;
-    nRating         = varargin{1};%P.currentTrial(1).nRating;
     LANGUAGE        = P.language; % de or en
 end
 
@@ -321,11 +323,12 @@ while numberOfSecondsRemaining  > 0
         
         [ keyIsDown, secs, keyCode ] = KbCheck; % this checks the keyboard very, very briefly.
         if keyIsDown % only if a key was pressed we check which key it was
+            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.buttonPress);
             response = 0; % predefine variable for confirmation button
             nrbuttonpresses = nrbuttonpresses + 1;
-
+            pressed = find(keyCode, 1, 'first');
+            
             if strcmp(scaleType,'Test')
-                pressed = find(keyCode, 1, 'first');
                 fprintf('%s\n',char(keyList(pressed)));
             end
             
@@ -348,18 +351,17 @@ while numberOfSecondsRemaining  > 0
                 break;
             end
             
-            keyId(nbuttonpresses) = pressed;
-            keyName(nbuttonpresses) = keyList(pressed);
-            keyTime(nbuttonpresses) = secs;
+            keyId(nrbuttonpresses) = pressed;
+            keyName(nrbuttonpresses) = keyList(pressed);
+            keyTime(nrbuttonpresses) = secs;
             logRatings(nrbuttonpresses) = currentRating; % log current rating
             
         end
     end
-    
+
     numberOfSecondsElapsed   = (GetSecs - startTime);
     numberOfSecondsRemaining = durRating - numberOfSecondsElapsed;
-    
-    if nrbuttonpresses
+    if nrbuttonpresses == 1
         reactionTime = numberOfSecondsElapsed;
     end
     
@@ -369,22 +371,40 @@ while numberOfSecondsRemaining  > 0
     
 end
 
-if  nrbuttonpresses == 0
+if nrbuttonpresses == 0
     reactionTime = durRating;
     fprintf('NO RESPONSE\n')
 end
 
-P.VAS.tonicStim(nRating).nRating = nRating;
-P.VAS.tonicStim(nRating).reactionTime = reactionTime;
-P.VAS.tonicStim(nRating).nRatings = nrbuttonpresses;
-P.VAS.tonicStim(nRating).durRating = numberOfSecondsElapsed;
-P.VAS.tonicStim(nRating).logRatings = logRatings;
-P.VAS.tonicStim(nRating).ratingTime = ratingTime;
+P.VAS(nRating).tonicStim.nRating = nRating;
+P.VAS(nRating).tonicStim.reactionTime = reactionTime;
+P.VAS(nRating).tonicStim.nRatings = nrbuttonpresses;
+P.VAS(nRating).tonicStim.durRating = numberOfSecondsElapsed;
+P.VAS(nRating).tonicStim.logRatings = logRatings;
+P.VAS(nRating).tonicStim.ratingTime = ratingTime;
 
 P.keyPresses(nRating).keyId = keyId;
+P.keyPresses(nRating).keyName = keyName;
 P.keyPresses(nRating).keyTime = keyTime;
 
 if strcmp(scaleType,'Test')
     ListenChar(0);
     sca;
+end
+
+
+end
+
+%% Set Marker for CED and BrainVision Recorder
+function SendTrigger(P,address,port)
+% Send pulse to CED for SCR, thermode, digitimer
+% [handle, errmsg] = IOPort('OpenSerialport',num2str(port)); % gives error
+% msg on grahl laptop
+if P.devices.trigger
+    outp(address,port);
+    WaitSecs(P.com.lpt.CEDDuration);
+    outp(address,0);
+    WaitSecs(P.com.lpt.CEDDuration);
+end
+
 end

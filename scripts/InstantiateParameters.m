@@ -1,7 +1,7 @@
 function P = InstantiateParameters
 
 P = struct;
-P.protocol.sbId     = 02; % subject ID
+P.protocol.sbId     = 04; % subject ID
 P.protocol.session  = 1;
 % P.protocol.nRatings = 2;
 % P.log.ratings       = [];
@@ -72,8 +72,8 @@ P.presentation.sStimPlateau             = 60; % duration of the constant pressur
 
 % Conditioned pain modulation
 P.presentation.CPM.blocks = 2; % number of blocks/runs in the CPM experiment - plan: 3 blocks/runs
-P.presentation.CPM.trialsPerBlock = 4; % 4 stimuli of 3 min per block -> 12 min + 4 x 30 s ITI + 60 s between blocks = 15 min per block/run -> 3 blocks = 45 min
-P.pain.CPM.phasicStim.on = [0 1 1 1 1 0]; % on which blocks the phasic test stimuli will be delivered to the other cuff, in addition to the tonic conditioning stimulus
+P.presentation.CPM.trialsPerBlock = 2; % 4 stimuli of 3 min per block -> 12 min + 4 x 30 s ITI + 60 s between blocks = 15 min per block/run -> 3 blocks = 45 min
+P.pain.CPM.phasicStim.on = [1 1 1 1 1 0]; % on which blocks the phasic test stimuli will be delivered to the other cuff, in addition to the tonic conditioning stimulus
 % these are also the blocks with online VAS rating of tonic stimulus
 conditions = [zeros(1,P.presentation.CPM.blocks/2) ones(1,P.presentation.CPM.blocks/2)]; % 0 = control tonic stimulus (non-painful), 1 = experimental tonic stimulus (painful)
 ordering = randperm(P.presentation.CPM.blocks);
@@ -94,8 +94,8 @@ P.pain.CPM.phasicStim.cuff  = 2;
 P.pain.CPM.tonicStim.fullStimDuration             = 60; % duration of 1 cycle of the tonic stimulus
 P.pain.CPM.tonicStim.rampDuration                 = P.pain.CPM.tonicStim.fullStimDuration/2; % duration of ramp up/down of 1 cycle
 P.pain.CPM.tonicStim.startendRampDuration         = 10; % duration of ramp up/down before/after tonic stimulus
-P.pain.CPM.tonicStim.pressurePeak    = 30; % pressure at peak of the tonic stimulus (maximum), e.g. at VAS 9
-P.pain.CPM.tonicStim.pressureTrough  = 20; % pressure at trough of the tonic stimulus (minimum), e.g. at VAS 7
+P.pain.CPM.tonicStim.pressurePeak    = 20; % pressure at peak of the tonic stimulus (maximum), e.g. at VAS 9
+P.pain.CPM.tonicStim.pressureTrough  = 10; % pressure at trough of the tonic stimulus (minimum), e.g. at VAS 7
 %P.pain.CPM.tonicStim.pressureDiff    = P.pain.CPM.tonicStim.pressurePeak-P.pain.CPM.tonicStim.pressureTrough;
 P.pain.CPM.tonicStim.pressurePeakControl    = 10; % pressure at peak of the tonic stimulus (maximum) for control condition
 P.pain.CPM.tonicStim.pressureTroughControl  = 5;  % pressure at trough of the tonic stimulus (minimum) for control condition
@@ -155,6 +155,7 @@ P.pain.CPM.phasicStim.onsets = onsets;
 % Rating of pressure pain stimuli
 P.presentation.CPM.tonicStim.firstTrialWait = 30; 
 P.presentation.CPM.tonicStim.durationVAS    = P.pain.CPM.tonicStim.fullStimDuration*P.pain.CPM.tonicStim.cycles; % Presentation duration of VAS rating scale for tonic stimuli (continous, online)
+P.presentation.CPM.tonicStim.durationVASBuffer = 5; % Seconds to wait until VAS finishes for CPAR to have finished, to save CPAR data
 P.presentation.CPM.tonicStim.totalITI       = 30; % total ITI between conditioning stimuli
 P.presentation.CPM.blockBetweenTime         = 60; % time in between blocks/runs
 P.presentation.BlockStopDuration        = 2;  % time to stop at the block display
