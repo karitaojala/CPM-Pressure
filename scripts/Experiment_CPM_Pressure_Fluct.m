@@ -35,7 +35,7 @@ if ~O.debug.toggleVisual
 end
 
 P.time.stamp = datestr(now,30);
-P.time.scriptStart=GetSecs;
+P.time.scriptStart = GetSecs;
 
 if ~isempty(O.language)
     P.language = O.language;
@@ -103,7 +103,7 @@ if P.startSection == 3
     if ~exist('tonicPressure_trough','var') % if no starting value provided by calibration
         ListenChar(0); % activate keyboard input
         commandwindow;
-        tonicPressure_trough=input('Please enter tonic pain stimulus trough intensity (kPa) for the experiment.\n');
+        tonicPressure_trough=input('\nPlease enter tonic pain stimulus trough intensity (kPa) for the experiment.\n');
         %         if isempty(tonicPressure_trough); tonicPressure_trough = P.pain.CPM.throughPressure; end
         ListenChar(2); % deactivate keyboard input
     end
@@ -128,8 +128,7 @@ if P.startSection == 3
     %     fprintf('\nTonic stimulus trough at %1.1f kPa\n',tonicPressure_peak);
     %     fprintf('\nPhasic stimulus at %1.1f kPa\n',phasicPressure);
     [abort]=ShowInstruction(P,O,3,1);
-    if abort;QuickCleanup(P);return;end
-    fprintf('\n');
+    if abort;QuickCleanup(P);return;end    
     [abort] = CondPainMod(P,O,tonicPressure_trough,tonicPressure_peak,phasicPressure);
     if abort;QuickCleanup(P);return;end
     
@@ -215,8 +214,8 @@ if ~exist(P.out.dir,'dir')
     mkdir(P.out.dir);
 end
 
-P.out.file.CPAR=['sub' sprintf('%03d',P.protocol.sbId) '_CPAR'];
-P.out.file.VAS=['sub' sprintf('%03d',P.protocol.sbId) '_VAS'];
+P.out.file.CPAR = ['sub' sprintf('%03d',P.protocol.sbId) '_CPAR'];
+P.out.file.VAS = ['sub' sprintf('%03d',P.protocol.sbId) '_VAS'];
 fprintf('Saving data to %s%s.\n',P.out.dir,P.out.file.CPAR);
 fprintf('Saving data to %s%s.\n',P.out.dir,P.out.file.VAS);
 
@@ -250,7 +249,7 @@ Screen('Preference', 'DefaultFontSize', P.style.fontsize);
 Screen('Preference', 'DefaultFontName', P.style.fontname);
 %Screen('Preference', 'TextAntiAliasing',2);                       % Enable textantialiasing high quality
 Screen('Preference', 'VisualDebuglevel', 0);                       % 0 disable all visual alerts
-%Screen('Preference', 'SuppressAllWarnings', 0);
+Screen('Preference', 'SuppressAllWarnings', 0);
 beep off;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Open a graphics window using PTB
@@ -302,7 +301,6 @@ else
     P.com.lpt.VASOnset      = 2; %8; % bit 5;
     P.com.lpt.ITIOnset      = 3; %16; % bit 6; white fixation cross
     P.com.lpt.buttonPress   = 4; % button press
-    % Button presses??
 end
 
 % Establish parallel port communication.
@@ -405,7 +403,7 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'then the measurement will start!', 'center', upperEight+P.style.lineheight, P.style.white);
         end
         
-    elseif section == 4
+    elseif section == 2
         
         fprintf('Ready CALIBRATION protocol.\n');
         if strcmp(P.language,'de')
@@ -537,17 +535,15 @@ for i = 1:length(preExpInts)
     if ~O.debug.toggleVisual
         Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
         Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
-        Screen('Flip',P.display.w);                      % gets timing of event for PutLog
-    else
-        GetSecs;
+        Screen('Flip',P.display.w);
     end
     
     fprintf('%1.1f kPa stimulus initiated.',preExpInts(i));
     
     stimDuration=CalcStimDuration(P,preExpInts(i),P.presentation.sStimPlateauPreexp);
     
-    countedDown=1;
-    tStimStart=GetSecs;
+    countedDown = 1;
+    tStimStart = GetSecs;
     SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
     
     if P.devices.arduino
@@ -566,8 +562,6 @@ for i = 1:length(preExpInts)
         
         abort = UseCPAR('Kill');
         if abort; QuickCleanup(P); return; end
-        
-%         fprintf('\n');
         
     else
         
@@ -596,8 +590,6 @@ for i = 1:length(preExpInts)
     
     if preexPainful
         fprintf('Stimulus rated as painful. \n');
-        %         testStartValue = preExpInts(i);
-        %         return;
     else
         fprintf('Stimulus rated as not painful. \n');
     end
@@ -706,7 +698,7 @@ for block = 1:P.presentation.CPM.blocks
     trialPressure = [tonicPressure_trough tonicPressure_peak phasicPressure]; % input to UseCPAR and CreateCPARStimulus
     
     % Start block
-    fprintf('\n=======BLOCK %d of %d=======\n',block,P.presentation.CPM.blocks);
+    fprintf('\n\n=======BLOCK %d of %d=======\n',block,P.presentation.CPM.blocks);
     
     fprintf('Displaying instructions... ');
     
@@ -759,20 +751,29 @@ for block = 1:P.presentation.CPM.blocks
                 introTextOn = GetSecs;
             end
         
+            fprintf('\nWaiting for the first stimulus to start... ');
             while GetSecs < introTextOn + P.presentation.CPM.tonicStim.firstTrialWait
+                countedDown = 1;
+                tmp=num2str(SecureRound(GetSecs-introTextOn,0));
+                CountDown(GetSecs-introTextOn,countedDown,[tmp ' ']);
                 [abort]=LoopBreaker(P);
                 if abort; break; end
+                WaitSecs(1);
             end
         end
         
         % Start trial
-        fprintf('\n=======TRIAL %d of %d=======\n',trial,P.presentation.CPM.trialsPerBlock);
+        fprintf('\n\n=======TRIAL %d of %d=======\n',trial,P.presentation.CPM.trialsPerBlock);
         
         [abort]=ApplyStimulus(P,O,trialPressure,block,trial); % run stimulus
+        save(fullfile(P.out.dir,['parameters_sub' sprintf('%03d',P.protocol.sbId) '.mat']),'P','O'); % Save instantiated parameters and overrides after each trial
+        % (includes timing information)
+        
         countTrial = countTrial+1;
         if abort; QuickCleanup; break; end
         
         if ~O.debug.toggleVisual
+            Screen('TextSize',P.display.w,P.style.fontsize); % text size back to bigger (smaller in VAS screen)
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Stimulus trial finished. Wait for the next stimulus to start.', 'center', upperHalf, P.style.white);
             outroTextOn = Screen('Flip',P.display.w);
         else
@@ -782,9 +783,14 @@ for block = 1:P.presentation.CPM.blocks
         % Intertrial interval if not the last stimulus in the block, 
         % if last trial then end trial immediately
         if trial ~= P.presentation.CPM.trialsPerBlock
+            fprintf('\nIntertrial interval... ');
             while GetSecs < outroTextOn + P.presentation.CPM.tonicStim.totalITI
+                countedDown = 1;
+                tmp=num2str(SecureRound(GetSecs-outroTextOn,0));
+                CountDown(GetSecs-outroTextOn,countedDown,[tmp ' ']);
                 [abort]=LoopBreaker(P);
                 if abort; break; end
+                WaitSecs(1);
             end
         end
         
@@ -800,18 +806,34 @@ for block = 1:P.presentation.CPM.blocks
     
     % Interblock interval
     if block ~= P.presentation.CPM.blocks
+        fprintf('\nInterblock interval... ');
         while GetSecs < outroTextOn + P.presentation.CPM.blockBetweenTime % wait the time between blocks
+            tmp=num2str(SecureRound(GetSecs-outroTextOn,0));
+            CountDown(GetSecs-outroTextOn,countedDown,[tmp ' ']);
             [abort]=LoopBreaker(P);
             if abort; break; end
+            WaitSecs(1);
         end
         
     elseif block == P.presentation.CPM.blocks % if last block, show end of the experiment screen
         
         if ~O.debug.toggleVisual
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'This part of the test has ended. Please wait for further instruction.', 'center', upperHalf, P.style.white);
-            %         endTextOn = Screen('Flip',P.display.w);
-            %     else
-            %         endTextOn = GetSecs;
+%             endTextOn = Screen('Flip',P.display.w);
+        end
+        
+        fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
+        
+        while 1
+            [keyIsDown, ~, keyCode] = KbCheck();
+            if keyIsDown
+                if find(keyCode) == P.keys.resume
+                    break;
+                elseif find(keyCode) == P.keys.esc
+                    abort = 1;
+                    break;
+                end
+            end
         end
         
         fprintf('\n CPM test has ended. ');
@@ -825,16 +847,11 @@ end
 
 function [abort]=ApplyStimulus(P,O,trialPressure,block,trial)
 
-abort=0;
+abort = 0;
 
 fprintf(['Tonic stimulus initiated (' num2str(trialPressure(1)) ' to ' num2str(trialPressure(2)) ' kPa)... ']);
 
-countedDown=1;
-SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
-
 phasic_on = P.pain.CPM.phasicStim.on(block);
-
-tStimStart=GetSecs;
 
 if P.devices.arduino
     
@@ -842,24 +859,43 @@ if P.devices.arduino
         
         abort = UseCPAR('Init',P.com.arduino); % initialize arduino/CPAR
         abort = UseCPAR('Set','CPM',P,trialPressure,phasic_on,block,trial); % set stimulus
+        P.time.trialStart(block,trial) = GetSecs-P.time.scriptStart;
+        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
         abort = UseCPAR('Trigger',P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
-        
+        P.time.tonicStimStart(block,trial) = GetSecs-P.time.scriptStart;
+        tStimStart = GetSecs;
+
         % VAS
-        fprintf(' VAS... ');
-        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
-        [abort,P] = tonicStimVASRating(P,O,block,trial);
+        if ~phasic_on
+            
+            fprintf(' VAS... ');
+            P.time.tonicStimVASStart(block,trial) = GetSecs-P.time.scriptStart;
+            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
+            if ~O.debug.toggleVisual; [abort,P] = tonicStimVASRating(P,O,block,trial); end
+            P.time.tonicStimVASEnd(block,trial) = GetSecs-P.time.scriptStart;
+            
+        else
+            
+            phasicOnsets = P.pain.CPM.phasicStim.onsets(block,trial,:,:);
+            phasicOnsets = sort(phasicOnsets(:));
+            
+            for phasicStim = 1:P.pain.CPM.tonicStim.cycles*P.pain.CPM.phasicStim.stimPerCycle
+                
+                VASOnset = tStimStart + phasicOnsets(phasicStim) + P.pain.CPM.phasicStim.duration + P.presentation.CPM.phasicStim.waitforVAS;
+                while GetSecs < VASOnset
+                    % Wait until VAS onset for this cycle/phasic stimulus
+                end
+                fprintf([' VAS (' num2str(phasicStim) '/' num2str(P.pain.CPM.tonicStim.cycles*P.pain.CPM.phasicStim.stimPerCycle) ')... ']);
+                P.time.phasiccStimVASStart(block,trial,phasicStim) = GetSecs-P.time.scriptStart;
+                SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
+                if ~O.debug.toggleVisual; [abort,P] = phasicStimVASRating(P,O,block,trial,phasicStim); end
+                P.time.phasicStimVASEnd(block,trial,phasicStim) = GetSecs-P.time.scriptStart;
+                
+            end
+            
+        end
         
-        %     if phasic_on
-        %         P = phasicStimVASRating(P,O,block);
-        %     else
-        %         while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS
-        %             [countedDown]=CountDown(GetSecs-tStimStart,countedDown,'.');
-        %             [abort]=LoopBreaker(P);
-        %             if abort; break; end
-        %         end
-        %     end
-        
-        while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS+P.presentation.CPM.tonicStim.durationVASBuffer
+        while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS%+P.presentation.CPM.tonicStim.durationBuffer
             [abort]=LoopBreaker(P);
             if abort; break; end
         end
@@ -876,7 +912,9 @@ if P.devices.arduino
 
 else
     
-    while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS+P.presentation.CPM.tonicStim.durationVASBuffer
+    countedDown = 1;
+    tStimStart = GetSecs;
+    while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS%+P.presentation.CPM.tonicStim.durationBuffer
         [countedDown]=CountDown(GetSecs-tStimStart,countedDown,'.');
         [abort]=LoopBreaker(P);
         if abort; return; end
@@ -918,7 +956,37 @@ tonicStim.response = response;
 VAS(trial).tonicStim = tonicStim;
 
 % Save on every trial
-fprintf(' Saving VAS data... ')
+% fprintf(' Saving VAS data... ')
+save(VASFile, 'VAS');
+
+if ~O.debug.toggleVisual
+    Screen('Flip',P.display.w);
+end
+
+end
+
+% Phasic stimulus pain rating with one-off VAS during interstimulus
+% interval
+function [abort,P]=phasicStimVASRating(P,O,block,trial,stim)
+
+[abort,finalRating,reactionTime,keyId,keyTime,response] = singleratingScale(P);
+
+VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '.mat']);
+if exist(VASFile,'file')
+    VASData = load(VASFile);
+    VAS = VASData.VAS;
+end
+
+phasicStim.finalRating = finalRating;
+phasicStim.reactionTime = reactionTime;
+phasicStim.keyId = keyId;
+phasicStim.keyTime = keyTime;
+phasicStim.response = response;
+
+VAS(trial,stim).phasicStim = phasicStim;
+
+% Save on every trial
+% fprintf(' Saving VAS data... ')
 save(VASFile, 'VAS');
 
 if ~O.debug.toggleVisual
@@ -928,7 +996,7 @@ end
 end
 
 % Save CPAR data
-function SaveData(P,trialData,block,countTrial)
+function SaveData(P,trialData,block,trial)
 
 try
     dataFile = fullfile(P.out.dir,[P.out.file.CPAR '_block' num2str(block) '.mat']);
@@ -937,13 +1005,13 @@ try
         cparData = loadedData.cparData;
     end
     
-    cparData(countTrial).data = trialData;
+    cparData(trial).data = trialData;
     
     if ~isempty(cparData) && ~isempty(trialData)
         save(dataFile,'cparData');
     end
 catch
-    fprintf(['Saving trial ' num2str(countTrial) 'data failed.\n']);
+    fprintf(['Saving trial ' num2str(trial) 'data failed.\n']);
 end
 
 end

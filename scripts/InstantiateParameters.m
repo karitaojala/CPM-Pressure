@@ -1,7 +1,7 @@
 function P = InstantiateParameters
 
 P = struct;
-P.protocol.sbId     = 04; % subject ID
+P.protocol.sbId     = 05; % subject ID
 P.protocol.session  = 1;
 % P.protocol.nRatings = 2;
 % P.log.ratings       = [];
@@ -153,14 +153,15 @@ P.pain.CPM.phasicStim.onsets = onsets;
 
 %% VAS rating parameters
 % Rating of pressure pain stimuli
-P.presentation.CPM.tonicStim.firstTrialWait = 30; 
+P.presentation.CPM.tonicStim.firstTrialWait = 5; 
 P.presentation.CPM.tonicStim.durationVAS    = P.pain.CPM.tonicStim.fullStimDuration*P.pain.CPM.tonicStim.cycles; % Presentation duration of VAS rating scale for tonic stimuli (continous, online)
-P.presentation.CPM.tonicStim.durationVASBuffer = 5; % Seconds to wait until VAS finishes for CPAR to have finished, to save CPAR data
+P.presentation.CPM.tonicStim.durationBuffer = 5; % Seconds to wait until VAS finishes for CPAR to have finished, to save CPAR data
 P.presentation.CPM.tonicStim.totalITI       = 30; % total ITI between conditioning stimuli
 P.presentation.CPM.blockBetweenTime         = 60; % time in between blocks/runs
 P.presentation.BlockStopDuration        = 2;  % time to stop at the block display
 
-P.presentation.phasicStim.durationVAS   = 5; % time to rate VAS for test stimuli during ISI
+P.presentation.CPM.phasicStim.durationVAS   = 5; % time to rate VAS for test stimuli during ISI
+P.presentation.CPM.phasicStim.waitforVAS    = 1; % time to wait until VAS onset after stimulus end
 % P.presentation.phasicStim.totalISI      = 20; % total ISI between test stimuli
 
 % P.CPM_CondStimTroughPressure    = 1; % tonic conditioning stimulus intensity trough (kPa); overridden by calibration
