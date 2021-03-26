@@ -14,6 +14,6 @@ O.display.screen        = 1; % 2 is default; use [] for one screen setup...
 O.sound.deviceId        = [];
 O.sound.step2Range      = [];
 O.pain.step2Range       = [];
-O.devices.arduino       = 1; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress arduino initialization
+O.devices.arduino       = 0; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress arduino initialization
 % O.devices.trigger  = 0;
 O.devices.eyetracker    = 0; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress eyetracker initialization

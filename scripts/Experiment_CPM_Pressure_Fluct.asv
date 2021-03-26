@@ -762,8 +762,6 @@ while ~abort
                 end
             end
             
-            if abort; break; end
-            
             % Start trial
             fprintf('\n\n=======TRIAL %d of %d=======\n',trial,P.presentation.CPM.trialsPerBlock);
             
@@ -793,14 +791,9 @@ while ~abort
                     if abort; break; end
                     WaitSecs(1);
                 end
-                
             end
             
-            if abort; break; end
-            
         end
-        
-        if abort; break; end
         
         % Text for finishing a block
         if ~O.debug.toggleVisual
@@ -820,8 +813,6 @@ while ~abort
                 if abort; break; end
                 WaitSecs(1);
             end
-            
-            if abort; break; end
             
         elseif block == P.presentation.CPM.blocks % if last block, show end of the experiment screen
             
@@ -863,21 +854,21 @@ abort = 0;
 
 while ~abort
     
-    fprintf(['Tonic stimulus initiated (' num2str(trialPressure(1)) ' to ' num2str(trialPressure(2)) ' kPa)... ']);
-    
-    phasic_on = P.pain.CPM.phasicStim.on(block);
-    
-    P.time.trialStart(block,trial) = GetSecs-P.time.scriptStart;
-    
-    if P.devices.arduino
+fprintf(['Tonic stimulus initiated (' num2str(trialPressure(1)) ' to ' num2str(trialPressure(2)) ' kPa)... ']);
+
+phasic_on = P.pain.CPM.phasicStim.on(block);
+
+P.time.trialStart(block,trial) = GetSecs-P.time.scriptStart;
+
+if P.devices.arduino
         
         abort = UseCPAR('Init',P.com.arduino); % initialize arduino/CPAR
-        abort = UseCPAR('Set','CPM',P,trialPressure,phasic_on,block,trial); % set stimulus
+        abort = UseCPAR('Set','CPM',P,trialPressure,phasic_on,block,trial); % set stimulus   
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
         abort = UseCPAR('Trigger',P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
         P.time.tonicStimStart(block,trial) = GetSecs-P.time.scriptStart;
         tStimStart = GetSecs;
-        
+
         % VAS
         if ~phasic_on
             
@@ -912,7 +903,7 @@ while ~abort
             [abort]=LoopBreaker(P);
             if abort; break; end
         end
-        
+    
         [abort,trialData] = UseCPAR('Data'); % retrieve data
         SaveData(P,trialData,block,trial); % save data for this trial
         fprintf(' Saving CPAR data... ')
@@ -920,25 +911,24 @@ while ~abort
         abort = UseCPAR('Kill');
         
         if abort; fprintf(' Aborting! \n'); end; break;
+        
+    end
 
-    else
-        
-        countedDown = 1;
-        tStimStart = GetSecs;
-        P.time.tonicStimStart(block,trial) = tStimStart-P.time.scriptStart;
-        while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS%+P.presentation.CPM.tonicStim.durationBuffer
-            tmp=num2str(SecureRound(GetSecs-tStimStart,0));
-            [countedDown]=CountDown(GetSecs-tStimStart,countedDown,[tmp ' ']);
-            [abort]=LoopBreaker(P);
-            if abort; break; end
-        end
-        
+else
+    
+    countedDown = 1;
+    tStimStart = GetSecs;
+    P.time.tonicStimStart(block,trial) = tStimStart-P.time.scriptStart;
+    while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS%+P.presentation.CPM.tonicStim.durationBuffer
+        tmp=num2str(SecureRound(GetSecs-tStimStart,0));
+        [countedDown]=CountDown(GetSecs-tStimStart,countedDown,[tmp ' ']);
+        [abort]=LoopBreaker(P);
         if abort; return; end
-        
     end
     
 end
 
+e
 if ~abort
     fprintf(' Trial concluded. \n');
 else
@@ -1104,16 +1094,13 @@ end
 %% Cleanup when aborting script
 function QuickCleanup(P)
 
-fprintf('\nAborting...');
-
 Screen('CloseAll');
 
+fprintf('\nAborting...');
 if P.devices.arduino && exist('dev','var')
     UseCPAR('Kill');
 end
-
 sca; % close window; also closes io64
 ListenChar(0); % use keys again
 commandwindow;
-
 end

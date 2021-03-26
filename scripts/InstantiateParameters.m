@@ -1,7 +1,7 @@
 function P = InstantiateParameters
 
 P = struct;
-P.protocol.sbId     = 05; % subject ID
+P.protocol.sbId     = 06; % subject ID
 P.protocol.session  = 1;
 % P.protocol.nRatings = 2;
 % P.log.ratings       = [];
