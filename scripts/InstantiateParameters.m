@@ -1,7 +1,7 @@
 function P = InstantiateParameters
 
 P = struct;
-P.protocol.sbId     = 06; % subject ID
+P.protocol.sbId     = 07; % subject ID
 P.protocol.session  = 1;
 % P.protocol.nRatings = 2;
 % P.log.ratings       = [];
@@ -158,6 +158,7 @@ P.presentation.CPM.tonicStim.durationVAS    = P.pain.CPM.tonicStim.fullStimDurat
 P.presentation.CPM.tonicStim.durationBuffer = 5; % Seconds to wait until VAS finishes for CPAR to have finished, to save CPAR data
 P.presentation.CPM.tonicStim.totalITI       = 30; % total ITI between conditioning stimuli
 P.presentation.CPM.blockBetweenTime         = 60; % time in between blocks/runs
+P.presentation.CPM.blockBetweenText         = 3; % time to show end of block text
 P.presentation.BlockStopDuration        = 2;  % time to stop at the block display
 
 P.presentation.CPM.phasicStim.durationVAS   = 5; % time to rate VAS for test stimuli during ISI

@@ -121,7 +121,7 @@ while numberOfSecondsRemaining  > 0
 end
 
 finalRating = ratings(end);  
-reactionTime = find(keyTime,1,'first');
+reactionTime = keyTime(find(keyTime,1,'first'));
 
 end
 

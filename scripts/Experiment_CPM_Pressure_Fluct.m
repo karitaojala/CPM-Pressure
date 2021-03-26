@@ -85,7 +85,7 @@ if abort;QuickCleanup(P);return;end
 % PREEXPOSURE
 if P.startSection == 1
     [abort]=ShowInstruction(P,O,1,1);
-    if abort;QuickCleanup(P);return;end
+    if abort;return;end
     [abort]=Preexposure(P,O);
 end
 if abort;QuickCleanup(P);return;end
@@ -128,16 +128,16 @@ if P.startSection == 3
     %     fprintf('\nTonic stimulus trough at %1.1f kPa\n',tonicPressure_peak);
     %     fprintf('\nPhasic stimulus at %1.1f kPa\n',phasicPressure);
     [abort]=ShowInstruction(P,O,3,1);
-    if abort;QuickCleanup(P);return;end    
+    if abort;return;end
     [abort] = CondPainMod(P,O,tonicPressure_trough,tonicPressure_peak,phasicPressure);
-    if abort;QuickCleanup(P);return;end
     
 end
+if abort;QuickCleanup(P);return;end
 
 if P.startSection == 4
     fprintf('\nExperiment ending.');
     [abort]=ShowInstruction(P,O,4);
-    if abort;QuickCleanup(P);return;end
+    if abort;return;end
 end
 
 if abort;QuickCleanup(P);return;end
@@ -296,7 +296,7 @@ if strcmp(P.env.hostname,'stimpc1')
     P.com.lpt.ITIOnset          = 128; % we'll figure this out later
     P.com.lpt.cueOnset          = 128; % we'll figure this out later
 else
-%     P.com.lpt.cueOnset      = 1; % bit 1; cue onset
+    %     P.com.lpt.cueOnset      = 1; % bit 1; cue onset
     P.com.lpt.pressureOnset = 1; %4; % bit 3; pressure trigger for SCR
     P.com.lpt.VASOnset      = 2; %8; % bit 5;
     P.com.lpt.ITIOnset      = 3; %16; % bit 6; white fixation cross
@@ -484,7 +484,7 @@ while 1
     
     if displayDuration==1
         tmp=num2str(SecureRound(GetSecs-introTextTime,0));
-        [countedDown]=CountDown(GetSecs-introTextTime,countedDown,[tmp ' ']);
+        [countedDown] = CountDown(P,GetSecs-introTextTime,countedDown,[tmp ' ']);
     end
 end
 
@@ -510,89 +510,85 @@ preexPainful = NaN;
 
 fprintf('\n==========================\nRunning preexposure sequence.\n');
 
-for i = 1:length(preExpInts)
+while ~abort
     
-    if ~O.debug.toggleVisual
-        Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
-        Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
-        tCrossOn = Screen('Flip',P.display.w);                      % gets timing of event for PutLog
-    else
-        tCrossOn = GetSecs;
-    end
-    
-    if i == 1
-        fprintf('[Initial trial, showing P.style.white cross for %1.1f seconds, red cross for %1.1f seconds]\n',P.presentation.sPreexpITI,P.presentation.sPreexpCue);
-    end
-    
-    fprintf('Displaying fixation cross... ');
-    SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.ITIOnset);
-    
-    while GetSecs < tCrossOn + P.presentation.sPreexpITI
-        [abort]=LoopBreaker(P);
-        if abort; break; end
-    end
-    
-    if ~O.debug.toggleVisual
-        Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
-        Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
-        Screen('Flip',P.display.w);
-    end
-    
-    fprintf('%1.1f kPa stimulus initiated.',preExpInts(i));
-    
-    stimDuration=CalcStimDuration(P,preExpInts(i),P.presentation.sStimPlateauPreexp);
-    
-    countedDown = 1;
-    tStimStart = GetSecs;
-    SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
-    
-    if P.devices.arduino
-        abort = UseCPAR('Init',P.com.arduino); % initialize arduino/CPAR
-        if abort; QuickCleanup(P); return; end
-        abort = UseCPAR('Set','preExp',P,stimDuration,preExpInts(i)); % set stimulus
-        if abort; QuickCleanup(P); return; end
-        abort = UseCPAR('Trigger',P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
-        if abort; QuickCleanup(P); return; end
+    for i = 1:length(preExpInts)
         
-        while GetSecs < tStimStart+sum(stimDuration)
-            [countedDown]=CountDown(GetSecs-tStimStart,countedDown,'.');
+        if ~O.debug.toggleVisual
+            Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
+            Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
+            tCrossOn = Screen('Flip',P.display.w);                      % gets timing of event for PutLog
+        else
+            tCrossOn = GetSecs;
+        end
+        
+        if i == 1
+            fprintf('[Initial trial, showing P.style.white cross for %1.1f seconds, red cross for %1.1f seconds]\n',P.presentation.sPreexpITI,P.presentation.sPreexpCue);
+        end
+        
+        fprintf('Displaying fixation cross... ');
+        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.ITIOnset);
+        
+        while GetSecs < tCrossOn + P.presentation.sPreexpITI
             [abort]=LoopBreaker(P);
             if abort; break; end
         end
         
-        abort = UseCPAR('Kill');
-        if abort; QuickCleanup(P); return; end
-        
-    else
-        
-        while GetSecs < tStimStart+sum(stimDuration)
-            [countedDown]=CountDown(GetSecs-tStimStart,countedDown,'.');
-            [abort]=LoopBreaker(P);
-            if abort; return; end
+        if ~O.debug.toggleVisual
+            Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
+            Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
+            Screen('Flip',P.display.w);
         end
-    end
-    
-    if ~abort
+        
+        fprintf('%1.1f kPa stimulus initiated.',preExpInts(i));
+        
+        stimDuration=CalcStimDuration(P,preExpInts(i),P.presentation.sStimPlateauPreexp);
+        
+        countedDown = 1;
+        tStimStart = GetSecs;
+        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
+        
+        if P.devices.arduino
+            abort = UseCPAR('Init',P.com.arduino); % initialize arduino/CPAR
+            abort = UseCPAR('Set','preExp',P,stimDuration,preExpInts(i)); % set stimulus
+            abort = UseCPAR('Trigger',P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+            
+            while GetSecs < tStimStart+sum(stimDuration)
+                [abort,countedDown]=CountDown(P,GetSecs-tStimStart,countedDown,'.');
+                if abort; break; end
+            end
+            
+            abort = UseCPAR('Kill');
+            
+        else
+            
+            while GetSecs < tStimStart+sum(stimDuration)
+                [abort,countedDown]=CountDown(P,GetSecs-tStimStart,countedDown,'.');
+                if abort; return; end
+            end
+            
+        end
+        
         fprintf(' concluded.\n');
-    else
-        QuickCleanup(P);
-        break;
+        
+        if ~O.debug.toggleVisual
+            Screen('Flip',P.display.w);
+        end
+        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
+        
+        if nargin < 3
+            preexPainful = QueryPreexPain(P,O);
+        end
+        
+        if preexPainful
+            fprintf('Stimulus rated as painful. \n');
+        else
+            fprintf('Stimulus rated as not painful. \n');
+        end
+        
     end
     
-    if ~O.debug.toggleVisual
-        Screen('Flip',P.display.w);
-    end
-    SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
-    
-    if nargin < 3
-        preexPainful = QueryPreexPain(P,O);
-    end
-    
-    if preexPainful
-        fprintf('Stimulus rated as painful. \n');
-    else
-        fprintf('Stimulus rated as not painful. \n');
-    end
+    break;
     
 end
 
@@ -743,23 +739,27 @@ while ~abort
         % Loop over trials
         for trial = 1:P.presentation.CPM.trialsPerBlock
             
+            if ~O.debug.toggleVisual
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
+                tCrossOn = Screen('Flip',P.display.w);
+            else
+                tCrossOn = GetSecs;
+            end
+                
             if trial == 1 % first trial no intertrial interval
-                if ~O.debug.toggleVisual
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Wait for the stimulus to start.', 'center', upperHalf, P.style.white);
-                    introTextOn = Screen('Flip',P.display.w);
-                else
-                    introTextOn = GetSecs;
+               
+                fprintf('\nWaiting for the first stimulus to start... ');
+                countedDown = 1;
+                while GetSecs < tCrossOn + P.presentation.CPM.tonicStim.firstTrialWait
+                    tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
+                    [abort,countedDown] = CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
+                    if abort; break; end
+%                     WaitSecs(1);
                 end
                 
-                fprintf('\nWaiting for the first stimulus to start... ');
-                while GetSecs < introTextOn + P.presentation.CPM.tonicStim.firstTrialWait
-                    countedDown = 1;
-                    tmp=num2str(SecureRound(GetSecs-introTextOn,0));
-                    CountDown(GetSecs-introTextOn,countedDown,[tmp ' ']);
-                    [abort]=LoopBreaker(P);
-                    if abort; break; end
-                    WaitSecs(1);
-                end
+                if abort; return; end
+                
             end
             
             if abort; break; end
@@ -767,32 +767,44 @@ while ~abort
             % Start trial
             fprintf('\n\n=======TRIAL %d of %d=======\n',trial,P.presentation.CPM.trialsPerBlock);
             
+            % Red fixation cross
+            if ~O.debug.toggleVisual
+                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
+                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
+                Screen('Flip',P.display.w);
+            end
+            
             [abort,P]=ApplyStimulus(P,O,trialPressure,block,trial); % run stimulus
             save(fullfile(P.out.dir,['parameters_sub' sprintf('%03d',P.protocol.sbId) '.mat']),'P','O'); % Save instantiated parameters and overrides after each trial
             % (includes timing information)
+            if abort; break; end
             
             countTrial = countTrial+1;
             
+            % White fixation cross
             if ~O.debug.toggleVisual
-                Screen('TextSize',P.display.w,P.style.fontsize); % text size back to bigger (smaller in VAS screen)
-                [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Stimulus trial finished. Wait for the next stimulus to start.', 'center', upperHalf, P.style.white);
-                outroTextOn = Screen('Flip',P.display.w);
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
+                tCrossOn = Screen('Flip',P.display.w);
             else
-                outroTextOn = GetSecs;
+                tCrossOn = GetSecs;
             end
             
             % Intertrial interval if not the last stimulus in the block,
             % if last trial then end trial immediately
             if trial ~= P.presentation.CPM.trialsPerBlock
+                
                 fprintf('\nIntertrial interval... ');
-                while GetSecs < outroTextOn + P.presentation.CPM.tonicStim.totalITI
-                    countedDown = 1;
-                    tmp=num2str(SecureRound(GetSecs-outroTextOn,0));
-                    CountDown(GetSecs-outroTextOn,countedDown,[tmp ' ']);
-                    [abort]=LoopBreaker(P);
+                countedDown = 1;
+                while GetSecs < tCrossOn + P.presentation.CPM.tonicStim.totalITI
+                    tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
+                    [abort,countedDown] = CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
                     if abort; break; end
-                    WaitSecs(1);
+                    if mod((countedDown/30), 1) == 0; fprintf('\n'); end % add line every 30 seconds
+%                     WaitSecs(1);
                 end
+                
+                if abort; return; end
                 
             end
             
@@ -801,27 +813,42 @@ while ~abort
         end
         
         if abort; break; end
-        
-        % Text for finishing a block
-        if ~O.debug.toggleVisual
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Stimulus block finished. Wait for the next block to start.', 'center', upperHalf, P.style.white);
-            outroTextOn = Screen('Flip',P.display.w);
-        else
-            outroTextOn = GetSecs;
-        end
-        
+
         % Interblock interval
         if block ~= P.presentation.CPM.blocks
-            fprintf('\nInterblock interval... ');
-            while GetSecs < outroTextOn + P.presentation.CPM.blockBetweenTime % wait the time between blocks
-                tmp=num2str(SecureRound(GetSecs-outroTextOn,0));
-                CountDown(GetSecs-outroTextOn,countedDown,[tmp ' ']);
-                [abort]=LoopBreaker(P);
-                if abort; break; end
-                WaitSecs(1);
+            % Text for finishing a block
+            if ~O.debug.toggleVisual
+                [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Stimulus block finished. Wait for the next block.', 'center', upperHalf, P.style.white);
+                outroTextOn = Screen('Flip',P.display.w);
+            else
+                outroTextOn = GetSecs;
             end
             
-            if abort; break; end
+            while GetSecs < outroTextOn + P.presentation.CPM.blockBetweenText % wait the time between blocks
+                tmp=num2str(SecureRound(GetSecs-outroTextOn,0));
+                [abort,countedDown]=CountDown(P,GetSecs-outroTextOn,countedDown,[tmp ' ']);
+                if abort; break; end
+%                 WaitSecs(1);
+            end
+        
+            if ~O.debug.toggleVisual
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
+                tCrossOn = Screen('Flip',P.display.w);
+            else
+                tCrossOn = GetSecs;
+            end
+            fprintf('\nInterblock interval... ');
+            countedDown = 1;
+            while GetSecs < tCrossOn + (P.presentation.CPM.blockBetweenTime - P.presentation.CPM.blockBetweenText) % wait the time between blocks
+                tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
+                [abort,countedDown]=CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
+                if abort; break; end
+                if mod((countedDown/30), 1) == 0; fprintf('\n'); end % add line every 30 seconds
+%                 WaitSecs(1);
+            end
+            
+            if abort; return; end
             
         elseif block == P.presentation.CPM.blocks % if last block, show end of the experiment screen
             
@@ -848,12 +875,11 @@ while ~abort
             
         end
         
-        
     end
     
+    break;
+    
 end
-
-if abort; QuickCleanup(P); return; end
 
 end
 
@@ -875,6 +901,7 @@ while ~abort
         abort = UseCPAR('Set','CPM',P,trialPressure,phasic_on,block,trial); % set stimulus
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
         abort = UseCPAR('Trigger',P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+        if abort; return; end
         P.time.tonicStimStart(block,trial) = GetSecs-P.time.scriptStart;
         tStimStart = GetSecs;
         
@@ -886,6 +913,7 @@ while ~abort
             SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
             if ~O.debug.toggleVisual; [abort,P] = tonicStimVASRating(P,O,block,trial); end
             P.time.tonicStimVASEnd(block,trial) = GetSecs-P.time.scriptStart;
+            if abort; return; end
             
         else
             
@@ -897,6 +925,8 @@ while ~abort
                 VASOnset = tStimStart + phasicOnsets(phasicStim) + P.pain.CPM.phasicStim.duration + P.presentation.CPM.phasicStim.waitforVAS;
                 while GetSecs < VASOnset
                     % Wait until VAS onset for this cycle/phasic stimulus
+                    [abort]=LoopBreakerStim(P);
+                    if abort; break; end
                 end
                 fprintf([' VAS (' num2str(phasicStim) '/' num2str(P.pain.CPM.tonicStim.cycles*P.pain.CPM.phasicStim.stimPerCycle) ')... ']);
                 P.time.phasiccStimVASStart(block,trial,phasicStim) = GetSecs-P.time.scriptStart;
@@ -904,12 +934,25 @@ while ~abort
                 if ~O.debug.toggleVisual; [abort,P] = phasicStimVASRating(P,O,block,trial,phasicStim); end
                 P.time.phasicStimVASEnd(block,trial,phasicStim) = GetSecs-P.time.scriptStart;
                 
+                if abort; return; end
+                
+                % Red fixation cross
+                if ~O.debug.toggleVisual
+                    Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
+                    Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
+                    Screen('Flip',P.display.w);
+                end
+            
+                if abort; break; end
+                
             end
             
         end
         
+        if abort; return; end
+        
         while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS%+P.presentation.CPM.tonicStim.durationBuffer
-            [abort]=LoopBreaker(P);
+            [abort]=LoopBreakerStim(P);
             if abort; break; end
         end
         
@@ -919,8 +962,8 @@ while ~abort
         
         abort = UseCPAR('Kill');
         
-        if abort; fprintf(' Aborting! \n'); end; break;
-
+        if abort; return; end
+        
     else
         
         countedDown = 1;
@@ -928,56 +971,58 @@ while ~abort
         P.time.tonicStimStart(block,trial) = tStimStart-P.time.scriptStart;
         while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS%+P.presentation.CPM.tonicStim.durationBuffer
             tmp=num2str(SecureRound(GetSecs-tStimStart,0));
-            [countedDown]=CountDown(GetSecs-tStimStart,countedDown,[tmp ' ']);
-            [abort]=LoopBreaker(P);
+            [abort,countedDown]=CountDown(P,GetSecs-tStimStart,countedDown,[tmp ' ']);
             if abort; break; end
+            if mod((countedDown/30), 1) == 0; fprintf('\n'); end % add line every 30 seconds
         end
         
         if abort; return; end
         
     end
     
+    break;
+    
 end
 
 if ~abort
     fprintf(' Trial concluded. \n');
 else
-    QuickCleanup(P); return;
+    return;
 end
 
 end
 
 function [abort,P]=tonicStimVASRating(P,O,block,trial)
 
-% if ~O.debug.toggleVisual
-%     % brief blank screen prior to rating
-%     tBlankOn = Screen('Flip',P.display.w);
-% else
-%     tBlankOn = GetSecs;
-% end
-% while GetSecs < tBlankOn + 0.5; end
+abort = 0;
 
-[abort,conRating,conTime,keyId,response] = onlineScale(P);
-
-VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '.mat']);
-if exist(VASFile,'file')
-    VASData = load(VASFile);
-    VAS = VASData.VAS;
-end
-
-tonicStim.conRating = conRating;
-tonicStim.conTime = conTime;
-tonicStim.keyId = keyId;
-tonicStim.response = response;
-
-VAS(trial).tonicStim = tonicStim;
-
-% Save on every trial
-% fprintf(' Saving VAS data... ')
-save(VASFile, 'VAS');
-
-if ~O.debug.toggleVisual
-    Screen('Flip',P.display.w);
+while ~abort
+    
+    [abort,conRating,conTime,keyId,response] = onlineScale(P);
+    
+    VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '.mat']);
+    if exist(VASFile,'file')
+        VASData = load(VASFile);
+        VAS = VASData.VAS;
+    end
+    
+    tonicStim.conRating = conRating;
+    tonicStim.conTime = conTime;
+    tonicStim.keyId = keyId;
+    tonicStim.response = response;
+    
+    VAS(trial).tonicStim = tonicStim;
+    
+    % Save on every trial
+    % fprintf(' Saving VAS data... ')
+    save(VASFile, 'VAS');
+    
+    if ~O.debug.toggleVisual
+        Screen('Flip',P.display.w);
+    end
+    
+    break;
+    
 end
 
 end
@@ -986,28 +1031,36 @@ end
 % interval
 function [abort,P]=phasicStimVASRating(P,O,block,trial,stim)
 
-[abort,finalRating,reactionTime,keyId,keyTime,response] = singleratingScale(P);
+abort = 0;
 
-VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '.mat']);
-if exist(VASFile,'file')
-    VASData = load(VASFile);
-    VAS = VASData.VAS;
-end
-
-phasicStim.finalRating = finalRating;
-phasicStim.reactionTime = reactionTime;
-phasicStim.keyId = keyId;
-phasicStim.keyTime = keyTime;
-phasicStim.response = response;
-
-VAS(trial,stim).phasicStim = phasicStim;
-
-% Save on every trial
-% fprintf(' Saving VAS data... ')
-save(VASFile, 'VAS');
-
-if ~O.debug.toggleVisual
-    Screen('Flip',P.display.w);
+while ~abort
+    
+    [abort,finalRating,reactionTime,keyId,keyTime,response] = singleratingScale(P);
+    
+    VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '.mat']);
+    if exist(VASFile,'file')
+        VASData = load(VASFile);
+        VAS = VASData.VAS;
+    end
+    
+    phasicStim.finalRating = finalRating;
+    phasicStim.reactionTime = reactionTime;
+    phasicStim.keyId = keyId;
+    phasicStim.keyTime = keyTime;
+    phasicStim.response = response;
+    
+    VAS(trial,stim).phasicStim = phasicStim;
+    
+    % Save on every trial
+    % fprintf(' Saving VAS data... ')
+    save(VASFile, 'VAS');
+    
+    if ~O.debug.toggleVisual
+        Screen('Flip',P.display.w);
+    end
+    
+    break;
+    
 end
 
 end
@@ -1062,11 +1115,17 @@ end
 end
 
 %% display string during countdown
-function [countedDown]=CountDown(secs, countedDown, countString)
+function [abort,countedDown]=CountDown(P, secs, countedDown, countString)
+
 if secs>countedDown
     fprintf('%s', countString);
     countedDown=ceil(secs);
+    WaitSecs(1);
 end
+
+[abort] = LoopBreakerStim(P);
+if abort; return; end
+
 end
 
 %% Use so the experiment can be aborted with proper key presses
@@ -1087,6 +1146,16 @@ if keyIsDown
                 end
             end
         end
+    end
+end
+end
+
+function [abort]=LoopBreakerStim(P)
+abort=0;
+[keyIsDown, ~, keyCode] = KbCheck();
+if keyIsDown
+    if find(keyCode) == P.keys.esc
+        abort=1;
     end
 end
 end
