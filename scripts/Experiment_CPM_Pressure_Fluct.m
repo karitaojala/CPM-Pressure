@@ -70,7 +70,14 @@ end
 [P,O] = SetPaths(P,O);
 
 % Save instantiated parameters and overrides
-save(fullfile(P.out.dir,['parameters_sub' sprintf('%03d',P.protocol.sbId) '.mat']),'P','O');
+paramFile = fullfile(P.out.dir,['parameters_sub' sprintf('%03d',P.protocol.sbId) '.mat']);
+if exist(paramFile,'file')
+    loadParams = load(paramFile);
+    P = loadParams.P;
+    O = loadParams.O;
+else
+    save(paramFile,'P','O');
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % Section selection (skip sections if desired)
@@ -93,43 +100,24 @@ if abort;QuickCleanup(P);return;end
 %%%%%%%%%%%%%%%%%%%%%%%
 % CALIBRATION
 if P.startSection == 2
-    
+    [abort]=ShowInstruction(P,O,2,1);
+    if abort;return;end
+    [abort]=CalibrationPressure(P,O);
 end
+if abort;QuickCleanup(P);return;end
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % CONDITIONED PAIN MODULATION EXPERIMENT
 if P.startSection == 3
     
-    if ~exist('tonicPressure_trough','var') % if no starting value provided by calibration
-        ListenChar(0); % activate keyboard input
-        commandwindow;
-        tonicPressure_trough=input('\nPlease enter tonic pain stimulus trough intensity (kPa) for the experiment.\n');
-        %         if isempty(tonicPressure_trough); tonicPressure_trough = P.pain.CPM.throughPressure; end
-        ListenChar(2); % deactivate keyboard input
-    end
+    ListenChar(0); % activate keyboard input
+    commandwindow;
+    pressure_input=input('\nHow to define pressure levels for the experiment: 1 = From calibration, 2 = From input, 3 = From instantiated parameters file\n');
+    ListenChar(2); % deactivate keyboard input
     
-    if ~exist('tonicPressure_peak','var') % if no starting value provided by calibration
-        ListenChar(0); % activate keyboard input
-        commandwindow;
-        tonicPressure_peak=input('Please enter tonic pain stimulus peak intensity (kPa) for the experiment.\n');
-        %         if isempty(tonicPressure_peak); tonicPressure_peak = P.pain.CPM.peakPressure; end
-        ListenChar(2); % deactivate keyboard input
-    end
-    
-    if ~exist('phasicPressure','var') % if no starting value provided by calibration
-        ListenChar(0); % activate keyboard input
-        commandwindow;
-        phasicPressure=input('Please enter phasic pain stimulus intensity (kPa) for the experiment.\n');
-        %         if isempty(phasicPressure); phasicPressure = P.pain.CPM.phasicPressure; end
-        ListenChar(2); % deactivate keyboard input
-    end
-    
-    %     fprintf('\nTonic stimulus trough at %1.1f kPa\n',tonicPressure_trough);
-    %     fprintf('\nTonic stimulus trough at %1.1f kPa\n',tonicPressure_peak);
-    %     fprintf('\nPhasic stimulus at %1.1f kPa\n',phasicPressure);
     [abort]=ShowInstruction(P,O,3,1);
     if abort;return;end
-    [abort] = CondPainMod(P,O,tonicPressure_trough,tonicPressure_peak,phasicPressure);
+    [abort] = CondPainMod(P,O,pressure_input);
     
 end
 if abort;QuickCleanup(P);return;end
@@ -399,8 +387,13 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['You will now receive a number of ' dstr 'pressure stimuli,'], 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'which may or may not be painful for you.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'We will ask you in a few moments about any remaining questions,', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'then the measurement will start!', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'First, the stimuli will be on the left arm, then on the right arm.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'After each stimulus, you will be asked to press a button', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'to indicate whether the stimulus was painful or not', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Do you have any remaining questions?', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'If not, the measurement will start!', 'center', upperEight+P.style.lineheight, P.style.white);
         end
         
     elseif section == 2
@@ -409,11 +402,13 @@ if ~O.debug.toggleVisual
         if strcmp(P.language,'de')
             
         elseif strcmp(P.language,'en')
-            if ~P.presentation.sStimPlateauPreexp; dstr = 'very brief '; else; dstr = ''; end
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['You will now receive a number of ' dstr 'pressure stimuli,'], 'center', upperEight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You will now receive a number of pressure stimuli,', 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'which may or may not be painful for you.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'You should rate these stimuli on their painfulness as instructed,', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'First, the stimuli will be long and on the left arm.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Then, the stimuli will be short and on the right arm. ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'You should rate these stimuli on their painfulness on a scale, as instructed.', 'center', upperEight+P.style.lineheight, P.style.white);
         end
         
     elseif section == 3
@@ -435,15 +430,18 @@ if ~O.debug.toggleVisual
         elseif strcmp(P.language,'en')
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'In a moment, the experiment will start.', 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You will receive long pressure stimuli on the left arm for 3 minutes, with some time in between.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'At the same time, there will sometimes be short pressure stimuli on the right arm.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You will receive long pressure stimuli on the left arm.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Sometimes, a rating scale will appear and you should', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'rate the stimulus for its painfulness CONTINUOUSLY.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'After each short stimulus ends, you should rate its pain intensity (scale will be shown)', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'After each long stimulus ends, you should rate its pain intensity on the same scale', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'There will sometimes be short pressure stimuli on the right arm.', 'center', upperEight+P.style.lineheight, P.style.white);
+%             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'After each short stimulus ends, you should rate its painfulness', 'center', upperEight+P.style.lineheight, P.style.white);
+%             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'After each long stimulus ends, you should rate its pain intensity on the same scale', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'It is VERY important that you rate EACH AND EVERY stimulus!', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'It is very important that you rate each and every stimulus!', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Commencing shortly!', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Please confirm verbally when you have read these instructions.', 'center', upperEight+P.style.lineheight, P.style.white);
         end
         
     elseif section == 4 % end of the test
@@ -496,100 +494,118 @@ end
 
 end
 
-%% Sends three triggers to CED, waits approximate stimulus duration plus ITI after each
+%% Pre-exposure sequence
 function [abort]=Preexposure(P,O,varargin)
 
 if nargin<3
-    preExpInts = P.pain.preExposure;
+    preExpInts = P.pain.preExposure.pressureIntensity;
 else % override (e.g. for validation sessions)
     preExpInts = varargin{1};
 end
 
 abort=0;
 preexPainful = NaN;
+P.data.preExposure.painThreshold = [];
 
 fprintf('\n==========================\nRunning preexposure sequence.\n');
 
 while ~abort
     
-    for i = 1:length(preExpInts)
+    for cuff = 1:2 % pre-exposure for both left (1) and right (2) cuffs
         
-        if ~O.debug.toggleVisual
-            Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
-            Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
-            tCrossOn = Screen('Flip',P.display.w);                      % gets timing of event for PutLog
-        else
-            tCrossOn = GetSecs;
+        if cuff == 1
+            side = 'LEFT';
+        elseif cuff == 2
+            side = 'RIGHT';
         end
         
-        if i == 1
-            fprintf('[Initial trial, showing P.style.white cross for %1.1f seconds, red cross for %1.1f seconds]\n',P.presentation.sPreexpITI,P.presentation.sPreexpCue);
-        end
+        fprintf(['Pre-exposure CUFF ' num2str(cuff) ' - ' side '\n']);
         
-        fprintf('Displaying fixation cross... ');
-        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.ITIOnset);
-        
-        while GetSecs < tCrossOn + P.presentation.sPreexpITI
-            [abort]=LoopBreaker(P);
-            if abort; break; end
-        end
-        
-        if ~O.debug.toggleVisual
-            Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
-            Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
-            Screen('Flip',P.display.w);
-        end
-        
-        fprintf('%1.1f kPa stimulus initiated.',preExpInts(i));
-        
-        stimDuration=CalcStimDuration(P,preExpInts(i),P.presentation.sStimPlateauPreexp);
-        
-        countedDown = 1;
-        tStimStart = GetSecs;
-        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
-        
-        if P.devices.arduino
-            abort = UseCPAR('Init',P.com.arduino); % initialize arduino/CPAR
-            abort = UseCPAR('Set','preExp',P,stimDuration,preExpInts(i)); % set stimulus
-            abort = UseCPAR('Trigger',P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+        for i = 1:length(preExpInts)
             
-            while GetSecs < tStimStart+sum(stimDuration)
-                [abort,countedDown]=CountDown(P,GetSecs-tStimStart,countedDown,'.');
+            if ~O.debug.toggleVisual
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
+                tCrossOn = Screen('Flip',P.display.w);                      % gets timing of event for PutLog
+            else
+                tCrossOn = GetSecs;
+            end
+            
+            if i == 1
+                fprintf('[Initial trial, showing P.style.white cross for %1.1f seconds, red cross for %1.1f seconds]\n',P.presentation.sPreexpITI,P.presentation.sPreexpCue);
+            end
+            
+            fprintf('Displaying fixation cross... ');
+            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.ITIOnset);
+            
+            while GetSecs < tCrossOn + P.presentation.sPreexpITI
+                [abort]=LoopBreaker(P);
                 if abort; break; end
             end
             
-            abort = UseCPAR('Kill');
-            
-        else
-            
-            while GetSecs < tStimStart+sum(stimDuration)
-                [abort,countedDown]=CountDown(P,GetSecs-tStimStart,countedDown,'.');
-                if abort; return; end
+            if ~O.debug.toggleVisual
+                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
+                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
+                Screen('Flip',P.display.w);
             end
             
+            fprintf('%1.1f kPa stimulus initiated.',preExpInts(i));
+            
+            stimDuration=CalcStimDuration(P,preExpInts(i),P.presentation.sStimPlateauPreexp);
+            
+            countedDown = 1;
+            tStimStart = GetSecs;
+            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
+            
+            if P.devices.arduino
+                abort = UseCPAR('Init',P.com.arduino); % initialize arduino/CPAR
+                abort = UseCPAR('Set','preExp',P,stimDuration,preExpInts(i),cuff); % set stimulus
+                abort = UseCPAR('Trigger',P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+                
+                while GetSecs < tStimStart+sum(stimDuration)
+                    [abort,countedDown]=CountDown(P,GetSecs-tStimStart,countedDown,'.');
+                    if abort; break; end
+                end
+                
+                abort = UseCPAR('Kill');
+                
+            else
+                
+                while GetSecs < tStimStart+sum(stimDuration)
+                    [abort,countedDown]=CountDown(P,GetSecs-tStimStart,countedDown,'.');
+                    if abort; return; end
+                end
+                
+            end
+            
+            fprintf(' concluded.\n');
+            
+            if ~O.debug.toggleVisual
+                Screen('Flip',P.display.w);
+            end
+            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
+            
+            if nargin < 3
+                preexPainful = QueryPreexPain(P,O);
+            end
+            
+            if preexPainful
+                fprintf('Stimulus rated as painful. \n');
+            else
+                fprintf('Stimulus rated as not painful. \n');
+            end
+            P.data.preExposure.painRatings(cuff,i) = preexPainful;
+            
         end
-        
-        fprintf(' concluded.\n');
-        
-        if ~O.debug.toggleVisual
-            Screen('Flip',P.display.w);
-        end
-        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
-        
-        if nargin < 3
-            preexPainful = QueryPreexPain(P,O);
-        end
-        
-        if preexPainful
-            fprintf('Stimulus rated as painful. \n');
-        else
-            fprintf('Stimulus rated as not painful. \n');
-        end
+    
+        P.data.preExposure.painThreshold(cuff) = preExpInts(find(P.data.preExposure.painRatings(cuff,:),1,'first'));
+        save(fullfile(P.out.dir,['parameters_sub' sprintf('%03d',P.protocol.sbId) '.mat']),'P','O');
+        fprintf(['Pre-exposure pain threshold CUFF ' num2str(cuff) ': ' num2str(P.data.preExposure.painThreshold(cuff)) ' kPa\n']);
         
     end
     
     break;
-    
+
 end
 
 end
@@ -651,7 +667,297 @@ end
 
 end
 
-function [abort] = CondPainMod(P,O,varargin)
+function [abort] = CalibrationPressure(P,O)
+
+abort=0;
+
+while ~abort
+    
+    if ~isempty(P.data.preExposure.painThreshold)
+        painThresholdSaved = P.data.preExposure.painThreshold;
+    else
+        painThresholdSaved = [];
+    end
+    
+    fprintf('\n==========================\nRunning calibration procedure.\n');
+    
+    % TONIC STIMULUS CALIBRATION
+    % Loop over calibration trials
+    
+    for calib = 2 % tonic stimuli first, then phasic stimuli (?)
+        
+        fprintf('Displaying instructions... ');
+        
+        if ~O.debug.toggleVisual
+            upperHalf = P.display.screenRes.height/2;
+            Screen('TextSize', P.display.w, 50);
+            if calib == 1
+                [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, 'Calibration long stimuli', 'center', upperHalf, P.style.white);
+            else
+                [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, 'Calibration short stimuli', 'center', upperHalf, P.style.white);
+            end
+            Screen('TextSize', P.display.w, 30);
+            [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, ' ', 'center', upperHalf+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, ' ', 'center', upperHalf+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Rate the pain intensity quickly after each stimulus ends!', 'center', upperHalf, P.style.white);
+            introTextOn = Screen('Flip',P.display.w);
+        else
+            introTextOn = GetSecs;
+        end
+        
+        while GetSecs < introTextOn + P.presentation.BlockStopDuration
+            [abort]=LoopBreaker(P);
+            if abort; break; end
+        end
+        
+        % Wait for input from experiment to continue
+        fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
+        
+        while 1
+            [keyIsDown, ~, keyCode] = KbCheck();
+            if keyIsDown
+                if find(keyCode) == P.keys.resume
+                    break;
+                elseif find(keyCode) == P.keys.esc
+                    abort = 1;
+                    break;
+                end
+            end
+        end
+        
+        WaitSecs(0.2);
+        
+        if calib == 1
+            trials = P.presentation.Calibration.tonicStim.trials;
+            pressureOrder = P.pain.Calibration.tonicStim.pressureOrder;
+            pressureChange = P.pain.Calibration.tonicStim.pressureChange;
+            durationITI = P.presentation.Calibration.tonicStim.ITI;
+        else
+            trials = P.presentation.Calibration.phasicStim.trials;
+            pressureOrder = P.pain.Calibration.phasicStim.pressureOrder;
+            pressureChange = P.pain.Calibration.phasicStim.pressureChange;
+            durationITI = P.presentation.Calibration.phasicStim.ITI;
+        end
+        
+        for trial = 1:trials
+            
+            if ~O.debug.toggleVisual
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
+                tCrossOn = Screen('Flip',P.display.w);
+            else
+                tCrossOn = GetSecs;
+            end
+            
+            if trial == 1 % first trial no intertrial interval
+                
+                fprintf('\nWaiting for the first stimulus to start... ');
+                countedDown = 1;
+                while GetSecs < tCrossOn + P.presentation.Calibration.firstTrialWait
+                    tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
+                    [abort,countedDown] = CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
+                    if abort; break; end
+                end
+                
+                if abort; return; end
+                
+            end
+            
+            if abort; break; end
+            
+            % Start trial
+            fprintf('\n\n=======TRIAL %d of %d=======\n',trial,trials);
+            
+            % Red fixation cross
+            if ~O.debug.toggleVisual
+                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
+                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
+                Screen('Flip',P.display.w);
+            end
+            
+            clear index
+            index = pressureOrder(trial);
+            pressureChangeTrial = pressureChange(index);
+            if ~isempty(painThresholdSaved)
+                painThreshold = painThresholdSaved(calib); % take individual pain threshold from pre-exposure
+            else
+                painThreshold = P.pain.Calibration.painTresholdPreset(calib); % take preset pain threshold (40 kPa)
+            end
+            trialPressure = painThreshold+pressureChangeTrial; % Need to make sure that cuff 1 = left = tonic, cuff 2 = right = phasic OR switch if any change
+            
+            [abort,P]=ApplyStimulusCalibration(P,O,trialPressure,calib,trial); % run stimulus
+            save(fullfile(P.out.dir,['parameters_sub' sprintf('%03d',P.protocol.sbId) '.mat']),'P','O'); % Save instantiated parameters and overrides after each trial
+            if abort; break; end
+            
+            % White fixation cross
+            if ~O.debug.toggleVisual
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
+                tCrossOn = Screen('Flip',P.display.w);
+            else
+                tCrossOn = GetSecs;
+            end
+            
+            % Intertrial interval if not the last stimulus in the block,
+            % if last trial then end trial immediately
+            if trial ~= trials
+                
+                fprintf('\nIntertrial interval... ');
+                countedDown = 1;
+                while GetSecs < tCrossOn + durationITI
+                    tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
+                    [abort,countedDown] = CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
+                    if abort; break; end
+                end
+                
+                if abort; return; end
+                
+            end
+            
+            if abort; break; end
+            
+        end
+        
+        if abort; break; end
+        
+    end
+    
+    break;
+    
+end
+
+if ~abort
+    fprintf(' Calibration finished. \n');
+else
+    return;
+end
+
+end
+
+function [abort,P]=ApplyStimulusCalibration(P,O,trialPressure,calib,trial)
+
+abort = 0;
+
+while ~abort
+    
+    fprintf(['Stimulus initiated at ' num2str(trialPressure) ' kPa... ']);
+    
+    if calib == 1
+        stimDuration = P.pain.Calibration.tonicStim.stimDuration;
+    else
+        stimDuration = P.pain.Calibration.phasicStim.stimDuration;
+    end
+    
+    P.time.calibStart(calib,trial) = GetSecs-P.time.scriptStart;
+    
+    if P.devices.arduino
+        
+        abort = UseCPAR('Init',P.com.arduino); % initialize arduino/CPAR
+        abort = UseCPAR('Set','Calibration',P,trialPressure,calib,trial); % set stimulus
+        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
+        abort = UseCPAR('Trigger',P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+        if abort; return; end
+        P.time.calibStimStart(calib,trial) = GetSecs-P.time.scriptStart;
+        
+        tStimStart = GetSecs;
+        while GetSecs < tStimStart+stimDuration+5
+            [abort]=LoopBreakerStim(P);
+            if abort; break; end
+        end
+                
+        % VAS
+        fprintf(' VAS... ');
+        tVASStart = GetSecs;
+        P.time.calibVASStart(calib,trial) = GetSecs-P.time.scriptStart;
+        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
+        if ~O.debug.toggleVisual; [abort,P] = calibStimVASRating(P,O,calib,trial,trialPressure); end
+        P.time.calibStimVASEnd(calib,trial) = GetSecs-P.time.scriptStart;
+        if abort; return; end
+        
+        while GetSecs < tVASStart+P.presentation.Calibration.durationVAS
+            [abort]=LoopBreakerStim(P);
+            if abort; break; end
+        end
+        
+%         [abort,calibData] = UseCPAR('Data'); % retrieve data
+%         SaveData(P,calibData,calib,trial); % save data for this trial
+%         fprintf(' Saving CPAR data... ')
+        
+        abort = UseCPAR('Kill');
+        
+        if abort; return; end
+        
+    else
+        
+        countedDown = 1;
+        tStimStart = GetSecs;
+        P.time.calibStart(calib,trial) = tStimStart-P.time.scriptStart;
+        while GetSecs < tStimStart+stimDuration+5+P.presentation.Calibration.durationVAS
+            tmp=num2str(SecureRound(GetSecs-tStimStart,0));
+            [abort,countedDown]=CountDown(P,GetSecs-tStimStart,countedDown,[tmp ' ']);
+            if abort; break; end
+            if mod((countedDown/30), 1) == 0; fprintf('\n'); end % add line every 30 seconds
+        end
+        
+        if abort; return; end
+        
+    end
+    
+    break;
+    
+end
+
+if ~abort
+    fprintf(' Calibration trial concluded. \n');
+else
+    return;
+end
+
+end
+
+function [abort,P]=calibStimVASRating(P,O,calib,trial,trialPressure)
+
+abort = 0;
+
+while ~abort
+    
+    [abort,finalRating,reactionTime,keyId,keyTime,response] = singleratingScale(P);
+    
+    VASFile = fullfile(P.out.dir, [P.out.file.VAS '_calibration_cuff' num2str(calib) '.mat']);
+    if exist(VASFile,'file')
+        VASData = load(VASFile);
+        VAS = VASData.VAS;
+    end
+    
+    clear calibData
+    calibData.trialPressure = trialPressure;
+    calibData.finalRating = finalRating;
+    calibData.reactionTime = reactionTime;
+    calibData.keyId = keyId;
+    calibData.keyTime = keyTime;
+    calibData.response = response;
+    
+    if calib == 1
+        VAS.tonicStim(trial) = calibData;
+    else
+        VAS.phasicStim(trial) = calibData;
+    end
+    
+    % Save on every trial
+    % fprintf(' Saving VAS data... ')
+    save(VASFile, 'VAS');
+    
+    if ~O.debug.toggleVisual
+        Screen('Flip',P.display.w);
+    end
+    
+    break;
+    
+end
+
+end
+
+function [abort] = CondPainMod(P,O,pressure_input)
 
 abort=0;
 
@@ -661,36 +967,76 @@ while ~abort
     
     countTrial = 1;
     
+    if pressure_input == 1
+        
+        % Tonic stimulus calibration
+        calibFile1 = fullfile(P.out.dir, [P.out.file.VAS '_calibration_cuff1.mat']);
+        if exist(calibFile1,'file')
+            calibData1 = load(calibFile1);
+            truePressureTonicCalib = [calibData1.VAS.tonicStim.trialPressure];
+            ratedPainTonicCalib = [calibData1.VAS.tonicStim.finalRating];
+        end
+        
+        % Phasic stimulus calibration
+        calibFile2 = fullfile(P.out.dir, [P.out.file.VAS '_calibration_cuff2.mat']);
+        if exist(calibFile2,'file')
+            calibData2 = load(calibFile2);
+            truePressurePhasicCalib = [calibData2.VAS.phasicStim.trialPressure];
+            ratedPainPhasicCalib = [calibData2.VAS.phasicStim.finalRating];
+        end
+         
+        % Find VAS 7 and VAS 9 for tonic pressure based on calibration
+        format long
+        slopePressureRatingTonic = ratedPainTonicCalib'\truePressureTonicCalib';
+        TonicVAS7 = round(70*slopePressureRatingTonic);
+        TonicVAS9 = round(90*slopePressureRatingTonic);
+        tonicPressure_trough_Exp = TonicVAS7;
+        tonicPressure_peak_Exp = TonicVAS9;
+        
+        % Find VAS 7 for phasic pressure
+        slopePressureRatingPhasic = ratedPainPhasicCalib'\truePressurePhasicCalib';
+        PhasicVAS7 = round(70*slopePressureRatingPhasic);
+        phasicPressure = PhasicVAS7;
+        
+    elseif pressure_input == 2
+        
+        ListenChar(0); % activate keyboard input
+        commandwindow;
+        tonicPressure_trough_Exp=input('\nPlease enter tonic pain stimulus trough intensity (kPa) for the experiment.\n');
+        ListenChar(2); % deactivate keyboard input
+        
+        ListenChar(0); % activate keyboard input
+        commandwindow;
+        tonicPressure_peak_Exp=input('Please enter tonic pain stimulus peak intensity (kPa) for the experiment.\n');
+        ListenChar(2); % deactivate keyboard input
+        
+        ListenChar(0); % activate keyboard input
+        commandwindow;
+        phasicPressure=input('Please enter phasic pain stimulus intensity (kPa) for the experiment.\n');
+        ListenChar(2); % deactivate keyboard input
+        
+    elseif pressure_input == 3
+        
+        tonicPressure_trough_Exp = P.pain.CPM.tonicStim.pressureTrough;
+        tonicPressure_peak_Exp = P.pain.CPM.tonicStim.pressurePeak;
+        phasicPressure = P.pain.CPM.phasicStim.pressure;
+        
+    end
+    
+    tonicPressure_trough_Control = P.pain.CPM.tonicStim.pressureTroughControl;
+    tonicPressure_peak_Control = P.pain.CPM.tonicStim.pressurePeakControl;
+        
     % Loop over blocks/runs
     for block = 1:P.presentation.CPM.blocks
         
         % Set tonic stimulus pressure
-        if nargin<1 && P.pain.CPM.tonicStim.condition(block) == 1 % experimental tonic stimulus
-            tonicPressure_trough = P.pain.CPM.tonicStim.pressureTrough;
-            tonicPressure_peak = P.pain.CPM.tonicStim.pressurePeak;
-            phasicPressure = P.pain.CPM.phasicStim.pressure;
-            
-        elseif nargin>= 1 && P.pain.CPM.tonicStim.condition(block) == 1 % experimental tonic stimulus
-            if isempty(varargin{1}); tonicPressure_trough = P.pain.CPM.tonicStim.pressureTrough;
-            else; tonicPressure_trough = varargin{1}; end
-            if isempty(varargin{2}); tonicPressure_peak = P.pain.CPM.tonicStim.pressurePeak;
-            else; tonicPressure_peak = varargin{2}; end
-            if isempty(varargin{3}); phasicPressure = P.pain.CPM.phasicStim.pressure;
-            else; phasicPressure = varargin{3}; end
-            
-        elseif nargin<1 && P.pain.CPM.tonicStim.condition(block) == 0 % control tonic stimulus
-            tonicPressure_trough = P.pain.CPM.tonicStim.pressureTroughControl;
-            tonicPressure_peak = P.pain.CPM.tonicStim.pressurePeakControl;
-            phasicPressure = P.pain.CPM.phasicStim.pressure; % phasic stimulus the same
-            
-        elseif nargin>= 1 && P.pain.CPM.tonicStim.condition(block) == 0
-            if isempty(varargin{1}); tonicPressure_trough = P.pain.CPM.tonicStim.pressureTroughControl;
-            else; tonicPressure_trough = varargin{1}; end
-            if isempty(varargin{2}); tonicPressure_peak = P.pain.CPM.tonicStim.pressurePeakControl;
-            else; tonicPressure_peak = varargin{2}; end
-            if isempty(varargin{3}); phasicPressure = P.pain.CPM.phasicStim.pressure; % phasic stimulus the same
-            else; phasicPressure = varargin{3}; end
-            
+        if P.pain.CPM.tonicStim.condition(block) == 1 % experimental tonic stimulus
+            tonicPressure_trough = tonicPressure_trough_Exp;
+            tonicPressure_peak = tonicPressure_peak_Exp;
+        
+        elseif P.pain.CPM.tonicStim.condition(block) == 0 % control tonic stimulus
+            tonicPressure_trough = tonicPressure_trough_Control;
+            tonicPressure_peak = tonicPressure_peak_Control;
         end
         
         trialPressure = [tonicPressure_trough tonicPressure_peak phasicPressure]; % input to UseCPAR and CreateCPARStimulus
@@ -1094,7 +1440,7 @@ end
 function [stimDuration] = CalcStimDuration(P,pressure,sStimPlateau)
 %diff=abs(temp-P.pain.bT);
 %riseTime=diff/P.pain.rS;
-riseTime = pressure/P.pain.riseSpeed;
+riseTime = pressure/P.pain.preExposure.riseSpeed;
 %fallTime=diff/P.pain.fS;
 %stimDuration=[riseTime sStimPlateau fallTime];
 stimDuration = [riseTime sStimPlateau];% only rise time

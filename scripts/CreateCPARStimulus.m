@@ -3,7 +3,7 @@
 % [stimulus1, stimulus2] = CreateCPARStimulus(varargin)
 %
 % Varargin:
-%   1. type - pre-exposure or CPM stimulus
+%   1. type - pre-exposure, calibration or CPM stimulus
 %   2. settings - P
 %   3. duration - an array of stimulus durations
 %                   pre-exposure stimuli: 
@@ -36,9 +36,10 @@ if strcmp(type,'preExp')
     
     duration = varargin{3};
     pressure = varargin{4}; % target pressure (kPa)
+    cuff = varargin{5};
     
     cuff_left = settings.pain.preExposure.cuff_left; 
-    cuff_right = pain.preExposure.cuff_right;
+    cuff_right = settings.pain.preExposure.cuff_right;
 
     ramp_up_duration = duration(1); % duration of ramp-up (target pressure/ramping up speed)
     plateau_onset = ramp_up_duration; % onset of constant pressure
@@ -51,9 +52,44 @@ if strcmp(type,'preExp')
     stimComb = cparCombined();
     cparCombinedAdd(stimComb,ramp_up); % add ramping up to stimulus
     cparCombinedAdd(stimComb,constant_pressure); % add constant pressure
-    stimulus1 = cparCreateStimulus(cuff_left,settings.pain.preExposure.repeat); % combined stimulus
-    stimulus2 = cparCreateStimulus(cuff_right,1,cparPulse(0, 0.1, 0)); % off cuff set to zero
     
+    if cuff == 1
+        stimulus1 = cparCreateStimulus(cuff_left,1,stimComb); % combined stimulus
+        stimulus2 = cparCreateStimulus(cuff_right,1,cparPulse(0, 0.1, 0)); % off cuff set to zero
+    elseif cuff == 2
+        stimulus1 = cparCreateStimulus(cuff_right,1,stimComb); % combined stimulus
+        stimulus2 = cparCreateStimulus(cuff_left,1,cparPulse(0, 0.1, 0)); % off cuff set to zero
+    end
+    
+elseif strcmp(type,'Calibration')
+    
+    pressure = varargin{3};
+    stimulusType = varargin{4};
+    cuff_tonic = settings.pain.preExposure.cuff_left; 
+    cuff_phasic = settings.pain.preExposure.cuff_right;
+    
+    clear combined_stim
+    combined_stim = cparCombined();
+    
+    if stimulusType == 1
+        duration = settings.pain.Calibration.tonicStim.stimDuration;
+        rampUp = settings.pain.CPM.tonicStim.startendRampDuration;
+        
+        pfirst = cparRamp(pressure, rampUp, 0); % first ramping up to trough pressure of the tonic stimulus
+        cparCombinedAdd(combined_stim, pfirst);
+        constant_pressure = cparPulse(pressure,duration,rampUp); % create constant pressure part
+        cparCombinedAdd(combined_stim, constant_pressure); % add constant pressure
+        stimulus1 = cparCreateStimulus(cuff_tonic,1,combined_stim); % combined stimulus
+        stimulus2 = cparCreateStimulus(cuff_phasic,1,cparPulse(0, 0.1, 0)); % off cuff set to zero
+    else
+        duration = settings.pain.Calibration.phasicStim.stimDuration;
+        rampUp = 0;
+        phasicStim = cparPulse(pressure,duration,rampUp);
+        cparCombinedAdd(combined_stim, phasicStim);
+        stimulus1 = cparCreateStimulus(cuff_phasic,1,combined_stim); % combined stimulus
+        stimulus2 = cparCreateStimulus(cuff_tonic,1,cparPulse(0, 0.1, 0)); % off cuff set to zero
+    end
+
 elseif strcmp(type,'CPM')
    
     pressure = varargin{3}; % target pressure (kPa)

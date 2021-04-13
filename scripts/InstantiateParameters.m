@@ -1,7 +1,7 @@
 function P = InstantiateParameters
 
 P = struct;
-P.protocol.sbId     = 07; % subject ID
+P.protocol.sbId     = 08; % subject ID
 P.protocol.session  = 1;
 % P.protocol.nRatings = 2;
 % P.log.ratings       = [];
@@ -44,7 +44,7 @@ if P.devices.arduino
         %             disp('stimpc1');
     elseif strcmp(P.env.hostname,'isnb05cda5ba721')
         P.com.arduino = 'COM3'; 
-        P.path.cpar = fullfile(cd,'CPAR');
+        P.path.cpar = fullfile(cd,'LabBench.CPAR-0.1.0');
         disp('worklaptop');
     else
         P.com.arduino = 'COM5'; % CPAR: depends on PC - work laptop COM3 - experiment laptop COM5
@@ -62,23 +62,42 @@ P.cpar.stoprule                      = 'b';  % CPAR stops only at button press (
 P.pain.preExposure.cuff_left            = 1; % 1: left, 2: right - depends on how cuffs plugged into the CPAR unit and put on participant's arm
 P.pain.preExposure.cuff_right           = 2; % 
 P.pain.preExposure.repeat               = 1; % number of repeats of each stimulus1111
-P.pain.preExposure.pressureIntensity    = [10 20 30 40]; % preexposure pressure intensities (kPa)
+P.pain.preExposure.pressureIntensity    = [10 20 30 40 50]; % preexposure pressure intensities (kPa)
 P.pain.preExposure.riseSpeed            = 10; % kPa/s
 P.pain.preExposure.pressureRange        = 5.0:1:100.0; % possible pressure range (kPa)
-P.presentation.sStimPlateauPreexp       = 60; % duration of the constant pressure plateau after rise time for pre-exposure (part 1)
+P.presentation.sStimPlateauPreexp       = 30; % duration of the constant pressure plateau after rise time for pre-exposure (part 1)
 P.presentation.sPreexpITI               = 10; % pre-exposure intertrial interval (ITI)
 P.presentation.sPreexpCue               = P.presentation.sStimPlateauPreexp/P.pain.preExposure.riseSpeed+P.presentation.sStimPlateauPreexp; % pre-exposure cue duration (stimulus duration with rise time included)
-P.presentation.sStimPlateau             = 60; % duration of the constant pressure plateau after rise time for pressure test (part 2)
+P.presentation.sStimPlateau             = P.presentation.sStimPlateauPreexp; % duration of the constant pressure plateau after rise time for pressure test (part 2)
+% P.data.preExposure.painThreshold        = []; % will be filled during pre-exposure
+
+% Calibration
+P.presentation.Calibration.firstTrialWait       = 5;
+P.presentation.Calibration.tonicStim.trials     = 5;
+P.presentation.Calibration.phasicStim.trials    = 5;
+
+P.pain.Calibration.painTresholdPreset           = [30 40]; % 40 for tonic stimuli, 50 for phasic stimuli
+P.pain.Calibration.tonicStim.stimDuration       = 30;
+P.pain.Calibration.tonicStim.pressureChange     = [-10 5 10 15 20];
+P.pain.Calibration.tonicStim.pressureOrder      = randperm(P.presentation.Calibration.tonicStim.trials);
+
+P.pain.Calibration.phasicStim.stimDuration      = 5;
+P.pain.Calibration.phasicStim.pressureChange    = [-10 5 10 15 20];
+P.pain.Calibration.phasicStim.pressureOrder     = randperm(P.presentation.Calibration.phasicStim.trials);
+
+P.presentation.Calibration.tonicStim.ITI        = 30;
+P.presentation.Calibration.phasicStim.ITI       = 15;
+P.presentation.Calibration.durationVAS          = 5;
 
 % Conditioned pain modulation
-P.presentation.CPM.blocks = 2; % number of blocks/runs in the CPM experiment - plan: 3 blocks/runs
-P.presentation.CPM.trialsPerBlock = 2; % 4 stimuli of 3 min per block -> 12 min + 4 x 30 s ITI + 60 s between blocks = 15 min per block/run -> 3 blocks = 45 min
-P.pain.CPM.phasicStim.on = [1 1 1 1 1 0]; % on which blocks the phasic test stimuli will be delivered to the other cuff, in addition to the tonic conditioning stimulus
+P.presentation.CPM.blocks                   = 2; % number of blocks/runs in the CPM experiment - plan: 3 blocks/runs
+P.presentation.CPM.trialsPerBlock           = 2; % 4 stimuli of 3 min per block -> 12 min + 4 x 30 s ITI + 60 s between blocks = 15 min per block/run -> 3 blocks = 45 min
+P.pain.CPM.phasicStim.on                    = [1 1 1 1 1 0]; % on which blocks the phasic test stimuli will be delivered to the other cuff, in addition to the tonic conditioning stimulus
 % these are also the blocks with online VAS rating of tonic stimulus
-conditions = [zeros(1,P.presentation.CPM.blocks/2) ones(1,P.presentation.CPM.blocks/2)]; % 0 = control tonic stimulus (non-painful), 1 = experimental tonic stimulus (painful)
-ordering = randperm(P.presentation.CPM.blocks);
-conditions_rand = conditions(ordering);
-P.pain.CPM.tonicStim.condition = [1 conditions_rand 1];
+conditions                      = [zeros(1,P.presentation.CPM.blocks/2) ones(1,P.presentation.CPM.blocks/2)]; % 0 = control tonic stimulus (non-painful), 1 = experimental tonic stimulus (painful)
+ordering                        = randperm(P.presentation.CPM.blocks);
+conditions_rand                 = conditions(ordering);
+P.pain.CPM.tonicStim.condition  = conditions_rand;%[1 conditions_rand 1];
 
 % CPAR cuff IDs
 P.pain.CPM.tonicStim.cuff   = 1; 
@@ -94,8 +113,8 @@ P.pain.CPM.phasicStim.cuff  = 2;
 P.pain.CPM.tonicStim.fullStimDuration             = 60; % duration of 1 cycle of the tonic stimulus
 P.pain.CPM.tonicStim.rampDuration                 = P.pain.CPM.tonicStim.fullStimDuration/2; % duration of ramp up/down of 1 cycle
 P.pain.CPM.tonicStim.startendRampDuration         = 10; % duration of ramp up/down before/after tonic stimulus
-P.pain.CPM.tonicStim.pressurePeak    = 20; % pressure at peak of the tonic stimulus (maximum), e.g. at VAS 9
-P.pain.CPM.tonicStim.pressureTrough  = 10; % pressure at trough of the tonic stimulus (minimum), e.g. at VAS 7
+P.pain.CPM.tonicStim.pressurePeak    = 50; % pressure at peak of the tonic stimulus (maximum), e.g. at VAS 9
+P.pain.CPM.tonicStim.pressureTrough  = 40; % pressure at trough of the tonic stimulus (minimum), e.g. at VAS 7
 %P.pain.CPM.tonicStim.pressureDiff    = P.pain.CPM.tonicStim.pressurePeak-P.pain.CPM.tonicStim.pressureTrough;
 P.pain.CPM.tonicStim.pressurePeakControl    = 10; % pressure at peak of the tonic stimulus (maximum) for control condition
 P.pain.CPM.tonicStim.pressureTroughControl  = 5;  % pressure at trough of the tonic stimulus (minimum) for control condition
@@ -108,7 +127,7 @@ P.pain.CPM.tonicStim.multipliers     = [1:2*P.pain.CPM.tonicStim.cycles]-1;
 % Goal: 3 x 5 seconds pulse but not possible with current CPAR firmware
 % (exceeds the maximum of possible components = 12)
 %rampSpeed = 10; % kPa/s
-P.pain.CPM.phasicStim.pressure          = 20; % phasic stimulus pressure, e.g. at VAS 8
+P.pain.CPM.phasicStim.pressure          = 80; % phasic stimulus pressure, e.g. at VAS 8
 P.pain.CPM.phasicStim.rampDuration      = 0; %phasicPressure/rampSpeed -> instant ramping up now
 P.pain.CPM.phasicStim.duration          = 5-P.pain.CPM.phasicStim.rampDuration; % duration of phasic stimulus in seconds
 %P.pain.CPM.phasicStim.ISI = 8:0.5:10; % interstimulus interval
