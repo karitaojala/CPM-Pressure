@@ -506,7 +506,7 @@ end
 abort=0;
 preexPainful = NaN;
 P.data.preExposure.painThreshold = [];
-P.data.preExposure.CPAR = [];
+P.data.preExposure.C = [];
 
 fprintf('\n==========================\nRunning preexposure sequence.\n');
 
@@ -562,7 +562,6 @@ while ~abort
                 [abort,dev] = InitCPAR; % initialize CPAR
                 [abort,data] = UseCPAR('Set',dev,'preExp',P,stimDuration,preExpInts(i),cuff); % set stimulus
                 abort = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
-                P.CPAR.dev = dev;
                 
                 while GetSecs < tStimStart+sum(stimDuration)
                     [abort,countedDown]=CountDown(P,GetSecs-tStimStart,countedDown,'.');
@@ -579,7 +578,7 @@ while ~abort
             end
             
             fprintf(' concluded.\n');
-            data = cparFinalizeSampling(dev, data);
+            data = cparGetData(dev, data);
             
             if ~O.debug.toggleVisual
                 Screen('Flip',P.display.w);
@@ -854,12 +853,10 @@ while ~abort
     
     if P.devices.arduino
         
-        clear data
         [abort,dev] = InitCPAR; % initialize CPAR
         [abort,data] = UseCPAR('Set',dev,'Calibration',P,trialPressure,calib,trial); % set stimulus
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
         abort = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
-        P.CPAR.dev = dev;
         if abort; return; end
         P.time.calibStimStart(calib,trial) = GetSecs-P.time.scriptStart;
         
@@ -883,9 +880,9 @@ while ~abort
             if abort; break; end
         end
         
-        calibData = cparFinalizeSampling(dev, data);
-        SaveData(P,calibData,calib,trial); % save data for this trial
-        fprintf(' Saving CPAR data... ')
+%         [abort,calibData] = UseCPAR('Data'); % retrieve data
+%         SaveData(P,calibData,calib,trial); % save data for this trial
+%         fprintf(' Saving CPAR data... ')
         
 %         abort = UseCPAR('Kill');
         
@@ -1251,7 +1248,6 @@ while ~abort
         [abort,data] = UseCPAR('Set',dev,'CPM',P,trialPressure,phasic_on,block,trial); % set stimulus
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
         abort = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
-        P.CPAR.dev = dev;
 
         if abort; return; end
         P.time.tonicStimStart(block,trial) = GetSecs-P.time.scriptStart;
@@ -1308,7 +1304,7 @@ while ~abort
             if abort; break; end
         end
         
-        trialData = cparFinalizeSampling(dev, data);
+        [abort,trialData] = UseCPAR('Data'); % retrieve data
         SaveData(P,trialData,block,trial); % save data for this trial
         fprintf(' Saving CPAR data... ')
         
@@ -1529,10 +1525,9 @@ fprintf('\nAborting...');
 
 Screen('CloseAll');
 
-if P.devices.arduino
-    cparStopSampling(P.CPAR.dev);
-    cparStop(P.CPAR.dev);
-end
+% if P.devices.arduino && exist('dev','var')
+%     UseCPAR('Kill');
+% end
 
 sca; % close window; also closes io64
 ListenChar(0); % use keys again
