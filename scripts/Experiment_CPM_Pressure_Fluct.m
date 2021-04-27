@@ -22,13 +22,18 @@
 function Experiment_CPM_Pressure_Fluct
 
 clear all %#ok<CLALL>
+restoredefaultpath
+
+addpath(cd);
+
 % clear mex global functions;         %#ok<CLMEX,CLFUNC>
 P = InstantiateParameters; % load default parameters for comparable projects (should not ever be changed)
 O = InstantiateOverrides; % load overrides used for testing (e.g., deactivating PTB output or other troubleshooting)
 
-addpath(cd);
 addpath(P.path.experiment)
 addpath(genpath(P.path.PTB))
+addpath(fullfile(P.path.PTB,'PsychBasic','MatlabWindowsFilesR2007a'))
+
 if ~O.debug.toggleVisual
     Screen('Preference', 'TextRenderer', 0);
     %Screen('Preference', 'SkipSyncTests', 1);
@@ -505,8 +510,8 @@ end
 
 abort=0;
 preexPainful = NaN;
-P.data.preExposure.painThreshold = [];
-P.data.preExposure.CPAR = [];
+% P.data.preExposure.painThreshold = [];
+% P.data.preExposure.CPAR = [];
 
 fprintf('\n==========================\nRunning preexposure sequence.\n');
 
@@ -560,8 +565,10 @@ while ~abort
             
             if P.devices.arduino
                 [abort,dev] = InitCPAR; % initialize CPAR
-                [abort,data] = UseCPAR('Set',dev,'preExp',P,stimDuration,preExpInts(i),cuff); % set stimulus
-                abort = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+                abort = UseCPAR('Set',dev,'preExp',P,stimDuration,preExpInts(i),cuff); % set stimulus
+%                 if numel(setCparOutput) > 1; abort = setCparOutput{1}; data = setCparOutput{2}; 
+%                 else; abort = setCparOutput(1); end
+                [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
                 P.CPAR.dev = dev;
                 
                 while GetSecs < tStimStart+sum(stimDuration)
@@ -596,7 +603,7 @@ while ~abort
                 fprintf('Stimulus rated as not painful. \n');
             end
             P.data.preExposure.painRatings(cuff,i) = preexPainful;
-            P.data.preExposure.CPAR(preExpInts) = data;
+            P.data.preExposure.CPAR(cuff,i) = data;
             
         end
         

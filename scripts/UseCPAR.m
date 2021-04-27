@@ -36,8 +36,8 @@ if strcmpi(action,'set')
     % varargin{2} = stimulus durations
     % varargin{3} = pressure in kPa
     
-    if ~exist('dev','var') || ~strcmpi(class(dev),'LabBench.CPAR.CPARDevice') % add: or not correct type
-        warning('\nDev structure containing COM port information from cparCreate required to start CPAR.');
+    if ~exist('dev','var') || ~strcmpi(class(dev),'LabBench.Instruments.CPAR.CPARDevice') % add: or not correct type
+        warning('\nDev structure from cparInitialize and cparGetDevice required to start CPAR.');
         abort = 1; varargout{1} = abort; return;
     elseif isempty(varargin{3})
 %         cparClose(dev);
@@ -80,15 +80,15 @@ if strcmpi(action,'set')
     
 elseif strcmpi(action,'trigger')
     % varargin{1} = stop mode; 'v' stops when certain VAS rating reached,
-    % 'b' only stops when a button pressed
+    % 'bp' only stops when a button pressed
     % varargin{2} = forced start; 'true' start even when VAS is not at 0,
     % 'false' VAS always has to be at 0 for CPAR to start
-    if ~exist('dev','var') || ~strcmpi(class(dev),'LabBench.CPAR.CPARDevice') % or not correct type
+    if ~exist('dev','var') || ~strcmpi(class(dev),'LabBench.Instruments.CPAR.CPARDevice') % or not correct type
         warning('Dev structure containing COM port information from cparCreate required to start CPAR.');
         abort = 1; varargout{1} = abort; return;
-    elseif ~strcmpi(varargin{1},'b') && ~strcmpi(varargin{1},'v')
+    elseif ~strcmpi(varargin{1},'bp') && ~strcmpi(varargin{1},'v')
 %         cparClose(dev);
-        warning('Invalid stopping option for CPAR: has to be either "b" for stopping at button press only, or "v" for stopping also at maximum VAS (10 cm).');
+        warning('Invalid stopping option for CPAR: has to be either "bp" for stopping at button press only, or "v" for stopping also at maximum VAS (10 cm).');
         abort = 1; varargout{1} = abort; return;
     elseif ~islogical(varargin{2})
 %         cparClose(dev);
@@ -99,7 +99,7 @@ elseif strcmpi(action,'trigger')
             cparStart(dev,varargin{1},varargin{2});
             data = cparInitializeSampling;
         catch
-            cparClose(dev);
+%             cparClose(dev);
             warning('Starting CPAR failed.');
             abort = 1; varargout{1} = abort; return;
         end

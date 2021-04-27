@@ -1,7 +1,7 @@
 function P = InstantiateParameters
 
 P = struct;
-P.protocol.sbId     = 08; % subject ID
+P.protocol.sbId     = 09; % subject ID
 P.protocol.session  = 1;
 % P.protocol.nRatings = 2;
 % P.log.ratings       = [];
@@ -27,7 +27,7 @@ if strcmp(P.env.hostname,'stimpc1')
 elseif strcmp(P.env.hostname,'isnb05cda5ba721')
     P.path.scriptBase           = cd;
     P.path.experiment           = fullfile('C:\Data','CPM-Pressure','data',P.project.name);
-    P.path.PTB                  = 'C:\Data\Toolboxes\Psychtoolbox\Psychtoolbox';
+    P.path.PTB                  = 'C:\Data\Toolboxes\Psychtoolbox';
 else
     P.path.scriptBase           = cd;
     P.path.experiment           = fullfile(cd,'..','..','data',P.project.name);
@@ -56,13 +56,13 @@ end
 %% Stimulus parameters
 % General CPAR
 P.cpar.forcedstart                   = true; % CPAR starts even if VAS rating device of CPAR is not at 0 (otherwise false)
-P.cpar.stoprule                      = 'b';  % CPAR stops only at button press (not when VAS rating with the device reaches the maximum, 'v')
+P.cpar.stoprule                      = 'bp';  % CPAR stops only at button press (not when VAS rating with the device reaches the maximum, 'v')
 
 % Pre-exposure
 P.pain.preExposure.cuff_left            = 1; % 1: left, 2: right - depends on how cuffs plugged into the CPAR unit and put on participant's arm
 P.pain.preExposure.cuff_right           = 2; % 
 P.pain.preExposure.repeat               = 1; % number of repeats of each stimulus1111
-P.pain.preExposure.pressureIntensity    = [10 20 30 40 50]; % preexposure pressure intensities (kPa)
+P.pain.preExposure.pressureIntensity    = [10 20 30]; % preexposure pressure intensities (kPa)
 P.pain.preExposure.riseSpeed            = 10; % kPa/s
 P.pain.preExposure.pressureRange        = 5.0:1:100.0; % possible pressure range (kPa)
 P.presentation.sStimPlateauPreexp       = 30; % duration of the constant pressure plateau after rise time for pre-exposure (part 1)
@@ -127,7 +127,7 @@ P.pain.CPM.tonicStim.multipliers     = [1:2*P.pain.CPM.tonicStim.cycles]-1;
 % Goal: 3 x 5 seconds pulse but not possible with current CPAR firmware
 % (exceeds the maximum of possible components = 12)
 %rampSpeed = 10; % kPa/s
-P.pain.CPM.phasicStim.pressure          = 80; % phasic stimulus pressure, e.g. at VAS 8
+P.pain.CPM.phasicStim.pressure          = 50; % phasic stimulus pressure, e.g. at VAS 8
 P.pain.CPM.phasicStim.rampDuration      = 0; %phasicPressure/rampSpeed -> instant ramping up now
 P.pain.CPM.phasicStim.duration          = 5-P.pain.CPM.phasicStim.rampDuration; % duration of phasic stimulus in seconds
 %P.pain.CPM.phasicStim.ISI = 8:0.5:10; % interstimulus interval

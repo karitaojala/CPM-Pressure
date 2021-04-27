@@ -48,10 +48,10 @@ if strcmp(type,'preExp')
     
     if cuff == 1
         stimulus1 = cparCreateWaveform(cuff_left,1); % combined stimulus
-        stimulus2 = cparCreateStimulus(cuff_right,1); % off cuff set to zero
+        stimulus2 = cparCreateWaveform(cuff_right,1); % off cuff set to zero
     elseif cuff == 2
-        stimulus1 = cparCreateStimulus(cuff_right,1); % combined stimulus
-        stimulus2 = cparCreateStimulus(cuff_left,1); % off cuff set to zero
+        stimulus1 = cparCreateWaveform(cuff_right,1); % combined stimulus
+        stimulus2 = cparCreateWaveform(cuff_left,1); % off cuff set to zero
     end
     
     cparWaveform_Inc(stimulus1, stim_pressure, ramp_up_duration); % ramp up
@@ -118,44 +118,37 @@ elseif strcmp(type,'CPM')
     
     if phasicOn % if phasic stimuli on for this block
         
-        combined_phasic = cparCombined();
+        stimulus2 = cparCreateWaveform(settings.pain.CPM.phasicStim.cuff, 1);
         %     timingPhasicBetween = 0; % start with 0 kPa pressure in the cuff until the first phasic stimulus timing comes
         
         for cycle = 1:settings.pain.CPM.tonicStim.cycles
             
             phasicCycleTimings = squeeze(settings.pain.CPM.phasicStim.onsets(block,trial,cycle,:));
             
-            if cycle == 1 % need to add one 0 kPa pressure stimulus before the first phasic stimulus - otherwise first phasic stimulus starts at time 0 despite giving another onset time
-                stimPhasicBetween = cparPulse(0, phasicCycleTimings(1), 0);
-                cparCombinedAdd(combined_phasic, stimPhasicBetween);
+            if cycle == 1 % need to add one 1 kPa pressure stimulus before the first phasic stimulus - otherwise first phasic stimulus starts at time 0 despite giving another onset time
+                cparWaveform_Step(stimulus2, 1, phasicCycleTimings(1));
             end
             
             for stim = 1:settings.pain.CPM.phasicStim.stimPerCycle
                 
-                timingPhasicStim = phasicCycleTimings(stim); % retrieve onset timing of the stimulus
-                %stimPhasicBetween = cparPulse(0, timingPhasicStim-timingPhasicBetween, timingPhasicBetween);
-                %cparCombinedAdd(combined_phasic, stimPhasicBetween);
-                %stimPhasicRamp = cparRamp(phasicPressure, phasicRampDuration, timingPhasicStim);
-                %cparCombinedAdd(combined_phasic, stimPhasicRamp);
-                stimPhasicPlateau = cparPulse(phasicPressure, phasicStimDuration, timingPhasicStim);
-                %stimPhasicPlateau = cparPulse(phasicPressure, phasicStimDuration, timingPhasicStim+phasicRampDuration);
-                cparCombinedAdd(combined_phasic, stimPhasicPlateau);
-                clear stimPhasicRamp stimPhasicPlateau
+                cparWaveform_Step(stimulus2, phasicPressure, phasicStimDuration);
                 
-                %timingPhasicBetween = timingPhasicStim + phasicRampDuration + phasicStimDuration;
-                %timingPhasicBetween = timingPhasicStim + phasicStimDuration;
+                if stim < settings.pain.CPM.phasicStim.stimPerCycle % before last stimulus per cycle
+                    ISI = phasicCycleTimings(stim+1)-phasicCycleTimings(stim); % retrieve onset timing of the stimulus
+                    cparWaveform_Step(stimulus2, 1, ISI); % keep at 1 kPa between phasic stimuli
+                end
                 
             end
 
         end
         
-        stimulus2 = cparCreateStimulus(settings.pain.CPM.phasicStim.cuff, 1, combined_phasic);
-        
     else
         
-        null_phasic = cparPulse(0, 0.1, 0);
-        stimulus2 = cparCreateStimulus(settings.pain.CPM.phasicStim.cuff, 1, null_phasic);
+        stimulus2 = cparCreateWaveform(settings.pain.CPM.phasicStim.cuff, 1);
+%         cparWaveform_Step(stimulus2, 0, 0.1);
         
     end
     
+end
+
 end
