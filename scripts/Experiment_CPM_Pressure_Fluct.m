@@ -14,7 +14,7 @@
 % Author: Karita Ojala, k.ojala@uke.de, University Medical Center Hamburg-Eppendorf
 %   Original script for calibrating thermal pain (some parts used here):
 %   Bjoern Horing, University Medical Center Hamburg-Eppendorf
-% Date: 2021-02-18
+% Date: 2021-04-29
 %
 % Version notes
 % 1.0
@@ -35,7 +35,7 @@ addpath(genpath(P.path.PTB))
 addpath(fullfile(P.path.PTB,'PsychBasic','MatlabWindowsFilesR2007a'))
 
 if ~O.debug.toggleVisual
-    Screen('Preference', 'TextRenderer', 0);
+%     Screen('Preference', 'TextRenderer', 0);
     %Screen('Preference', 'SkipSyncTests', 1);
 end
 
@@ -93,6 +93,8 @@ if abort;QuickCleanup(P);return;end
 % EXPERIMENT START
 %%%%%%%%%%%%%%%%%%%%%%%
 
+P.data.preExposure.painThreshold = [];
+
 %%%%%%%%%%%%%%%%%%%%%%%
 % PREEXPOSURE
 if P.startSection == 1
@@ -122,7 +124,7 @@ if P.startSection == 3
     
     [abort]=ShowInstruction(P,O,3,1);
     if abort;return;end
-    [abort] = CondPainMod(P,O,pressure_input);
+    [abort]=CondPainMod(P,O,pressure_input);
     
 end
 if abort;QuickCleanup(P);return;end
@@ -368,9 +370,9 @@ if ~O.debug.toggleVisual
     Screen('Preference', 'TextRenderer', 0);
 end
 
-if nargin<4
-    displayDuration = 0; % toggle to display seconds that instructions are displayed in command line
-end
+% if nargin<4
+%     displayDuration = 0; % toggle to display seconds that instructions are displayed in command line
+% end
 
 abort = 0;
 upperEight = P.display.screenRes.height*P.display.Ytext;
@@ -586,7 +588,8 @@ while ~abort
             end
             
             fprintf(' concluded.\n');
-            data = cparFinalizeSampling(dev, data);
+            data = cparGetData(dev, data);
+            preExpCPARdata = cparFinalizeSampling(dev, data);
             
             if ~O.debug.toggleVisual
                 Screen('Flip',P.display.w);
@@ -603,7 +606,7 @@ while ~abort
                 fprintf('Stimulus rated as not painful. \n');
             end
             P.data.preExposure.painRatings(cuff,i) = preexPainful;
-            P.data.preExposure.CPAR(cuff,i) = data;
+            P.data.preExposure.CPAR(cuff,i) = preExpCPARdata;
             
         end
         
@@ -863,15 +866,15 @@ while ~abort
         
         clear data
         [abort,dev] = InitCPAR; % initialize CPAR
-        [abort,data] = UseCPAR('Set',dev,'Calibration',P,trialPressure,calib,trial); % set stimulus
+        abort = UseCPAR('Set',dev,'Calibration',P,trialPressure,calib,trial); % set stimulus
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
-        abort = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+        [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
         P.CPAR.dev = dev;
         if abort; return; end
         P.time.calibStimStart(calib,trial) = GetSecs-P.time.scriptStart;
         
         tStimStart = GetSecs;
-        while GetSecs < tStimStart+stimDuration+5
+        while GetSecs < tStimStart+stimDuration
             [abort]=LoopBreakerStim(P);
             if abort; break; end
         end
@@ -879,7 +882,7 @@ while ~abort
         % VAS
         fprintf(' VAS... ');
         tVASStart = GetSecs;
-        P.time.calibVASStart(calib,trial) = GetSecs-P.time.scriptStart;
+        P.time.calibStimVASStart(calib,trial) = GetSecs-P.time.scriptStart;
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
         if ~O.debug.toggleVisual; [abort,P] = calibStimVASRating(P,O,calib,trial,trialPressure); end
         P.time.calibStimVASEnd(calib,trial) = GetSecs-P.time.scriptStart;
@@ -890,6 +893,7 @@ while ~abort
             if abort; break; end
         end
         
+        data = cparGetData(dev, data);
         calibData = cparFinalizeSampling(dev, data);
         SaveData(P,calibData,calib,trial); % save data for this trial
         fprintf(' Saving CPAR data... ')
@@ -1255,9 +1259,9 @@ while ~abort
     if P.devices.arduino
         
         [abort,dev] = InitCPAR; % initialize CPAR
-        [abort,data] = UseCPAR('Set',dev,'CPM',P,trialPressure,phasic_on,block,trial); % set stimulus
+        data = UseCPAR('Set',dev,'CPM',P,trialPressure,phasic_on,block,trial); % set stimulus
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
-        abort = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+        [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
         P.CPAR.dev = dev;
 
         if abort; return; end
@@ -1315,6 +1319,7 @@ while ~abort
             if abort; break; end
         end
         
+        data = cparGetData(dev, data);
         trialData = cparFinalizeSampling(dev, data);
         SaveData(P,trialData,block,trial); % save data for this trial
         fprintf(' Saving CPAR data... ')
@@ -1536,9 +1541,12 @@ fprintf('\nAborting...');
 
 Screen('CloseAll');
 
-if P.devices.arduino
+if P.devices.arduino && isvalid(P.CPAR.dev)
     cparStopSampling(P.CPAR.dev);
     cparStop(P.CPAR.dev);
+    fprintf(' CPAR device was stopped.');
+else
+    fprintf(' CPAR already stopped.');
 end
 
 sca; % close window; also closes io64

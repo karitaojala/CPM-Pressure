@@ -30,6 +30,7 @@ end
 
 abort = 0;
 varargout{1} = abort;
+varargout{2} = [];
 
 if strcmpi(action,'set')
     % varargin{1} = P, set parameters
@@ -107,18 +108,18 @@ elseif strcmpi(action,'trigger')
         varargout{2} = data;
     end
    
-elseif strcmpi(action,'data')
-    
-    data = varargin{1};
-    
-    try
-        data = cparGetData(data,dev);
-        varargout{2} = data;
-    catch
-        cparClose(dev);
-        warning('Getting CPAR data failed.');
-        abort = 1; varargout{1} = abort; return;
-    end
+% elseif strcmpi(action,'data')
+%     
+%     data = varargin{1};
+%     
+%     try
+%         data = cparGetData(data,dev);
+%         varargout{2} = data;
+%     catch
+%         cparClose(dev);
+%         warning('Getting CPAR data failed.');
+%         abort = 1; varargout{1} = abort; return;
+%     end
 end
 
 end
