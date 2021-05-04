@@ -85,7 +85,7 @@ P.pain.Calibration.phasicStim.pressureChange    = [-10 5 10 15];
 P.presentation.Calibration.phasicStim.trials    = numel(P.pain.Calibration.phasicStim.pressureChange);
 P.pain.Calibration.phasicStim.pressureOrder     = randperm(P.presentation.Calibration.phasicStim.trials);
 
-P.presentation.Calibration.tonicStim.ITI        = 30;
+P.presentation.Calibration.tonicStim.ITI        = 20;
 P.presentation.Calibration.phasicStim.ITI       = 15;
 P.presentation.Calibration.durationVAS          = 5;
 
@@ -116,8 +116,8 @@ P.pain.CPM.tonicStim.startendRampDuration         = 10; % duration of ramp up/do
 P.pain.CPM.tonicStim.pressurePeak    = 20; % pressure at peak of the tonic stimulus (maximum), e.g. at VAS 9
 P.pain.CPM.tonicStim.pressureTrough  = 10; % pressure at trough of the tonic stimulus (minimum), e.g. at VAS 7
 %P.pain.CPM.tonicStim.pressureDiff    = P.pain.CPM.tonicStim.pressurePeak-P.pain.CPM.tonicStim.pressureTrough;
-P.pain.CPM.tonicStim.pressurePeakControl    = 10; % pressure at peak of the tonic stimulus (maximum) for control condition
-P.pain.CPM.tonicStim.pressureTroughControl  = 5;  % pressure at trough of the tonic stimulus (minimum) for control condition
+P.pain.CPM.tonicStim.pressurePeakControl    = 8; % pressure at peak of the tonic stimulus (maximum) for control condition
+P.pain.CPM.tonicStim.pressureTroughControl  = 3;  % pressure at trough of the tonic stimulus (minimum) for control condition
 P.pain.CPM.tonicStim.cycles          = 3;
 P.pain.CPM.tonicStim.multipliers     = [1:2*P.pain.CPM.tonicStim.cycles]-1;
 P.pain.CPM.tonicStim.totalDuration   = P.pain.CPM.tonicStim.fullCycleDuration*P.pain.CPM.tonicStim.cycles+2*P.pain.CPM.tonicStim.startendRampDuration;
@@ -132,7 +132,7 @@ P.pain.CPM.phasicStim.pressure          = 30; % phasic stimulus pressure, e.g. a
 P.pain.CPM.phasicStim.rampDuration      = 0; %phasicPressure/rampSpeed -> instant ramping up now
 P.pain.CPM.phasicStim.duration          = 5-P.pain.CPM.phasicStim.rampDuration; % duration of phasic stimulus in seconds
 %P.pain.CPM.phasicStim.ISI = 8:0.5:10; % interstimulus interval
-P.pain.CPM.phasicStim.stimPerCycle      = 2; % how many phasic stimuli per cycle of the tonic stimulus
+P.pain.CPM.phasicStim.stimPerCycle      = 3; % how many phasic stimuli per cycle of the tonic stimulus
 P.pain.CPM.phasicStim.jitter            = 0:0.5:2; % jitter for onset of phasic stimuli in seconds
 P.pain.CPM.phasicStim.stimInterval      = 15; % approximate interval between phasic stimuli onsets
 % 5 s stimulus + 2 s jitter from 0 onset -> offset at max. 7 s after ->
@@ -175,14 +175,14 @@ P.pain.CPM.phasicStim.onsets = onsets;
 % Rating of pressure pain stimuli
 P.presentation.CPM.tonicStim.firstTrialWait = 5; 
 P.presentation.CPM.tonicStim.durationVAS    = P.pain.CPM.tonicStim.totalDuration; % Presentation duration of VAS rating scale for tonic stimuli (continous, online)
-P.presentation.CPM.tonicStim.durationBuffer = 5; % Seconds to wait until VAS finishes for CPAR to have finished, to save CPAR data
-P.presentation.CPM.tonicStim.totalITI       = 30; % total ITI between conditioning stimuli
-P.presentation.CPM.blockBetweenTime         = 60; % time in between blocks/runs
+P.presentation.CPM.tonicStim.durationBuffer = 0; % Seconds to wait until VAS finishes for CPAR to have finished, to save CPAR data
+P.presentation.CPM.tonicStim.totalITI       = 20; % total ITI between conditioning stimuli
+P.presentation.CPM.blockBetweenTime         = 40; % time in between blocks/runs
 P.presentation.CPM.blockBetweenText         = 3; % time to show end of block text
-P.presentation.BlockStopDuration        = 2;  % time to stop at the block display
+P.presentation.BlockStopDuration            = 2;  % time to stop at the block display
 
 P.presentation.CPM.phasicStim.durationVAS   = 5; % time to rate VAS for test stimuli during ISI
-P.presentation.CPM.phasicStim.waitforVAS    = 1; % time to wait until VAS onset after stimulus end
+P.presentation.CPM.phasicStim.waitforVAS    = 0; % time to wait until VAS onset after stimulus end
 % P.presentation.phasicStim.totalISI      = 20; % total ISI between test stimuli
 
 % P.CPM_CondStimTroughPressure    = 1; % tonic conditioning stimulus intensity trough (kPa); overridden by calibration
