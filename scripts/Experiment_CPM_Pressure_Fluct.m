@@ -519,7 +519,7 @@ fprintf('\n==========================\nRunning preexposure sequence.\n');
 
 while ~abort
     
-    for cuff = 1:2 % pre-exposure for both left (1) and right (2) cuffs
+    for cuff = P.pain.preExposure.cuff_order % pre-exposure for both left (1) and right (2) cuffs, randomized order
         
         if cuff == 1
             side = 'LEFT';

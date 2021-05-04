@@ -61,9 +61,8 @@ P.cpar.stoprule                      = 'bp';  % CPAR stops only at button press 
 % Pre-exposure
 P.pain.preExposure.cuff_left            = 1; % 1: left, 2: right - depends on how cuffs plugged into the CPAR unit and put on participant's arm
 P.pain.preExposure.cuff_right           = 2; % 
-P.pain.preExposure.cuff_order           = randperm(2);
-P.pain.preExposure.repeat               = 1; % number of repeats of each stimulus
-P.pain.preExposure.pressureIntensity    = [10 20 30 40 50 60 70 80]; % preexposure pressure intensities (kPa)
+P.pain.preExposure.repeat               = 1; % number of repeats of each stimulus1111
+P.pain.preExposure.pressureIntensity    = [10 20 30]; % preexposure pressure intensities (kPa)
 P.pain.preExposure.riseSpeed            = 10; % kPa/s
 P.pain.preExposure.pressureRange        = 5.0:1:100.0; % possible pressure range (kPa)
 P.presentation.sStimPlateauPreexp       = 30; % duration of the constant pressure plateau after rise time for pre-exposure (part 1)
@@ -75,21 +74,19 @@ P.presentation.sStimPlateau             = P.presentation.sStimPlateauPreexp; % d
 % Calibration
 P.presentation.Calibration.firstTrialWait       = 5;
 
-P.pain.Calibration.painTresholdPreset           = [20 30]; % first for tonic stimuli, second for phasic stimuli
-
+P.pain.Calibration.painTresholdPreset           = [20 30]; % 40 for tonic stimuli, 50 for phasic stimuli
 P.pain.Calibration.tonicStim.stimDuration       = 30;
 P.pain.Calibration.tonicStim.pressureChange     = [-10 5 10 15];
 P.presentation.Calibration.tonicStim.trials     = numel(P.pain.Calibration.tonicStim.pressureChange);
 P.pain.Calibration.tonicStim.pressureOrder      = randperm(P.presentation.Calibration.tonicStim.trials);
 
 P.pain.Calibration.phasicStim.stimDuration      = 5;
-P.pain.Calibration.phasicStim.pressureChange    = [-5 -10 5 10 15 20 25 5 10 15];
+P.pain.Calibration.phasicStim.pressureChange    = [-10 -5 5 10 15 20];
 P.presentation.Calibration.phasicStim.trials    = numel(P.pain.Calibration.phasicStim.pressureChange);
-P.pain.Calibration.phasicStim.pressureOrder     = randperm(P.presentation.Calibration.phasicStim.trials-1)+1;
-P.pain.Calibration.phasicStim.pressureOrder     = [1 P.pain.Calibration.phasicStim.pressureOrder]; % -5 kPa always first to not surprise participants
+P.pain.Calibration.phasicStim.pressureOrder     = randperm(P.presentation.Calibration.phasicStim.trials);
 
 P.presentation.Calibration.tonicStim.ITI        = 20;
-P.presentation.Calibration.phasicStim.ITI       = 10;
+P.presentation.Calibration.phasicStim.ITI       = 15;
 P.presentation.Calibration.durationVAS          = 5;
 
 % Conditioned pain modulation
