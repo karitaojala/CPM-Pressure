@@ -1,4 +1,7 @@
-% script from Björn Horing, modified by Karita Ojala 2021-05-06
+% modified by bh 2019-05-29
+% added est_lin as argout
+% revamped everything for varargout
+% etc etc full restructuring, what's with the t.tmp.etc?
 % varargin{1} is verbosity suppression, with 0 = all output, 1 = figures only, 2 = text only, 3 = no output (except argout)
 % varargin{2} and {3} are figure handles used to plot multiple lin/sig fits (e.g. for whole sample visualization)
 
@@ -117,7 +120,7 @@ if nargin>3 && ( varargin{1}==0 || varargin{1}==2 ) % bh
     % Check - was the whole scale used?
     fprintf('\nCheck for minimal and maximal rating:\n');
     fprintf('Minimal rating: %d, Pressure: %3.1f \n', min(y), x(y == min(y)));
-    fprintf('Maximal rating: %d, Pressure: %3.1f \n', max(y), x(y == max(y)));
+    fprintf('Maximal rating: %d, Presure: %3.1f \n', max(y), x(y == max(y)));
     fprintf('Rating range(max-min rating): %d\n', max(y)-min(y));
 end
 
