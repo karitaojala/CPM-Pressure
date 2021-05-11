@@ -13,6 +13,7 @@ try
     if ~isempty(cparData) && ~isempty(trialData)
         save(cparFile,'cparData');
     end
+    
 catch
     fprintf(['Saving trial ' num2str(trial) ' data failed.\n']);
 end

@@ -1,11 +1,10 @@
 function P = InstantiateParameters
 
-P = struct;
-P.protocol.sbId         = 09; % subject ID
+P.protocol.sbId         = 01; % subject ID
 P.protocol.session      = 1;
 P.language              = 'en'; % de or en
 P.project.name          = 'CPM-Pressure-01';
-P.project.part          = 'Pilot-01';
+P.project.part          = 'Pilot-02';
 P.devices.arduino        = 1; % if '' or [], will not try to use Arduino
 P.devices.eyetracker    = 0;
 P.devices.trigger       = 0; % 1 single parallel port, arduino; rest undefined
@@ -71,21 +70,23 @@ P.pain.preExposure.repeat               = 1; % number of repeats of each stimulu
 P.pain.preExposure.pressureIntensity    = [10 15 20 25 30 35 40 45 50 55 60 65 70 75 80]; % preexposure pressure intensities (kPa)
 P.pain.preExposure.riseSpeed            = 10; % kPa/s
 P.pain.preExposure.pressureRange        = 5.0:1:100.0; % possible pressure range (kPa)
-P.presentation.sStimPlateauPreexp       = 30; % duration of the constant pressure plateau after rise time for pre-exposure (part 1)
+P.presentation.sStimPlateauPreexp       = [30 5]; % duration of the constant pressure plateau after rise time for pre-exposure (part 1)
 P.presentation.sPreexpITI               = 10; % pre-exposure intertrial interval (ITI)
 P.presentation.sPreexpCue               = P.presentation.sStimPlateauPreexp/P.pain.preExposure.riseSpeed+P.presentation.sStimPlateauPreexp; % pre-exposure cue duration (stimulus duration with rise time included)
 P.presentation.sStimPlateau             = P.presentation.sStimPlateauPreexp; % duration of the constant pressure plateau after rise time for pressure test (part 2)
 
 P.awiszus.N     = 6; % number of trials
-P.awiszus.X     = P.pain.preExposure.pressureIntensity;  % kPa range to be covered
-P.awiszus.mu    = 20; % assumed population mean (also become first stimulus to be tested? -> currently go upward)
-P.awiszus.sd    = 15; % assumed population std, kPa
+P.awiszus.X     = P.pain.preExposure.pressureIntensity(1):1:P.pain.preExposure.pressureIntensity(end);  % kPa range to be covered
+P.awiszus.mu    = 35; % assumed population mean (also become first stimulus to be tested? -> currently go upward)
+P.awiszus.sd    = 10; % assumed population std, kPa
 P.awiszus.sp    = 5; % assumed individual spread, kPa
 P.awiszus.nextX = P.awiszus.mu;
 
 % Psychometric scaling
-P.pain.psychScaling.stimType            = 2; % short stimuli only
+% P.pain.psychScaling.stimType            = 2; % short stimuli only
 P.pain.psychScaling.cuff_order          = randperm(2);
+P.pain.psychScaling.trials              = 4;
+P.pain.psychScaling.thresholdMultiplier = 0.25; % multiplier for pain threshold to determine step size for pressure intensities
     
 % Calibration
 P.calibration.pressure = [];
@@ -93,16 +94,16 @@ P.calibration.rating = [];
     
 P.pain.Calibration.VASTargetsFixed              = [10,30,90];
 P.pain.Calibration.VASTargetsVisual             = [10,30,50,70,90];
-P.pain.Calibration.painTresholdPreset           = [30 50]; % first for tonic stimuli, second for phasic stimuli
+P.pain.Calibration.painTresholdPreset           = [30 60]; % first for tonic stimuli, second for phasic stimuli
 
 P.pain.Calibration.tonicStim.stimDuration       = 30;
 % P.pain.Calibration.tonicStim.pressureChange     = [-10 5 10 15];
-P.presentation.Calibration.tonicStim.trials     = numel(P.pain.Calibration.tonicStim.pressureChange);
+% P.presentation.Calibration.tonicStim.trials     = numel(P.pain.Calibration.tonicStim.pressureChange);
 % P.pain.Calibration.tonicStim.pressureOrder      = randperm(P.presentation.Calibration.tonicStim.trials);
 
 P.pain.Calibration.phasicStim.stimDuration      = 5;
 % P.pain.Calibration.phasicStim.pressureChange    = [-5 -10 5 10 15 20 25 5 10 15];
-P.presentation.Calibration.phasicStim.trials    = numel(P.pain.Calibration.phasicStim.pressureChange);
+% P.presentation.Calibration.phasicStim.trials    = numel(P.pain.Calibration.phasicStim.pressureChange);
 % P.pain.Calibration.phasicStim.pressureOrder     = randperm(P.presentation.Calibration.phasicStim.trials-1)+1;
 % P.pain.Calibration.phasicStim.pressureOrder     = [1 P.pain.Calibration.phasicStim.pressureOrder]; % -5 kPa always first to not surprise participants
 

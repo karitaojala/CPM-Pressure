@@ -1,4 +1,4 @@
-function [abort,P] = calibStimVASRating(P,O,calibStep,trial,trialPressure)
+function [abort,P] = calibStimVASRating(P,O,calibStep,cuff,trial,trialPressure)
 
 abort = 0;
 
@@ -6,7 +6,7 @@ while ~abort
     
     [abort,finalRating,reactionTime,keyId,keyTime,response] = singleratingScale(P);
     
-    VASFile = fullfile(P.out.dir, [P.out.file.VAS '_calibration_step' num2str(calibStep) '.mat']);
+    VASFile = fullfile(P.out.dir, [P.out.file.VAS '_calibration.mat']);
     if exist(VASFile,'file')
         VASData = load(VASFile);
         VAS = VASData.VAS;
@@ -20,8 +20,18 @@ while ~abort
     calibData.keyTime = keyTime;
     calibData.response = response;
     
-    P.calibration.pressure(end+1) = trialPressure;
-    P.calibration.rating(end+1) = finalRating;
+    if calibStep == 1
+        P.calibration.pressure(cuff,trial) = trialPressure;
+        P.calibration.rating(cuff,trial) = finalRating;
+    elseif calibStep == 2
+        itemNo = P.pain.psychScaling.trials+trial; % start from after Psychometric Scaling trials
+        P.calibration.pressure(cuff,itemNo) = trialPressure;
+        P.calibration.rating(cuff,itemNo) = finalRating;
+    elseif calibStep == 3
+        itemNo = P.pain.psychScaling.trials+numel(P.pain.Calibration.VASTargetsFixed)+trial; % start from after Psychometric Scaling and Fixed Intensity trials
+        P.calibration.pressure(cuff,itemNo) = trialPressure;
+        P.calibration.rating(cuff,itemNo) = finalRating;
+    end
     
     VAS(calibStep).calibStep(trial) = calibData;
     

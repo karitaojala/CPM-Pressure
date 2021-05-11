@@ -1,6 +1,6 @@
 function [abort,P]=ApplyStimulus(P,O,trialPressure,block,trial)
 
-cparFile = fullfile([P.out.file.CPAR '_CPM.mat']);
+cparFile = fullfile(P.out.dir,[P.out.file.CPAR '_calibration.mat']);
 
 abort = 0;
 

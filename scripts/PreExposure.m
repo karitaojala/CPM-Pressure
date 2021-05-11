@@ -16,6 +16,8 @@ while ~abort
     
     for cuff = P.pain.preExposure.cuff_order % pre-exposure for both left (1) and right (2) cuffs, randomized order
         
+        stimType = cuff;
+        
         if cuff == 1
             side = 'LEFT';
         elseif cuff == 2
@@ -61,7 +63,7 @@ while ~abort
             end 
             fprintf('%1.1f kPa stimulus initiated.',preExpInt);
             
-            stimDuration = CalcStimDuration(P,preExpInt,P.presentation.sStimPlateauPreexp);
+            stimDuration = CalcStimDuration(P,preExpInt,P.presentation.sStimPlateauPreexp(cuff));
             
             countedDown = 1;
             tStimStart = GetSecs;
@@ -90,7 +92,7 @@ while ~abort
             fprintf(' concluded.\n');
             data = cparGetData(dev, data);
             preExpCPARdata = cparFinalizeSampling(dev, data);
-            saveCPARData(P,preExpCPARdata,cparFile,cuff,trial);
+            saveCPARData(preExpCPARdata,cparFile,cuff,trial);
             
             if ~O.debug.toggleVisual
                 Screen('Flip',P.display.w);

@@ -24,11 +24,15 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Wir melden uns gleich, falls Sie noch Fragen haben,', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'danach geht es los!', 'center', upperEight+P.style.lineheight, P.style.white);
         elseif strcmp(P.language,'en')
-            if ~P.presentation.sStimPlateauPreexp; dstr = 'very brief '; else; dstr = ''; end
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['You will now receive a number of ' dstr 'pressure stimuli,'], 'center', upperEight, P.style.white);
+%             if ~P.presentation.sStimPlateauPreexp; dstr = 'very brief '; else; dstr = ''; end
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['You will now receive a number of pressure stimuli,'], 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'which may or may not be painful for you.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'First, the stimuli will be on the left arm, then on the right arm.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'The stimuli will be on one arm at a time but ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' the starting arm is different for each participant.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'The stimuli on the left arm will be long and ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' the the stimuli on the right arm will be short.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'After each stimulus, you will be asked to press a button', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'to indicate whether the stimulus was painful or not', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -39,21 +43,37 @@ if ~O.debug.toggleVisual
         
     elseif section == 2
         
-        fprintf('Ready CALIBRATION protocol.\n');
+        fprintf('Ready PSYCHOMETRIC SCALING protocol.\n');
         if strcmp(P.language,'de')
             
         elseif strcmp(P.language,'en')
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You will now receive a number of pressure stimuli,', 'center', upperEight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'which may or may not be painful for you.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You will now receive a few more stimuli on either arm,', 'center', upperEight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'which range in their intensity from low to high.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'First, the stimuli will be long and on the left arm.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Then, the stimuli will be short and on the right arm. ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'First, all stimuli will be applied on one arm, and then on the other.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Again, left arm will get long stimuli and right arm short stimuli.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'You should rate these stimuli on their painfulness on a scale, as instructed.', 'center', upperEight+P.style.lineheight, P.style.white);
         end
         
     elseif section == 3
         
+        fprintf('Ready VAS TARGET REGRESSSION protocol.\n');
+        if strcmp(P.language,'de')
+            
+        elseif strcmp(P.language,'en')
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You will now receive a number of varying pressure stimuli,', 'center', upperEight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'which may or may not be painful for you.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'First, the stimuli will be long and on the left arm.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Then, the stimuli will be short and on the right arm. ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'You should rate these stimuli on their painfulness on a scale, as before.', 'center', upperEight+P.style.lineheight, P.style.white);
+        end
+        
+    elseif section == 4
+        
+        fprintf('Ready CONDITIONED PAIN MODULATION protocol.\n');
         if strcmp(P.language,'de')
             %             if ~P.toggles.doScaleTransl
             %                 [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Gleich beginnt Teil 2 der Schmerzschwellenmessung.', 'center', upperEight, P.style.white);
@@ -85,7 +105,7 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Please confirm verbally when you have read these instructions.', 'center', upperEight+P.style.lineheight, P.style.white);
         end
         
-    elseif section == 4 % end of the test
+    elseif section == 5 % end of the test
         
         if strcmp(P.language,'de')
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'END', 'center', upperEight, P.style.white);

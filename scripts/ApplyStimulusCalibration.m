@@ -1,6 +1,6 @@
-function [abort,P]=ApplyStimulusCalibration(P,O,trialPressure,calibStep,trial)
+function [abort,P]=ApplyStimulusCalibration(P,O,trialPressure,calibStep,stimType,cuff,trial)
 
-cparFile = fullfile([P.out.file.CPAR '_Calibration.mat']);
+cparFile = fullfile(P.out.dir,[P.out.file.CPAR '_calibration.mat']);
 
 abort = 0;
 
@@ -8,12 +8,11 @@ while ~abort
     
     fprintf(['Stimulus initiated at ' num2str(trialPressure) ' kPa... ']);
     
-    if calibStep == 1 || calibStep == 3
-        stimType = 2;
+    if stimType == 1
+        rampDuration = trialPressure/P.pain.preExposure.riseSpeed;
+        stimDuration = rampDuration+P.pain.Calibration.tonicStim.stimDuration;
+    elseif stimType == 2
         stimDuration = P.pain.Calibration.phasicStim.stimDuration;
-    elseif calibStep == 2
-        stimType = 1;
-        stimDuration = P.pain.Calibration.tonicStim.stimDuration;
     end
     
     P.time.calibStart(trial) = GetSecs-P.time.scriptStart;
@@ -22,7 +21,7 @@ while ~abort
         
         clear data
         [abort,dev] = InitCPAR; % initialize CPAR
-        abort = UseCPAR('Set',dev,'Calibration',P,trialPressure,stimType,trial); % set stimulus
+        abort = UseCPAR('Set',dev,'Calibration',P,trialPressure,stimType,cuff,trial); % set stimulus
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
         [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
         P.CPAR.dev = dev;
@@ -40,7 +39,7 @@ while ~abort
         tVASStart = GetSecs;
         P.time.calibStimVASStart(trial) = GetSecs-P.time.scriptStart;
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
-        if ~O.debug.toggleVisual; [abort,P] = calibStimVASRating(P,O,calibStep,trial,trialPressure); end
+        if ~O.debug.toggleVisual; [abort,P] = calibStimVASRating(P,O,calibStep,cuff,trial,trialPressure); end
         P.time.calibStimVASEnd(trial) = GetSecs-P.time.scriptStart;
         if abort; return; end
         

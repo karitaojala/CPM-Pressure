@@ -30,6 +30,7 @@ addpath(cd);
 P = InstantiateParameters; % load default parameters for comparable projects (should not ever be changed)
 O = InstantiateOverrides; % load overrides used for testing (e.g., deactivating PTB output or other troubleshooting)
 
+addpath(genpath(P.path.scriptBase))
 addpath(P.path.experiment)
 addpath(genpath(P.path.PTB))
 addpath(fullfile(P.path.PTB,'PsychBasic','MatlabWindowsFilesR2007a'))
@@ -92,45 +93,56 @@ if abort;QuickCleanup(P);return;end
 % EXPERIMENT START %
 %%%%%%%%%%%%%%%%%%%%
 
-P.data.preExposure.painThreshold = [];
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PREEXPOSURE
+% PREEXPOSURE & AWISZUS
 if P.startSection == 1
     [abort]=ShowInstruction(P,O,1,1);
     if abort;return;end
-    [abort]=Preexposure(P,O);
+    P = P = InstantiateParameters;
+    [abort]=PreExposure(P,O);
 end
 if abort;QuickCleanup(P);return;end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% CALIBRATION
+% CALIBRATION / PSYCHOMETRIC SCALING
 if P.startSection == 2
     [abort]=ShowInstruction(P,O,2,1);
     if abort;return;end
-    [abort]=CalibrationPressure(P,O);
+    load(P.out.file.param,'P','O');
+    [abort]=PsychometricScaling(P,O);
+end
+if abort;QuickCleanup(P);return;end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CALIBRATION / VAS TARGET REGRESSION
+if P.startSection == 3
+    [abort]=ShowInstruction(P,O,3,1);
+    if abort;return;end
+    load(P.out.file.param,'P','O');
+    [abort]=TargetRegressionVAS(P,O);
 end
 if abort;QuickCleanup(P);return;end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONDITIONED PAIN MODULATION EXPERIMENT
-if P.startSection == 3
+if P.startSection == 4
     
     ListenChar(0); % activate keyboard input
     commandwindow;
     pressure_input=input('\nHow to define pressure levels for the experiment: ... 1 = From calibration, 2 = From input, 3 = From instantiated parameters file\n');
     ListenChar(2); % deactivate keyboard input
     
-    [abort]=ShowInstruction(P,O,3,1);
+    load(P.out.file.param,'P','O');
+    [abort]=ShowInstruction(P,O,4,1);
     if abort;return;end
     [abort]=CondPainMod(P,O,pressure_input);
     
 end
 if abort;QuickCleanup(P);return;end
 
-if P.startSection == 4
+if P.startSection == 5
     fprintf('\nExperiment ending.');
-    [abort]=ShowInstruction(P,O,4);
+    [abort]=ShowInstruction(P,O,5);
     if abort;return;end
 end
 
@@ -314,17 +326,17 @@ function [abort,P] = StartExperimentAt(P,query)
 
 abort=0;
 
-P.keys.n1                 = KbName('1!'); % | Preexposure | Calibration | CPM experiment | Finish
-P.keys.n2                 = KbName('2@'); % | Calibration | CPM experiment | Finish
-P.keys.n3                 = KbName('3#'); % | CPM experiment | Finish
-P.keys.n4                 = KbName('4$'); % | Finish
+P.keys.n1                 = KbName('1!'); % | Preexposure & Awiszus
+P.keys.n2                 = KbName('2@'); % | Calibration/Psychometric Scaling
+P.keys.n3                 = KbName('3#'); % | Calibration/VAS Target Regression
+P.keys.n4                 = KbName('4$'); % | Conditioned Pain Modulation Experiment
 keyN1Str = upper(char(P.keys.keyList(P.keys.n1)));
 keyN2Str = upper(char(P.keys.keyList(P.keys.n2)));
 keyN3Str = upper(char(P.keys.keyList(P.keys.n3)));
 keyN4Str = upper(char(P.keys.keyList(P.keys.n4)));
 keyEscStr = upper(char(P.keys.keyList(P.keys.esc)));
 
-fprintf('%sIndicate which step you want to start at for\n(%s Preexposure => %s Calibration => %s CPM experiment => %s Finish. [%s] to abort.\n',query,keyN1Str(1),keyN2Str(1),keyN3Str(1),keyN4Str(1),keyEscStr);
+fprintf('%sIndicate which step you want to start at for\n(%s Preexposure => %s Calibration/Psychometric Scaling => %s Calibration/VAS Target Regression => %s CPM experiment. [%s] to abort.\n',query,keyN1Str(1),keyN2Str(1),keyN3Str(1),keyN4Str(1),keyEscStr);
 
 P.startSection = 0;
 while 1

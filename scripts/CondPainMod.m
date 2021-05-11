@@ -10,34 +10,20 @@ while ~abort
     
     if pressure_input == 1
         
-        % Tonic stimulus calibration
-        calibFile1 = fullfile(P.out.dir, [P.out.file.VAS '_calibration_cuff1.mat']);
-        if exist(calibFile1,'file')
-            calibData1 = load(calibFile1);
-            truePressureTonicCalib = [calibData1.VAS.tonicStim.trialPressure];
-            ratedPainTonicCalib = [calibData1.VAS.tonicStim.finalRating];
-        end
-        
-        % Phasic stimulus calibration
-        calibFile2 = fullfile(P.out.dir, [P.out.file.VAS '_calibration_cuff2.mat']);
-        if exist(calibFile2,'file')
-            calibData2 = load(calibFile2);
-            truePressurePhasicCalib = [calibData2.VAS.phasicStim.trialPressure];
-            ratedPainPhasicCalib = [calibData2.VAS.phasicStim.finalRating];
-        end
-         
-        % Find VAS 7 and VAS 9 for tonic pressure based on calibration
-        format long
-        slopePressureRatingTonic = ratedPainTonicCalib'\truePressureTonicCalib';
-        TonicVAS7 = round(70*slopePressureRatingTonic);
-        TonicVAS9 = round(90*slopePressureRatingTonic);
-        tonicPressure_trough_Exp = TonicVAS7;
-        tonicPressure_peak_Exp = TonicVAS9;
-        
-        % Find VAS 7 for phasic pressure
-        slopePressureRatingPhasic = ratedPainPhasicCalib'\truePressurePhasicCalib';
-        PhasicVAS7 = round(70*slopePressureRatingPhasic);
-        phasicPressure = PhasicVAS7;
+        % Find VAS70 and VAS90 from tonic stimulus calibration
+        predPressureTonic = P.calibration.results(P.pain.CPM.tonicStim.cuff).fitData.predPressureSigmoid;
+        VASindex = P.pain.Calibration.VASTargetsVisual==70;
+        TonicVAS70 = predPressureTonic(VASindex);
+        VASindex = P.pain.Calibration.VASTargetsVisual==90;
+        TonicVAS90 = predPressureTonic(VASindex);
+        tonicPressure_trough_Exp = TonicVAS70;
+        tonicPressure_peak_Exp = TonicVAS90;
+      
+        % Find VAS70 from phasic stimulus calibration
+        predPressurePhasic = P.calibration.results(P.pain.CPM.phasicStim.cuff).fitData.predPressureSigmoid;
+        VASindex = P.pain.Calibration.VASTargetsVisual==70;
+        PhasicVAS70 = predPressurePhasic(VASindex);
+        phasicPressure = PhasicVAS70;
         
     elseif pressure_input == 2
         

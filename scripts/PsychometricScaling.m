@@ -14,21 +14,35 @@ abort=0;
 
 while ~abort
     
-stimType = P.pain.psychScaling.stimType; 
-
-for cuff = P.pain.psychScaling.cuff_order % randomized order
+    calibStep = 1;
+%     stimType = P.pain.psychScaling.stimType;
+    trials = P.pain.psychScaling.trials;
     
-    painThreshold = P.awiszus.painThresholdFinal(cuff);
-    stepSize = 0.25*painThreshold;
-%     if painThreshold > 40
-%         stepSize = 10;
-%     else
-%         stepSize = 5;
-%     end
-    
-    scalingPressures = ceil([painThreshold+stepSize painThreshold+2*stepSize painThreshold+3*stepSize]);
-    
-    for trial = 1:trials
+    for cuff = P.pain.psychScaling.cuff_order % randomized order
+        
+        stimType = cuff;%
+        
+        if stimType == 1
+            durationITI = P.presentation.Calibration.tonicStim.ITI;
+%             cuff = P.pain.preExposure.cuff_left;
+        else
+            durationITI = P.presentation.Calibration.phasicStim.ITI;
+%             cuff = P.pain.preExposure.cuff_right;
+        end
+        
+        painThreshold = P.awiszus.painThresholdFinal(cuff);
+        stepSize = P.pain.psychScaling.thresholdMultiplier*painThreshold;
+        
+        clear scalingPressures
+        for pressure = 1:trials
+            if pressure ~= trials
+                scalingPressures(pressure) = ceil(painThreshold+pressure*stepSize); %#ok<AGROW>
+            else
+                scalingPressures(pressure) = ceil(painThreshold+(pressure-2)*stepSize); %#ok<AGROW>
+            end
+        end
+        
+        for trial = 1:trials
             
             if ~O.debug.toggleVisual
                 Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
@@ -37,7 +51,7 @@ for cuff = P.pain.psychScaling.cuff_order % randomized order
             else
                 tCrossOn = GetSecs;
             end
-       
+            
             
             if trial == 1 % first trial no intertrial interval
                 
@@ -64,7 +78,7 @@ for cuff = P.pain.psychScaling.cuff_order % randomized order
             end
             
             trialPressure = scalingPressures(trial);
-            [abort,P] = ApplyStimulusCalibration(P,O,trialPressure,stimType,trial); % run stimulus
+            [abort,P] = ApplyStimulusCalibration(P,O,trialPressure,calibStep,stimType,cuff,trial); % run stimulus
             save(P.out.file.param,'P','O'); % Save instantiated parameters and overrides after each trial
             
             if abort; break; end
@@ -99,11 +113,11 @@ for cuff = P.pain.psychScaling.cuff_order % randomized order
         end
         
         if abort; break; end
+        
+    end
     
-end
-
-break;
-
+    break;
+    
 end
 
 if ~abort

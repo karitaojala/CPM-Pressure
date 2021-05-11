@@ -4,16 +4,6 @@ abort=0;
 
 while ~abort
     
-    if isempty(P.calibration.pressure) || isempty(P.calibration.rating)
-        fprintf('No valid previous data from psychometric scaling.');
-        fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
-    else
-        % Fit previous data and retrieve regression results
-        x = P.calibration.pressure;
-        y = P.calibration.rating;
-        [P.pain.Calibration.VASTargetsFixedPressure,~] = FitData(x,y,P.pain.Calibration.VASTargetsFixed,2);  % last vargin 2 = text only output
-    end
-    
     fprintf('\n==========================\nRunning VAS target regression.\n');
     
     % Separately for long tonic stimuli and short phasic stimuli
@@ -59,13 +49,27 @@ while ~abort
         end
         
         WaitSecs(0.2);
-        
+
         if stimType == 1
-            %             trials = P.presentation.Calibration.tonicStim.trials;
             durationITI = P.presentation.Calibration.tonicStim.ITI;
+            cuff = P.pain.preExposure.cuff_left;
         else
-            %             trials = P.presentation.Calibration.phasicStim.trials;
             durationITI = P.presentation.Calibration.phasicStim.ITI;
+            cuff = P.pain.preExposure.cuff_right;
+        end
+        calibStep = 2; % in this case, second calibration step is the tonic stimulus, third is the phasic stimulus
+        
+        fprintf('\n')
+        if isempty(P.calibration.pressure(cuff,:)) || isempty(P.calibration.rating(cuff,:))
+            fprintf('No valid previous data from psychometric scaling.');
+            fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
+        else
+            % Fit previous data and retrieve regression results
+            pressureData = P.calibration.pressure(cuff,:);
+            ratingData = P.calibration.rating(cuff,:);
+            x = pressureData(pressureData>0); % take only non-zero data
+            y = ratingData(pressureData>0); % take only ratings associated with non-zero pressures
+            [P.pain.Calibration.VASTargetsFixedPressure,~] = FitData(x,y,P.pain.Calibration.VASTargetsFixed,0);  % last vargin, 0 = figure+text, 2 = text only output
         end
         
         %% FIXED INTENSITY VAS TARGETS
@@ -116,7 +120,7 @@ while ~abort
             % Retrieve predicted pressure as current trial pressure to rate
             trialPressure = P.pain.Calibration.VASTargetsFixedPressure(trial);
             
-            [abort,P] = ApplyStimulusCalibration(P,O,trialPressure,stimType,trial); % run stimulus
+            [abort,P] = ApplyStimulusCalibration(P,O,trialPressure,calibStep,stimType,cuff,trial); % run stimulus
             save(P.out.file.param,'P','O'); % Save instantiated parameters and overrides after each trial
             if abort; break; end
             
@@ -155,10 +159,9 @@ while ~abort
         
         fprintf('\n==========================\nADAPTIVE VAS TARGET REGRESSION.\n');
         
-        trialsAdaptive = numel(P.pain.Calibration.VASTargetsFixed);
-        
         % Start trial
-        nextStim = 1;
+        calibStep = 3;
+        nextStim = NaN;
         varTrial = 0;
         nH = figure;
         while ~isempty(nextStim)
@@ -191,14 +194,20 @@ while ~abort
             if ~isempty(nextStim)
                 
                 % Find next stimulus pressure intensity based on previous VAS rating data
-                ex = P.calibration.pressure;
-                ey = P.calibration.rating;
+                ex = P.calibration.pressure(cuff,:);
+                ey = P.calibration.rating(cuff,:);
                 if varTrial<2 % lin is more robust for the first additions; in the worst case [0 X 100], sig will get stuck in a step fct
                     linOrSig = 'lin';
                 else
                     linOrSig = 'sig';
                 end
                 [nextStim,~,tValidation,targetVAS] = CalibValidation(ex,ey,[],[],linOrSig,P.toggles.doConfirmAdaptive,1,1,nH,num2cell([zeros(1,numel(ex)-1) varTrial]),['s' num2str(numel(varTrial)+1)]);
+                
+                if isempty(nextStim)
+                    fprintf('Last variable stimulus, exiting loop.');
+%                     warning('Next stimulus pressure intensity from CalibValidation is empty, exiting while loop.');
+                    break
+                end
                 
                 % Red fixation cross during the trial
                 if ~O.debug.toggleVisual
@@ -209,8 +218,8 @@ while ~abort
             
                 % Apply stimulus
                 varTrial = varTrial+1;
-                fprintf('\n=======VARIABLE TRIAL %d of %d=======\n',varTrial,trialsAdaptive);
-                [abort,P] = ApplyStimulusCalibration(P,O,trialPressure,stimType,varTrial); % run stimulus
+                fprintf('\n=======VARIABLE TRIAL %d=======\n',varTrial);
+                [abort,P] = ApplyStimulusCalibration(P,O,nextStim,calibStep,stimType,cuff,varTrial); % run stimulus
                 save(P.out.file.param,'P','O'); % Save instantiated parameters and overrides after each trial
                 if abort; break; end
                 
@@ -223,21 +232,16 @@ while ~abort
                     tCrossOn = GetSecs;
                 end
                 
-                % Intertrial interval if not the last stimulus in the block,
-                % if last trial then end trial immediately
-                if trial ~= trialsAdaptive
-                    
-                    fprintf('\nIntertrial interval... ');
-                    countedDown = 1;
-                    while GetSecs < tCrossOn + durationITI
-                        tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
-                        [abort,countedDown] = CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
-                        if abort; break; end
-                    end
-                    
-                    if abort; return; end
-                    
+                % Intertrial interval
+                fprintf('\nIntertrial interval... ');
+                countedDown = 1;
+                while GetSecs < tCrossOn + durationITI
+                    tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
+                    [abort,countedDown] = CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
+                    if abort; break; end
                 end
+                
+                if abort; return; end
                 
             end
             
@@ -248,7 +252,10 @@ while ~abort
         if abort; break; end
         
         % Get calibration results for the stimulus type
-        P = GetRegressionResults(P);
+        calibration = GetRegressionResults(P,stimType);
+        P.calibration.results(stimType) = calibration;
+        
+        save(P.out.file.param, 'P', 'O');
         
     end
     
