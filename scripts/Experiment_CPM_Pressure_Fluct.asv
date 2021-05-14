@@ -93,13 +93,12 @@ if abort;QuickCleanup(P);return;end
 if P.devices.arduino
     [abort,initSuccess,dev] = InitCPAR; % initialize CPAR
     if initSuccess
-        P.cpar.init = initSuccess;
+        P.cpar.initDone = initSuccess;
         P.cpar.dev = dev;
     else
-        warning('\nCPAR initialization not successful, aborting!');
-        abort = 1;
+        warning('\nExperiment ending.');
+        break;
     end
-    if abort;QuickCleanup(P);return;end
 end
 
 %%%%%%%%%%%%%%%%%%%%
@@ -237,9 +236,9 @@ if ~exist(P.out.dir,'dir')
     mkdir(P.out.dir);
 end
 
-fprintf('\n\nSaving parameters to %s.\n',P.out.file.param);
+fprintf('Saving parameters to %s%s.\n',P.out.dir,P.out.file.param);
 fprintf('Saving CPAR data to %s%s.\n',P.out.dir,P.out.file.CPAR);
-fprintf('Saving VAS data to %s%s.\n\n',P.out.dir,P.out.file.VAS);
+fprintf('Saving VAS data to %s%s.\n',P.out.dir,P.out.file.VAS);
 
 end
 
@@ -343,7 +342,7 @@ end
 
 end
 
-function [abort,P] = StartExperimentAt(P)
+function [abort,P] = StartExperimentAt(P,query)
 
 abort=0;
 
@@ -359,7 +358,7 @@ keyN4Str = upper(char(P.keys.keyList(P.keys.n4)));
 keyN5Str = upper(char(P.keys.keyList(P.keys.n5)));
 keyEscStr = upper(char(P.keys.keyList(P.keys.esc)));
 
-fprintf('// Indicate which step you want to start at for: \n(%s Pre-exposure & Awiszus => %s VAS training => %s Calibration/Psychometric Scaling => %s Calibration/VAS Target Regression => %s CPM experiment. // \n[%s] to abort.\n\n',keyN1Str(1),keyN2Str(1),keyN3Str(1),keyN4Str(1),keyN5Str(1),keyEscStr);
+fprintf('%sIndicate which step you want to start at for\n(%s Preexposure => %s VAS training => %s Calibration/Psychometric Scaling => %s Calibration/VAS Target Regression => %s CPM experiment. [%s] to abort.\n',query,keyN1Str(1),keyN2Str(1),keyN3Str(1),keyN4Str(1),keyN5Str(1),keyEscStr);
 
 P.startSection = 0;
 while 1
@@ -398,12 +397,12 @@ fprintf('\nAborting...');
 
 Screen('CloseAll');
 
-if P.devices.arduino && isfield(P.cpar,'dev')
-    cparStopSampling(P.cpar.dev);
-    cparStop(P.cpar.dev);
-    fprintf(' CPAR device was stopped\n.');
+if P.devices.arduino && isvalid(P.CPAR.dev)
+    cparStopSampling(P.CPAR.dev);
+    cparStop(P.CPAR.dev);
+    fprintf(' CPAR device was stopped.');
 else
-    fprintf(' CPAR already stopped\n.');
+    fprintf(' CPAR already stopped.');
 end
 
 sca; % close window; also closes io64

@@ -1,6 +1,7 @@
-function [abort,dev] = InitCPAR()
+function [abort,initSuccess,dev] = InitCPAR()
 
 abort = 0;
+initSuccess = 0;
 
 cparInitialize; % initialize CPAR
 CPARid = cparList; % get CPAR device id
@@ -25,6 +26,6 @@ if ~cparIsReady(dev)
     throw(me)
 end
         
-if isempty(dev); abort = 1; end
+if isempty(dev); abort = 1; else; initSuccess = 1; end
 
 end

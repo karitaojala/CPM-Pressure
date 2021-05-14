@@ -41,7 +41,6 @@ if strcmpi(action,'set')
         warning('\nDev structure from cparInitialize and cparGetDevice required to start CPAR.');
         abort = 1; varargout{1} = abort; return;
     elseif isempty(varargin{3})
-%         cparClose(dev);
         error('Input pressure required.');
     elseif ~isnumeric(varargin{3})
         warning('\nInput pressure needs to be in numeric format. Attempting conversion.');
@@ -49,16 +48,13 @@ if strcmpi(action,'set')
             pressure_num = str2double(varargin{3});
             varargin{3} = pressure_num;
         catch
-%             cparClose(dev);
             warning('\nCould not convert input pressure into numeric, try again.');
             abort = 1; varargout{1} = abort; return;
         end
     elseif isempty(varargin{2})
-%         cparClose(dev);
         warning('\nPressure pain durations (ramp-up and plateau) required.');
         abort = 1; varargout{1} = abort; return;
     elseif isempty(varargin{1})
-%         cparClose(dev);
         warning('\nSettings structure (P) required.');
         abort = 1; varargout{1} = abort; return;
     end
@@ -66,7 +62,6 @@ if strcmpi(action,'set')
     try
         [created_stim_cuff1, created_stim_cuff2] = CreateCPARStimulus(varargin);
     catch
-%         cparClose(dev);
         warning('Creating stimulus for CPAR failed - check stimulus parameters.');
         abort = 1; varargout{1} = abort; return;
     end
@@ -74,7 +69,6 @@ if strcmpi(action,'set')
     try
         cparSetWaveform(dev,created_stim_cuff1,created_stim_cuff2); 
     catch
-%         cparClose(dev);
         warning('Setting stimulus for CPAR failed - check created stimulus.');
         abort = 1; varargout{1} = abort; return;
     end
@@ -88,11 +82,9 @@ elseif strcmpi(action,'trigger')
         warning('Dev structure containing COM port information from cparCreate required to start CPAR.');
         abort = 1; varargout{1} = abort; return;
     elseif ~strcmpi(varargin{1},'bp') && ~strcmpi(varargin{1},'v')
-%         cparClose(dev);
         warning('Invalid stopping option for CPAR: has to be either "bp" for stopping at button press only, or "v" for stopping also at maximum VAS (10 cm).');
         abort = 1; varargout{1} = abort; return;
     elseif ~islogical(varargin{2})
-%         cparClose(dev);
         warning('Forced start option for CPAR missing: has to be either TRUE or FALSE.');
         abort = 1; varargout{1} = abort; return;
     else
@@ -100,7 +92,6 @@ elseif strcmpi(action,'trigger')
             cparStart(dev,varargin{1},varargin{2});
             data = cparInitializeSampling;
         catch
-%             cparClose(dev);
             warning('Starting CPAR failed.');
             abort = 1; varargout{1} = abort; return;
         end

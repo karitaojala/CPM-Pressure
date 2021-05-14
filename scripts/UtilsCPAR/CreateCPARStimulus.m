@@ -15,8 +15,8 @@
 %                   pre-exposure stimuli: 
 %                           pressure(1): constant plateau pressure
 %                   CPM stimuli: 
-%                           pressure(1): tonic conditioning stimulus VAS 7
-%                           pressure(2): tonic conditioning stimulus VAS 9
+%                           pressure(1): tonic conditioning stimulus VAS 70
+%                           pressure(2): tonic conditioning stimulus VAS 90
 %                           pressure(3): phasic test stimulus
 %   5. phasic stimulus setting (ON/OFF for the block) for CPM
 %   6. CPM block
@@ -61,15 +61,17 @@ elseif strcmp(type,'Calibration')
     
     pressure = varargin{3};
     stimulusType = varargin{4};
-    cuff_tonic = settings.pain.preExposure.cuff_left; 
-    cuff_phasic = settings.pain.preExposure.cuff_right;
+    cuff = varargin{5};
+
+    cuff1 = settings.pain.preExposure.cuff_left;
+    cuff2 = settings.pain.preExposure.cuff_right;
     
     if stimulusType == 1
         duration = settings.pain.Calibration.tonicStim.stimDuration;
         rampUp = settings.pain.CPM.tonicStim.startendRampDuration;
         
-        stimulus1 = cparCreateWaveform(cuff_tonic,1); % combined stimulus
-        stimulus2 = cparCreateWaveform(cuff_phasic,1); % off cuff set to zero
+        stimulus1 = cparCreateWaveform(cuff1,1); % combined stimulus
+        stimulus2 = cparCreateWaveform(cuff2,1); % off cuff set to zero
         
         rateRampUp = pressure/rampUp;
         
@@ -80,8 +82,13 @@ elseif strcmp(type,'Calibration')
         duration = settings.pain.Calibration.phasicStim.stimDuration;
         %rampUp = 0;
         
-        stimulus1 = cparCreateWaveform(cuff_phasic,1); % combined stimulus
-        stimulus2 = cparCreateWaveform(cuff_tonic,1); % off cuff set to zero
+        if cuff == 1
+            stimulus1 = cparCreateWaveform(cuff1,1); % combined stimulus
+            stimulus2 = cparCreateWaveform(cuff2,1); % off cuff set to zero
+        elseif cuff == 2
+            stimulus1 = cparCreateWaveform(cuff2,1); % combined stimulus
+            stimulus2 = cparCreateWaveform(cuff1,1); % off cuff set to zero
+        end
         
         cparWaveform_Step(stimulus1,pressure,duration);
 

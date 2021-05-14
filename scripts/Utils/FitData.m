@@ -1,4 +1,7 @@
-% script from Björn Horing, modified by Karita Ojala 2021-05-06
+% modified by bh 2019-05-29
+% added est_lin as argout
+% revamped everything for varargout
+% etc etc full restructuring, what's with the t.tmp.etc?
 % varargin{1} is verbosity suppression, with 0 = all output, 1 = figures only, 2 = text only, 3 = no output (except argout)
 % varargin{2} and {3} are figure handles used to plot multiple lin/sig fits (e.g. for whole sample visualization)
 
@@ -20,32 +23,23 @@ blin = [];
 brob = [];
 bsig = [];
 
+nTrials = numel(x); 
 trial = [1:numel(x)]'; 
-
-% Exclude zero ratings
-x(y==0)=[]; 
-trial(y==0)=[]; 
-y(y==0)=[]; 
-% Exclude NaN ratings
 x(isnan(y))=[]; 
 trial(isnan(y))=[]; 
 y(isnan(y))=[]; 
-
-nTrials = numel(x); 
 
 % estimate linear function
 blin = [ones(numel(x),1) x]\y;
 for vas = 1:size(target_vas,2)
     est_lin(vas) = linreverse(blin,target_vas(vas));
 end
-est_lin = ceil(est_lin);
 
 % estimate robust linear function
 [brob,statsrob] = robustfit(x,y);
 for vas = 1:size(target_vas,2)
     est_rob(vas) = linreverse(brob,target_vas(vas));
 end
-est_rob = ceil(est_rob);
 
 % estimate sigmoid function
 a = mean(x); b = 1; % L = 0; U = 100; % l/u bounds to be fitted
@@ -57,7 +51,6 @@ options = statset('Display','off','Robust','on','MaxIter',10000); % bh
 for vas = 1:size(target_vas,2)
     est_sig(vas) = sigreverse([bsig -1 101],target_vas(vas));
 end
-est_sig = ceil(est_sig);
 
 % plot
 xplot = 0:5:100;
@@ -113,12 +106,11 @@ end
 if nargin>3 && ( varargin{1}==0 || varargin{1}==2 ) % bh
     results1 = [trial x y];
     results = sortrows(results1,2);
-    fprintf('Fitted data (trial / x / y):\n')
     disp(results);
 
     fprintf('Estimates from  fit (n=%d)\n',nTrials);
     for vas = 1:size(target_vas,2)
-        fprintf('%d : \tsigmoid: %d kPa\tlinear: %d kPa\trobust: %d kPa\n',target_vas(vas),est_sig(vas),est_lin(vas),est_rob(vas));
+        fprintf('%d : \tsigmoid: %1.3f kPa\tlinear: %1.3f kPa\trobust: %1.3f kPa\n',target_vas(vas),est_sig(vas),est_lin(vas),est_rob(vas));
     end
     fprintf('\n');
     fprintf('Residual sum of sigmoid fit : %2.1f\n',res_sig_sum);
@@ -127,8 +119,8 @@ if nargin>3 && ( varargin{1}==0 || varargin{1}==2 ) % bh
 
     % Check - was the whole scale used?
     fprintf('\nCheck for minimal and maximal rating:\n');
-    fprintf('Minimal rating: %d, Pressure: %2.1f \n', min(y), x(y == min(y)));
-    fprintf('Maximal rating: %d, Pressure: %2.1f \n', max(y), x(y == max(y)));
+    fprintf('Minimal rating: %d, Pressure: %3.1f \n', min(y), x(y == min(y)));
+    fprintf('Maximal rating: %d, Presure: %3.1f \n', max(y), x(y == max(y)));
     fprintf('Rating range(max-min rating): %d\n', max(y)-min(y));
 end
 
