@@ -4,26 +4,23 @@ abort=0;
 
 while ~abort
     
-    fprintf('\n==========================\nRunning CPM procedure.\n');
+    fprintf('\n==========================\nRunning CPM experiment.\n==========================\n');
     
     countTrial = 1;
     
     if pressure_input == 1
         
         % Find VAS70 and VAS90 from tonic stimulus calibration
-        predPressureTonic = P.calibration.results(P.pain.CPM.tonicStim.cuff).fitData.predPressureSigmoid;
-        VASindex = P.pain.Calibration.VASTargetsVisual==70;
-        TonicVAS70 = predPressureTonic(VASindex);
-        VASindex = P.pain.Calibration.VASTargetsVisual==90;
-        TonicVAS90 = predPressureTonic(VASindex);
-        tonicPressure_trough_Exp = TonicVAS70;
-        tonicPressure_peak_Exp = TonicVAS90;
+        predPressureTonic = P.calibration.results(P.pain.CPM.tonicStim.cuff).fitData.predPressureLinear;
+        TonicVASTrough = predPressureTonic(P.pain.CPM.tonicStim.VASindexPeak);
+        TonicVASPeak = predPressureTonic(P.pain.CPM.tonicStim.VASindexTrough);
+        tonicPressure_trough_Exp = TonicVASTrough;
+        tonicPressure_peak_Exp = TonicVASPeak;
       
-        % Find VAS70 from phasic stimulus calibration
-        predPressurePhasic = P.calibration.results(P.pain.CPM.phasicStim.cuff).fitData.predPressureSigmoid;
-        VASindex = P.pain.Calibration.VASTargetsVisual==70;
-        PhasicVAS70 = predPressurePhasic(VASindex);
-        phasicPressure = PhasicVAS70;
+        % Find intensity from phasic stimulus calibration
+        predPressurePhasic = P.calibration.results(P.pain.CPM.phasicStim.cuff).fitData.predPressureLinear;
+        PhasicVAS = predPressurePhasic(P.pain.CPM.phasicStim.VASindex);
+        phasicPressure = PhasicVAS;
         
     elseif pressure_input == 2
         

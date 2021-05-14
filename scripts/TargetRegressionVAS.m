@@ -2,12 +2,16 @@ function [abort] = TargetRegressionVAS(P,O)
 
 abort=0;
 
+fprintf('\n==========================\nRunning VAS target regression.\n==========================\n');
+
 while ~abort
     
-    fprintf('\n==========================\nRunning VAS target regression.\n');
-    
     % Separately for long tonic stimuli and short phasic stimuli
-    for stimType = 1:2 % tonic stimuli first, then phasic stimuli
+    for cuff = P.pain.Calibration.cuff_order % randomized order
+        
+        stimType = P.pain.cuffStim(cuff);
+
+        fprintf([P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------']);
         
         fprintf('Displaying instructions... ');
         
@@ -52,21 +56,18 @@ while ~abort
 
         if stimType == 1
             durationITI = P.presentation.Calibration.tonicStim.ITI;
-            cuff = P.pain.preExposure.cuff_left;
         else
             durationITI = P.presentation.Calibration.phasicStim.ITI;
-            cuff = P.pain.preExposure.cuff_right;
         end
-        calibStep = 2; % in this case, second calibration step is the tonic stimulus, third is the phasic stimulus
         
         fprintf('\n')
-        if isempty(P.calibration.pressure(cuff,:)) || isempty(P.calibration.rating(cuff,:))
+        if isempty(P.calibration.pressure(stimType,:)) || isempty(P.calibration.rating(stimType,:))
             fprintf('No valid previous data from psychometric scaling.');
             fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
         else
             % Fit previous data and retrieve regression results
-            pressureData = P.calibration.pressure(cuff,:);
-            ratingData = P.calibration.rating(cuff,:);
+            pressureData = P.calibration.pressure(stimType,:);
+            ratingData = P.calibration.rating(stimType,:);
             x = pressureData(pressureData>0); % take only non-zero data
             y = ratingData(pressureData>0); % take only ratings associated with non-zero pressures
             [P.pain.Calibration.VASTargetsFixedPressure,~] = FitData(x,y,P.pain.Calibration.VASTargetsFixed,0);  % last vargin, 0 = figure+text, 2 = text only output
@@ -77,7 +78,8 @@ while ~abort
         % psychometric scaling VAS ratings and a few fixed VAS targets are
         % used at first to better estimate the VAS and pressure relationship
         % by fitting a sigmoid function
-        fprintf('\n==========================\nFIXED VAS TARGET REGRESSION.\n');
+        fprintf('\n==========================\nFIXED VAS TARGET REGRESSION.\n==========================\n');
+        calibStep = P.pain.Calibration.calibStep.fixedTrials; 
         
         trialsFixed = numel(P.pain.Calibration.VASTargetsFixed);
         
@@ -157,10 +159,10 @@ while ~abort
         
         %% ADAPTIVE INTENSITY VAS TARGETS
         
-        fprintf('\n==========================\nADAPTIVE VAS TARGET REGRESSION.\n');
+        fprintf('\n==========================\nADAPTIVE VAS TARGET REGRESSION.\n==========================\n');
+        calibStep = P.pain.Calibration.calibStep.adaptiveTrials; 
         
         % Start trial
-        calibStep = 3;
         nextStim = NaN;
         varTrial = 0;
         nH = figure;
@@ -194,14 +196,14 @@ while ~abort
             if ~isempty(nextStim)
                 
                 % Find next stimulus pressure intensity based on previous VAS rating data
-                ex = P.calibration.pressure(cuff,:);
-                ey = P.calibration.rating(cuff,:);
+                ex = P.calibration.pressure(stimType,:);
+                ey = P.calibration.rating(stimType,:);
                 if varTrial<2 % lin is more robust for the first additions; in the worst case [0 X 100], sig will get stuck in a step fct
                     linOrSig = 'lin';
                 else
                     linOrSig = 'sig';
                 end
-                [nextStim,~,tValidation,targetVAS] = CalibValidation(ex,ey,[],[],linOrSig,P.toggles.doConfirmAdaptive,1,1,nH,num2cell([zeros(1,numel(ex)-1) varTrial]),['s' num2str(numel(varTrial)+1)]);
+                [nextStim,~,~,~] = CalibValidation(ex,ey,[],[],linOrSig,P.toggles.doConfirmAdaptive,1,1,nH,num2cell([zeros(1,numel(ex)-1) varTrial]),['s' num2str(numel(varTrial)+1)]);
                 
                 if isempty(nextStim)
                     fprintf('Last variable stimulus, exiting loop.');

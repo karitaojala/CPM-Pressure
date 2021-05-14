@@ -10,7 +10,7 @@ while ~abort
     
     if stimType == 1
         rampDuration = trialPressure/P.pain.preExposure.riseSpeed;
-        stimDuration = rampDuration+P.pain.Calibration.tonicStim.stimDuration;
+        stimDuration = rampDuration+P.pain.Calibration.tonicStim.stimDuration+5;
     elseif stimType == 2
         stimDuration = P.pain.Calibration.phasicStim.stimDuration;
     end

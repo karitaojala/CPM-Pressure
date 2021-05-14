@@ -40,15 +40,30 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Do you have any remaining questions?', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'If not, the measurement will start!', 'center', upperEight+P.style.lineheight, P.style.white);
         end
-        
+    
     elseif section == 2
+        
+        fprintf('Ready VAS TRAINING protocol.\n');
+        if strcmp(P.language,'de')
+            
+        elseif strcmp(P.language,'en')
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You will now train in rating the pressure stimuli,', 'center', upperEight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'with a visual scale on the screen, but with no pressure yet.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, '0 is no pain, 1 is minimal pain, 100 is unbearable pain.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Left arrow decreases rating, right arrow increases rating.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'During the experiment, you should rate each stimulus on their painfulness.', 'center', upperEight+P.style.lineheight, P.style.white);
+        end
+        
+    elseif section == 3
         
         fprintf('Ready PSYCHOMETRIC SCALING protocol.\n');
         if strcmp(P.language,'de')
             
         elseif strcmp(P.language,'en')
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You will now receive a few more stimuli on either arm,', 'center', upperEight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'which range in their intensity from low to high.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'which range in their intensity from low to high pain.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'First, all stimuli will be applied on one arm, and then on the other.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Again, left arm will get long stimuli and right arm short stimuli.', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -56,7 +71,7 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'You should rate these stimuli on their painfulness on a scale, as instructed.', 'center', upperEight+P.style.lineheight, P.style.white);
         end
         
-    elseif section == 3
+    elseif section == 4
         
         fprintf('Ready VAS TARGET REGRESSSION protocol.\n');
         if strcmp(P.language,'de')
@@ -71,7 +86,7 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'You should rate these stimuli on their painfulness on a scale, as before.', 'center', upperEight+P.style.lineheight, P.style.white);
         end
         
-    elseif section == 4
+    elseif section == 5
         
         fprintf('Ready CONDITIONED PAIN MODULATION protocol.\n');
         if strcmp(P.language,'de')
@@ -105,7 +120,7 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Please confirm verbally when you have read these instructions.', 'center', upperEight+P.style.lineheight, P.style.white);
         end
         
-    elseif section == 5 % end of the test
+    elseif section == 6 % end of the test
         
         if strcmp(P.language,'de')
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'END', 'center', upperEight, P.style.white);

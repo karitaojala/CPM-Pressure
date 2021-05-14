@@ -12,22 +12,23 @@ function [abort] = PsychometricScaling(P,O)
 
 abort=0;
 
+fprintf('\n==========================\nRunning psychometric perceptual scaling.\n==========================\n');
+
 while ~abort
     
-    calibStep = 1;
-%     stimType = P.pain.psychScaling.stimType;
+    calibStep = P.pain.psychScaling.calibStep;
     trials = P.pain.psychScaling.trials;
     
     for cuff = P.pain.psychScaling.cuff_order % randomized order
         
-        stimType = cuff;%
+        stimType = P.pain.cuffStim(cuff);
+
+        fprintf([P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------']);
         
         if stimType == 1
             durationITI = P.presentation.Calibration.tonicStim.ITI;
-%             cuff = P.pain.preExposure.cuff_left;
         else
             durationITI = P.presentation.Calibration.phasicStim.ITI;
-%             cuff = P.pain.preExposure.cuff_right;
         end
         
         painThreshold = P.awiszus.painThresholdFinal(cuff);

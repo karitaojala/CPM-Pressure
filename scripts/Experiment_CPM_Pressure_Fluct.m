@@ -89,6 +89,19 @@ end
 [abort,P]=StartExperimentAt(P,'Start experiment? ');
 if abort;QuickCleanup(P);return;end
 
+% Initialize CPAR
+if P.devices.arduino
+    [abort,initSuccess,dev] = InitCPAR; % initialize CPAR
+    if initSuccess
+        P.cpar.init = initSuccess;
+        P.cpar.dev = dev;
+    else
+        warning('\nCPAR initialization not successful, aborting!');
+        abort = 1;
+    end
+    if abort;QuickCleanup(P);return;end
+end
+
 %%%%%%%%%%%%%%%%%%%%
 % EXPERIMENT START %
 %%%%%%%%%%%%%%%%%%%%
@@ -98,14 +111,23 @@ if abort;QuickCleanup(P);return;end
 if P.startSection == 1
     [abort]=ShowInstruction(P,O,1,1);
     if abort;return;end
-    [abort]=PreExposure(P,O);
+    [abort]=PreExposureAwiszus(P,O);
+end
+if abort;QuickCleanup(P);return;end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% VAS TRAINING
+if P.startSection == 2
+    [abort]=ShowInstruction(P,O,2,1);
+    if abort;return;end
+    [abort]=VASTraining(P,O);
 end
 if abort;QuickCleanup(P);return;end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CALIBRATION / PSYCHOMETRIC SCALING
-if P.startSection == 2
-    [abort]=ShowInstruction(P,O,2,1);
+if P.startSection == 3
+    [abort]=ShowInstruction(P,O,3,1);
     if abort;return;end
     load(P.out.file.param,'P','O');
     [abort]=PsychometricScaling(P,O);
@@ -114,8 +136,8 @@ if abort;QuickCleanup(P);return;end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CALIBRATION / VAS TARGET REGRESSION
-if P.startSection == 3
-    [abort]=ShowInstruction(P,O,3,1);
+if P.startSection == 4
+    [abort]=ShowInstruction(P,O,4,1);
     if abort;return;end
     load(P.out.file.param,'P','O');
     [abort]=TargetRegressionVAS(P,O);
@@ -124,7 +146,7 @@ if abort;QuickCleanup(P);return;end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONDITIONED PAIN MODULATION EXPERIMENT
-if P.startSection == 4
+if P.startSection == 5
     
     ListenChar(0); % activate keyboard input
     commandwindow;
@@ -132,16 +154,16 @@ if P.startSection == 4
     ListenChar(2); % deactivate keyboard input
     
     load(P.out.file.param,'P','O');
-    [abort]=ShowInstruction(P,O,4,1);
+    [abort]=ShowInstruction(P,O,5,1);
     if abort;return;end
     [abort]=CondPainMod(P,O,pressure_input);
     
 end
 if abort;QuickCleanup(P);return;end
 
-if P.startSection == 5
+if P.startSection == 6
     fprintf('\nExperiment ending.');
-    [abort]=ShowInstruction(P,O,5);
+    [abort]=ShowInstruction(P,O,6);
     if abort;return;end
 end
 
@@ -215,9 +237,9 @@ if ~exist(P.out.dir,'dir')
     mkdir(P.out.dir);
 end
 
-fprintf('Saving parameters to %s%s.\n',P.out.dir,P.out.file.param);
+fprintf('\n\nSaving parameters to %s.\n',P.out.file.param);
 fprintf('Saving CPAR data to %s%s.\n',P.out.dir,P.out.file.CPAR);
-fprintf('Saving VAS data to %s%s.\n',P.out.dir,P.out.file.VAS);
+fprintf('Saving VAS data to %s%s.\n\n',P.out.dir,P.out.file.VAS);
 
 end
 
@@ -321,21 +343,23 @@ end
 
 end
 
-function [abort,P] = StartExperimentAt(P,query)
+function [abort,P] = StartExperimentAt(P)
 
 abort=0;
 
 P.keys.n1                 = KbName('1!'); % | Preexposure & Awiszus
-P.keys.n2                 = KbName('2@'); % | Calibration/Psychometric Scaling
-P.keys.n3                 = KbName('3#'); % | Calibration/VAS Target Regression
-P.keys.n4                 = KbName('4$'); % | Conditioned Pain Modulation Experiment
+P.keys.n2                 = KbName('2@'); % | VAS rating training
+P.keys.n3                 = KbName('3#'); % | Calibration/Psychometric Scaling
+P.keys.n4                 = KbName('4$'); % | Calibration/VAS Target Regression
+P.keys.n5                 = KbName('5%'); % | Conditioned Pain Modulation Experiment
 keyN1Str = upper(char(P.keys.keyList(P.keys.n1)));
 keyN2Str = upper(char(P.keys.keyList(P.keys.n2)));
 keyN3Str = upper(char(P.keys.keyList(P.keys.n3)));
 keyN4Str = upper(char(P.keys.keyList(P.keys.n4)));
+keyN5Str = upper(char(P.keys.keyList(P.keys.n5)));
 keyEscStr = upper(char(P.keys.keyList(P.keys.esc)));
 
-fprintf('%sIndicate which step you want to start at for\n(%s Preexposure => %s Calibration/Psychometric Scaling => %s Calibration/VAS Target Regression => %s CPM experiment. [%s] to abort.\n',query,keyN1Str(1),keyN2Str(1),keyN3Str(1),keyN4Str(1),keyEscStr);
+fprintf('// Indicate which step you want to start at for: \n(%s Pre-exposure & Awiszus => %s VAS training => %s Calibration/Psychometric Scaling => %s Calibration/VAS Target Regression => %s CPM experiment. // \n[%s] to abort.\n\n',keyN1Str(1),keyN2Str(1),keyN3Str(1),keyN4Str(1),keyN5Str(1),keyEscStr);
 
 P.startSection = 0;
 while 1
@@ -352,6 +376,9 @@ while 1
             break;
         elseif find(keyCode) == P.keys.n4
             P.startSection=4;
+            break;
+        elseif find(keyCode) == P.keys.n5
+            P.startSection=5;
             break;
         elseif find(keyCode) == P.keys.esc
             P.startSection=0;
@@ -371,12 +398,12 @@ fprintf('\nAborting...');
 
 Screen('CloseAll');
 
-if P.devices.arduino && isvalid(P.CPAR.dev)
-    cparStopSampling(P.CPAR.dev);
-    cparStop(P.CPAR.dev);
-    fprintf(' CPAR device was stopped.');
+if P.devices.arduino && isfield(P.cpar,'dev')
+    cparStopSampling(P.cpar.dev);
+    cparStop(P.cpar.dev);
+    fprintf(' CPAR device was stopped\n.');
 else
-    fprintf(' CPAR already stopped.');
+    fprintf(' CPAR already stopped\n.');
 end
 
 sca; % close window; also closes io64
