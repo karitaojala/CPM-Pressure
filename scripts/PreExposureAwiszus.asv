@@ -1,6 +1,6 @@
 function [abort]=PreExposureAwiszus(P,O,varargin)
 
-cparFile = fullfile(P.out.dir,[P.out.file.CPAR '_PreExposure.mat']);
+cparFile = fullfile([P.out.file.CPAR '_PreExposure.mat']);
 
 abort=0;
 
@@ -14,7 +14,7 @@ while ~abort
 
         fprintf([P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
         
-        for trial = 1:(numel(P.pain.preExposure.startSimuli)+P.awiszus.N) % pre-exposure + Awiszus trials
+        for trial = 1:P.awiszus.N
             
             if ~O.debug.toggleVisual
                 Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
@@ -41,7 +41,7 @@ while ~abort
             if trial <= numel(P.pain.preExposure.startSimuli) % pure pre-exposure to get used to the feeling
                 preExpInt = P.pain.preExposure.startSimuli(trial);
                 preExpPhase = 'pre-exposure';
-            elseif trial == numel(P.pain.preExposure.startSimuli)+1 % first trial of Awiszus procedure starts from the pre-defined population mean
+            elseif trial > numel(P.pain.preExposure.startSimuli) % second trial Awiszus procedure starts from the defined value
                 preExpInt = P.awiszus.mu(stimType);
                 preExpPhase = 'Awiszus';
             else % rest of the trials pressure is adjusted according to participant's rating and the Awiszus procedure
@@ -96,15 +96,15 @@ while ~abort
 
             end
 
-            P.awiszus.threshRatings.pressure(cuff,trial) = preExpInt;
+            P.awiszus.threshRatings.pressure(cuff,trial) = P.awiszus.nextX(stimType);
             P.awiszus.threshRatings.ratings(cuff,trial) = preexPainful;
 
         end
         
         % last suggested value from Awiszus is the pain threshold
-        P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial);
+        P.awiszus.painThresholdFinal(cuff) = P.awiszus.nextX(stimType);
         save(P.out.file.param,'P','O');
-        fprintf(['\nPain threshold ' P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS : ' num2str(P.awiszus.painThresholdFinal(cuff)) ' kPa\n\n']);
+        fprintf(['Pain threshold ' P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS ': ' num2str(P.awiszus.painThresholdFinal(cuff)) ' kPa\n']);
         
     end
     

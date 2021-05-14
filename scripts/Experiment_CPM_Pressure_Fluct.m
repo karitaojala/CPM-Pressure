@@ -343,7 +343,7 @@ end
 
 end
 
-function [abort,P] = StartExperimentAt(P)
+function [abort,P] = StartExperimentAt(P,query)
 
 abort=0;
 
@@ -359,7 +359,7 @@ keyN4Str = upper(char(P.keys.keyList(P.keys.n4)));
 keyN5Str = upper(char(P.keys.keyList(P.keys.n5)));
 keyEscStr = upper(char(P.keys.keyList(P.keys.esc)));
 
-fprintf('// Indicate which step you want to start at for: \n(%s Pre-exposure & Awiszus => %s VAS training => %s Calibration/Psychometric Scaling => %s Calibration/VAS Target Regression => %s CPM experiment. // \n[%s] to abort.\n\n',keyN1Str(1),keyN2Str(1),keyN3Str(1),keyN4Str(1),keyN5Str(1),keyEscStr);
+fprintf('%s Indicate which step you want to start at for: \n%s) Pre-exposure & Awiszus => %s) VAS training => %s) Calibration/Psychometric Scaling => %s) Calibration/VAS Target Regression => %s) CPM experiment. \n[%s] to abort.\n\n',query,keyN1Str(1),keyN2Str(1),keyN3Str(1),keyN4Str(1),keyN5Str(1),keyEscStr);
 
 P.startSection = 0;
 while 1
@@ -394,14 +394,14 @@ end
 
 %% Cleanup when aborting script
 function QuickCleanup(P)
-fprintf('\nAborting...');
+fprintf('\n\nAborting...');
 
 Screen('CloseAll');
 
 if P.devices.arduino && isfield(P.cpar,'dev')
     cparStopSampling(P.cpar.dev);
     cparStop(P.cpar.dev);
-    fprintf(' CPAR device was stopped\n.');
+    fprintf(' CPAR device was stopped.\n');
 else
     fprintf(' CPAR already stopped\n.');
 end

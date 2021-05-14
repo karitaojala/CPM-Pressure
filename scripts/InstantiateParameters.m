@@ -85,8 +85,8 @@ P.presentation.sStimPlateau             = P.presentation.sStimPlateauPreexp; % d
 P.awiszus.N     = 6; % number of trials
 P.awiszus.X     = P.pain.preExposure.pressureIntensity(1):1:P.pain.preExposure.pressureIntensity(end);  % kPa range to be covered
 P.awiszus.mu  = [30 35]; % assumed population mean (also become first stimulus to be tested), tonic + phasic
-P.awiszus.sd  = [10 10]; % assumed population std, kPa
-P.awiszus.sp  = [5 5]; % assumed individual spread, kPa
+P.awiszus.sd  = [6 8]; % assumed population std, kPa
+P.awiszus.sp  = [3 3]; % assumed individual spread, kPa
 P.awiszus.nextX = P.awiszus.mu; % first phasic stimulus
 
 % VAS training

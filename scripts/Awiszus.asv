@@ -32,9 +32,9 @@ function varargout = Awiszus(action,varargin)
 if strcmpi(action,'init')
     
     P                           = varargin{1}; % Awiszus (and other) parameters
-    stimType                    = varargin{2};
+    stimType                = varargin{2};
     P.awiszus.dist(stimType,:)  = normpdf(P.awiszus.X,P.awiszus.mu(stimType),P.awiszus.sd(stimType));
-    varargout{1}                = P;
+    varargout{1}    = P;
     
 elseif strcmpi(action,'update')
     
