@@ -3,8 +3,11 @@ function [abort,initSuccess,dev] = InitCPAR()
 abort = 0;
 initSuccess = 0;
 
-cparInitialize; % initialize CPAR
-CPARid = cparList; % get CPAR device id
+try % test if CPAR initialized already
+    CPARid = cparList; % get CPAR device id
+catch
+    cparInitialize; % initialize CPAR if it wasn't done yet
+end
 
 dev = cparGetDevice(CPARid); % attempt to establish connection to CPAR
 
@@ -18,7 +21,7 @@ while cparError(dev)
         throw(me);
     end
 end
-fprintf(' connected\n');
+fprintf(' connected.\n');
 
 % Check if the device is ready
 if ~cparIsReady(dev)

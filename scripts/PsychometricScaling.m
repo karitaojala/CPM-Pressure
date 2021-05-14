@@ -12,7 +12,7 @@ function [abort] = PsychometricScaling(P,O)
 
 abort=0;
 
-fprintf('\n==========================\nRunning psychometric perceptual scaling.\n==========================\n');
+fprintf('\n========================================\nRunning psychometric perceptual scaling.\n========================================\n');
 
 while ~abort
     
@@ -23,7 +23,7 @@ while ~abort
         
         stimType = P.pain.cuffStim(cuff);
 
-        fprintf([P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------']);
+        fprintf([P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
         
         if stimType == 1
             durationITI = P.presentation.Calibration.tonicStim.ITI;
