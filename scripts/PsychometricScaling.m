@@ -19,11 +19,15 @@ while ~abort
     calibStep = P.pain.psychScaling.calibStep;
     trials = P.pain.psychScaling.trials;
     
+    cuff2process = 0;
+    
     for cuff = P.pain.psychScaling.cuff_order % randomized order
         
+        cuff2process = cuff2process + 1;
+        
         stimType = P.pain.cuffStim(cuff);
-
-        fprintf([P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
+        
+        fprintf(['\n' P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
         
         if stimType == 1
             durationITI = P.presentation.Calibration.tonicStim.ITI;
@@ -31,6 +35,7 @@ while ~abort
             durationITI = P.presentation.Calibration.phasicStim.ITI;
         end
         
+        %         P.awiszus.painThresholdFinal = [30 35];
         painThreshold = P.awiszus.painThresholdFinal(cuff);
         stepSize = P.pain.psychScaling.thresholdMultiplier*painThreshold;
         
@@ -113,6 +118,18 @@ while ~abort
             
         end
         
+        % Intercuff interval between 1st and 2nd cuff
+        if cuff2process == 1
+            fprintf('\nIntercuff interval... ');
+            countedDown = 1;
+            while GetSecs < tCrossOn + P.presentation.Calibration.interCuffInterval
+                tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
+                [abort,countedDown] = CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
+                if abort; break; end
+            end
+            fprintf('\n');
+        end
+        
         if abort; break; end
         
     end
@@ -122,7 +139,7 @@ while ~abort
 end
 
 if ~abort
-    fprintf(' Psychometric scaling finished. \n');
+    fprintf('\nPsychometric perceptual scaling finished. \n');
 else
     return;
 end

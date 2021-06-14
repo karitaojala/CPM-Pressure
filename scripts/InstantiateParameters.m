@@ -1,8 +1,8 @@
 function P = InstantiateParameters
 
-P.protocol.sbId         = 03; % subject ID
+P.protocol.sbId         = 06; % subject ID
 P.protocol.session      = 1;
-P.language              = 'en'; % de or en
+P.language              = 'de'; % de or en
 P.project.name          = 'CPM-Pressure-01';
 P.project.part          = 'Pilot-02';
 P.devices.arduino        = 1; % if '' or [], will not try to use Arduino
@@ -65,7 +65,7 @@ P.cpar.initdone                      = 0;
 % Pre-exposure
 P.pain.cuffSide = {'LEFT' 'RIGHT'}; % cuff 1: left arm, cuff 2: right arm
 P.pain.stimName = {'TONIC' 'PHASIC'};
-P.pain.cuffStim = randperm(2); % 1 = tonic stimulus cuff 1/left, phasic stimulus cuff 2/right, 2 = tonic stim cuff 2/right, phasic stim cuff 1/left
+P.pain.cuffStim = randperm(2); % 1 = tonic stimulus cuff 1, phasic stimulus cuff 2, 2 = tonic stim cuff 2, phasic stim cuff 1
 
 P.pain.preExposure.cuff_left            = 1; % 1: left, 2: right - depends on how cuffs plugged into the CPAR unit and put on participant's arm
 P.pain.preExposure.cuff_right           = 2; % 
@@ -73,7 +73,7 @@ P.pain.preExposure.cuff_order           = randperm(2);
 P.pain.preExposure.repeat               = 1; % number of repeats of each stimulus
 % P.pain.preExposure.pressureIntensity    = [10 20 30 40 50 60 70 80];
 P.pain.preExposure.pressureIntensity    = [25 30 35 40 45 50 55 60 65 70 75 80 85 90 95]; % preexposure pressure intensities (kPa)
-P.pain.preExposure.riseSpeed            = 10; % kPa/s
+P.pain.preExposure.riseSpeed            = 30; % kPa/s
 P.pain.preExposure.pressureRange        = 5.0:1:100.0; % possible pressure range (kPa)
 P.pain.preExposure.startSimuli          = [10 20];
 P.presentation.sStimPlateauPreexp       = [30 5]; % duration of the constant pressure plateau after rise time for pre-exposure (part 1)
@@ -95,7 +95,7 @@ P.presentation.VAStraining.durationITI = 5;
 
 % Psychometric scaling
 P.pain.psychScaling.calibStep           = 1;
-P.pain.psychScaling.cuff_order          = randperm(2);
+P.pain.psychScaling.cuff_order          = P.pain.preExposure.cuff_order;%painThresholdFinal;%randperm(2);
 P.pain.psychScaling.trials              = 4;
 P.pain.psychScaling.thresholdMultiplier = 0.25; % multiplier for pain threshold to determine step size for pressure intensities
     
@@ -105,33 +105,55 @@ P.calibration.rating = [];
 
 P.pain.Calibration.calibStep.fixedTrials        = 2;
 P.pain.Calibration.calibStep.adaptiveTrials     = 3;
-P.pain.Calibration.cuff_order                   = randperm(2);
+P.pain.Calibration.cuff_order                   = P.pain.preExposure.cuff_order;
 
 P.pain.Calibration.VASTargetsFixed              = [10,30,90];
-P.pain.Calibration.VASTargetsVisual             = [20,40,60,80];
+P.pain.Calibration.VASTargetsVisual             = [20,30,40,50,60,70,80];
 P.pain.Calibration.painTresholdPreset           = [30 60]; % first for tonic stimuli, second for phasic stimuli
 
 P.pain.Calibration.tonicStim.stimDuration       = 30;
 P.pain.Calibration.phasicStim.stimDuration      = 5;
 
 P.presentation.Calibration.firstTrialWait       = 5;
-P.presentation.Calibration.tonicStim.ITI        = 20;
+P.presentation.Calibration.interCuffInterval    = 15;
+P.presentation.Calibration.tonicStim.ITI        = 30;
 P.presentation.Calibration.phasicStim.ITI       = 10;
 P.presentation.Calibration.durationVAS          = 5;
 
 % Conditioned pain modulation
-P.presentation.CPM.blocks                   = 2; % number of blocks/runs in the CPM experiment - plan: 3 blocks/runs
-P.presentation.CPM.trialsPerBlock           = 2; % 4 stimuli of 3 min per block -> 12 min + 4 x 30 s ITI + 60 s between blocks = 15 min per block/run -> 3 blocks = 45 min
-P.pain.CPM.phasicStim.on                    = [1 1 1 1 1 0]; % on which blocks the phasic test stimuli will be delivered to the other cuff, in addition to the tonic conditioning stimulus
-% these are also the blocks with online VAS rating of tonic stimulus
-conditions                      = [zeros(1,P.presentation.CPM.blocks/2) ones(1,P.presentation.CPM.blocks/2)]; % 0 = control tonic stimulus (non-painful), 1 = experimental tonic stimulus (painful)
-ordering                        = randperm(P.presentation.CPM.blocks);
-conditions_rand                 = conditions(ordering);
-P.pain.CPM.tonicStim.condition  = conditions_rand;%[1 conditions_rand 1];
+P.presentation.CPM.blocks                   = 2; % number of blocks/runs in the CPM experiment - plan: 4 blocks/runs
+P.presentation.CPM.trialsPerBlock           = 4; % 3 stimuli of 3 min per block -> 9 min + 3 x 20 s ITI + 60 s between blocks = 11 min per block/run -> 4 blocks = 44 min
+P.pain.CPM.phasicStim.on                    = [ones(1,P.presentation.CPM.trialsPerBlock-1) 0]; % on which trials the phasic test stimuli will be delivered to the other cuff, in addition to the tonic conditioning stimulus
+% last trial of the block no phasic stimulus, tonic only
+% these are also the trials with online VAS rating of tonic stimulus
+P.presentation.CPM.contRatingInstructionDuration = 30;
+
+conditions                      = [1 0];%[zeros(1,P.presentation.CPM.blocks/2) ones(1,P.presentation.CPM.blocks/2)]; % 0 = control tonic stimulus (non-painful), 1 = experimental tonic stimulus (painful)
+% ordering                        = randperm(P.presentation.CPM.blocks);
+% conditions_rand                 = conditions(ordering);
+% P.pain.CPM.tonicStim.condition  = conditions_rand;%[1 conditions_rand 1];
+
+% Latin square of conditions
+% N = P.presentation.CPM.blocks;
+% M = [1:N; ones(N-1,N)];
+% LatSqu = rem(cumsum(M)-1,N)+1;
+% LatSqu_participant = LatSqu(P.protocol.sbId,:);
+% conditions_participant = conditions(LatSqu_participant);
+% A = conditions;
+% n = numel(A);
+% k = sum(A);
+% c = nchoosek(1:n,k);
+% m = size(c,1);
+% out = zeros(m,n);
+% out(sub2ind([m,n],(1:m)'*ones(1,k),c)) = 1;
+% conditions_participant = out(P.protocol.sbId,:);
+conditions_participant = conditions;
+P.pain.CPM.tonicStim.condition = conditions_participant;
+% make a list with 100 rows of random order of the 6 unique permutations
 
 % CPAR cuff IDs
-P.pain.CPM.tonicStim.cuff   = 1; 
-P.pain.CPM.phasicStim.cuff  = 2;
+P.pain.CPM.tonicStim.cuff   = P.pain.preExposure.cuff_order(P.pain.cuffStim==1); 
+P.pain.CPM.phasicStim.cuff  = P.pain.preExposure.cuff_order(P.pain.cuffStim==2);
 
 % Tonic stimulus properties
 % Current settings: 
@@ -164,7 +186,6 @@ P.pain.CPM.phasicStim.pressure          = 30; % phasic stimulus pressure, e.g. a
 P.pain.CPM.phasicStim.rampDuration      = 0; %phasicPressure/rampSpeed -> instant ramping up now
 P.pain.CPM.phasicStim.duration          = 5-P.pain.CPM.phasicStim.rampDuration; % duration of phasic stimulus in seconds
 P.pain.CPM.phasicStim.VASindex          = P.pain.Calibration.VASTargetsVisual==60;
-%P.pain.CPM.phasicStim.ISI = 8:0.5:10; % interstimulus interval
 P.pain.CPM.phasicStim.stimPerCycle      = 3; % how many phasic stimuli per cycle of the tonic stimulus
 P.pain.CPM.phasicStim.jitter            = 0:0.5:2; % jitter for onset of phasic stimuli in seconds
 P.pain.CPM.phasicStim.stimInterval      = 15; % approximate interval between phasic stimuli onsets

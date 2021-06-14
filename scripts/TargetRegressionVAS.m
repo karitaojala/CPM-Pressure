@@ -6,12 +6,16 @@ fprintf('\n==========================\nRunning VAS target regression.\n=========
 
 while ~abort
     
+    cuff2process = 0;
+    
     % Separately for long tonic stimuli and short phasic stimuli
     for cuff = P.pain.Calibration.cuff_order % randomized order
         
+        cuff2process = cuff2process + 1;
+        
         stimType = P.pain.cuffStim(cuff);
-
-        fprintf([P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
+        
+        fprintf(['\n' P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
         
         fprintf('Displaying instructions... ');
         
@@ -19,14 +23,27 @@ while ~abort
             upperHalf = P.display.screenRes.height/2;
             Screen('TextSize', P.display.w, 50);
             if stimType == 1
-                [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, 'Calibration long stimuli', 'center', upperHalf, P.style.white);
+                if strcmp(P.language,'de')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Kalibrierung: langanhaltender Reiz', 'center', upperHalf, P.style.white);
+                elseif strcmp(P.language,'en')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Calibration long stimuli', 'center', upperHalf, P.style.white);
+                end
             else
-                [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, 'Calibration short stimuli', 'center', upperHalf, P.style.white);
+                if strcmp(P.language,'de')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Kalibrierung: kurzer Reiz', 'center', upperHalf, P.style.white);
+                elseif strcmp(P.language,'en')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Calibration long stimuli', 'center', upperHalf, P.style.white);
+                end
             end
             Screen('TextSize', P.display.w, 30);
-            [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, ' ', 'center', upperHalf+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, ' ', 'center', upperHalf+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Rate the pain intensity quickly after each stimulus ends!', 'center', upperHalf, P.style.white);
+%             [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, ' ', 'center', upperHalf+P.style.lineheight, P.style.white);
+%             [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, ' ', 'center', upperHalf+P.style.lineheight, P.style.white);
+%             if strcmp(P.language,'de')
+%                 [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, 'Bitte denken Sie daran, die Schmerzintensität so schnell', 'center', upperHalf, P.style.white);
+%                 [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'wie möglich zu bewerten, sobald der Reiz beendet wurde.', 'center', upperHalf, P.style.white);
+%             elseif strcmp(P.language,'en')
+%                 [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Please rate the painfulness of each stimulus quickly after it ends!', 'center', upperHalf, P.style.white);
+%             end
             introTextOn = Screen('Flip',P.display.w);
         else
             introTextOn = GetSecs;
@@ -53,7 +70,7 @@ while ~abort
         end
         
         WaitSecs(0.2);
-
+        
         if stimType == 1
             durationITI = P.presentation.Calibration.tonicStim.ITI;
         else
@@ -61,13 +78,13 @@ while ~abort
         end
         
         fprintf('\n')
-        if isempty(P.calibration.pressure(stimType,:)) || isempty(P.calibration.rating(stimType,:))
+        if isempty(P.calibration.pressure(cuff,:)) || isempty(P.calibration.rating(cuff,:))
             fprintf('No valid previous data from psychometric scaling.');
             fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
         else
             % Fit previous data and retrieve regression results
-            pressureData = P.calibration.pressure(stimType,:);
-            ratingData = P.calibration.rating(stimType,:);
+            pressureData = P.calibration.pressure(cuff,:);
+            ratingData = P.calibration.rating(cuff,:);
             x = pressureData(pressureData>0); % take only non-zero data
             y = ratingData(pressureData>0); % take only ratings associated with non-zero pressures
             [P.pain.Calibration.VASTargetsFixedPressure,~] = FitData(x,y,P.pain.Calibration.VASTargetsFixed,0);  % last vargin, 0 = figure+text, 2 = text only output
@@ -79,7 +96,7 @@ while ~abort
         % used at first to better estimate the VAS and pressure relationship
         % by fitting a sigmoid function
         fprintf('\n==========================\nFIXED VAS TARGET REGRESSION.\n==========================\n');
-        calibStep = P.pain.Calibration.calibStep.fixedTrials; 
+        calibStep = P.pain.Calibration.calibStep.fixedTrials;
         
         trialsFixed = numel(P.pain.Calibration.VASTargetsFixed);
         
@@ -160,7 +177,7 @@ while ~abort
         %% ADAPTIVE INTENSITY VAS TARGETS
         
         fprintf('\n==========================\nADAPTIVE VAS TARGET REGRESSION.\n==========================\n');
-        calibStep = P.pain.Calibration.calibStep.adaptiveTrials; 
+        calibStep = P.pain.Calibration.calibStep.adaptiveTrials;
         
         % Start trial
         nextStim = NaN;
@@ -196,18 +213,19 @@ while ~abort
             if ~isempty(nextStim)
                 
                 % Find next stimulus pressure intensity based on previous VAS rating data
-                ex = P.calibration.pressure(stimType,:);
-                ey = P.calibration.rating(stimType,:);
-                if varTrial<2 % lin is more robust for the first additions; in the worst case [0 X 100], sig will get stuck in a step fct
-                    linOrSig = 'lin';
-                else
-                    linOrSig = 'sig';
-                end
+                ex = P.calibration.pressure(cuff,:);
+                ey = P.calibration.rating(cuff,:);
+                linOrSig = 'lin';
+                %                 if varTrial<2 % lin is more robust for the first additions; in the worst case [0 X 100], sig will get stuck in a step fct
+                %                     linOrSig = 'lin';
+                %                 else
+                %                     linOrSig = 'sig';
+                %                 end
                 [nextStim,~,~,~] = CalibValidation(ex,ey,[],[],linOrSig,P.toggles.doConfirmAdaptive,1,1,nH,num2cell([zeros(1,numel(ex)-1) varTrial]),['s' num2str(numel(varTrial)+1)]);
                 
                 if isempty(nextStim)
                     fprintf('Last variable stimulus, exiting loop.');
-%                     warning('Next stimulus pressure intensity from CalibValidation is empty, exiting while loop.');
+                    %                     warning('Next stimulus pressure intensity from CalibValidation is empty, exiting while loop.');
                     break
                 end
                 
@@ -217,7 +235,7 @@ while ~abort
                     Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
                     Screen('Flip',P.display.w);
                 end
-            
+                
                 % Apply stimulus
                 varTrial = varTrial+1;
                 fprintf('\n=======VARIABLE TRIAL %d=======\n',varTrial);
@@ -254,10 +272,24 @@ while ~abort
         if abort; break; end
         
         % Get calibration results for the stimulus type
-        calibration = GetRegressionResults(P,stimType);
+        calibration = GetRegressionResults(P,cuff);
         P.calibration.results(stimType) = calibration;
         
         save(P.out.file.param, 'P', 'O');
+        
+        % Intercuff interval between 1st and 2nd cuff
+        if cuff2process == 1
+            fprintf('\nIntercuff interval... ');
+            countedDown = 1;
+            while GetSecs < tCrossOn + P.presentation.Calibration.interCuffInterval
+                tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
+                [abort,countedDown] = CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
+                if abort; break; end
+            end
+            fprintf('\n');
+        end
+        
+        if abort; break; end
         
     end
     

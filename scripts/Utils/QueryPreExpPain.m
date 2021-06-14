@@ -10,8 +10,8 @@ if strcmp(P.env.hostname,'stimpc1')
     end
 else
     if strcmp(P.language,'de')
-        keyNotPainful = ['die Taste [' upper(char(P.keys.keyList(P.keys.notPainful))) ']'];
-        keyPainful =  ['die Taste [' upper(char(P.keys.keyList(P.keys.painful))) ']'];
+        keyNotPainful = 'LINKE PFEILTASTE';
+        keyPainful =  'RECHTE PFEILTASTE';
     elseif strcmp(P.language,'en')
         keyNotPainful = ['the key [' upper(char(P.keys.keyList(P.keys.notPainful))) ']'];
         keyPainful =  ['the key [' upper(char(P.keys.keyList(P.keys.painful))) ']'];
@@ -24,10 +24,12 @@ fprintf('Was this stimulus painful [%s], or not painful [%s]?\n',upper(char(P.ke
 if ~O.debug.toggleVisual
     if strcmp(P.language,'de')
         [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'War dieser Reiz SCHMERZHAFT für Sie?', 'center', upperEight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
         [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Falls ja, drücken Sie bitte ' keyPainful '.'], 'center', upperEight+P.style.lineheight, P.style.white);
         [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Falls nein, drücken Sie bitte ' keyNotPainful '.'], 'center', upperEight+P.style.lineheight, P.style.white);
     elseif strcmp(P.language,'en')
         [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Was this stimulus PAINFUL for you?', 'center', upperEight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
         [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['If yes, please press ' keyPainful '.'], 'center', upperEight+P.style.lineheight, P.style.white);
         [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['If no, please press ' keyNotPainful '.'], 'center', upperEight+P.style.lineheight, P.style.white);
     end

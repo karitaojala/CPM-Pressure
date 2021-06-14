@@ -7,6 +7,7 @@ try % test if CPAR initialized already
     CPARid = cparList; % get CPAR device id
 catch
     cparInitialize; % initialize CPAR if it wasn't done yet
+    CPARid = cparList;
 end
 
 dev = cparGetDevice(CPARid); % attempt to establish connection to CPAR

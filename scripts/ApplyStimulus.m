@@ -1,6 +1,6 @@
 function [abort,P]=ApplyStimulus(P,O,trialPressure,block,trial)
 
-cparFile = fullfile(P.out.dir,[P.out.file.CPAR '_calibration.mat']);
+cparFile = fullfile(P.out.dir,[P.out.file.CPAR '_CPM.mat']);
 
 abort = 0;
 
@@ -8,18 +8,24 @@ while ~abort
     
     fprintf(['Tonic stimulus initiated (' num2str(trialPressure(1)) ' to ' num2str(trialPressure(2)) ' kPa)... ']);
     
-    phasic_on = P.pain.CPM.phasicStim.on(block);
+    % whether phasic stimulus on or not (last trial of the block
+    % only long stimulus + continuous rating of it)
+    phasic_on = P.pain.CPM.phasicStim.on(trial);
     
     P.time.trialStart(block,trial) = GetSecs-P.time.scriptStart;
     
     if P.devices.arduino
         
-        [abort,dev] = InitCPAR; % initialize CPAR
-        data = UseCPAR('Set',dev,'CPM',P,trialPressure,phasic_on,block,trial); % set stimulus
-        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
-        [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
-        P.CPAR.dev = dev;
-
+        [abort,initSuccess,dev] = InitCPAR; % initialize CPAR
+        if initSuccess
+            data = UseCPAR('Set',dev,'CPM',P,trialPressure,phasic_on,block,trial); % set stimulus
+            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
+            [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+            P.CPAR.dev = dev;
+        else
+            abort = 1;
+            return;
+        end
         if abort; return; end
         P.time.tonicStimStart(block,trial) = GetSecs-P.time.scriptStart;
         tStimStart = GetSecs;

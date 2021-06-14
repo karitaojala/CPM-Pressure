@@ -11,14 +11,14 @@ while ~abort
     if pressure_input == 1
         
         % Find VAS70 and VAS90 from tonic stimulus calibration
-        predPressureTonic = P.calibration.results(P.pain.CPM.tonicStim.cuff).fitData.predPressureLinear;
+        predPressureTonic = P.calibration.results(1).fitData.predPressureLinear;
         TonicVASTrough = predPressureTonic(P.pain.CPM.tonicStim.VASindexPeak);
         TonicVASPeak = predPressureTonic(P.pain.CPM.tonicStim.VASindexTrough);
         tonicPressure_trough_Exp = TonicVASTrough;
         tonicPressure_peak_Exp = TonicVASPeak;
       
         % Find intensity from phasic stimulus calibration
-        predPressurePhasic = P.calibration.results(P.pain.CPM.phasicStim.cuff).fitData.predPressureLinear;
+        predPressurePhasic = P.calibration.results(2).fitData.predPressureLinear;
         PhasicVAS = predPressurePhasic(P.pain.CPM.phasicStim.VASindex);
         phasicPressure = PhasicVAS;
         
@@ -29,15 +29,15 @@ while ~abort
         tonicPressure_trough_Exp=input('\nPlease enter tonic pain stimulus trough intensity (kPa) for the experiment.\n');
         ListenChar(2); % deactivate keyboard input
         
-        ListenChar(0); % activate keyboard input
+        ListenChar(0); 
         commandwindow;
         tonicPressure_peak_Exp=input('Please enter tonic pain stimulus peak intensity (kPa) for the experiment.\n');
-        ListenChar(2); % deactivate keyboard input
+        ListenChar(2); 
         
-        ListenChar(0); % activate keyboard input
+        ListenChar(0); 
         commandwindow;
         phasicPressure=input('Please enter phasic pain stimulus intensity (kPa) for the experiment.\n');
-        ListenChar(2); % deactivate keyboard input
+        ListenChar(2); 
         
     elseif pressure_input == 3
         
@@ -63,7 +63,7 @@ while ~abort
             tonicPressure_peak = tonicPressure_peak_Control;
         end
         
-        trialPressure = [tonicPressure_trough tonicPressure_peak phasicPressure]; % input to UseCPAR and CreateCPARStimulus
+        trialPressure = [tonicPressure_trough tonicPressure_peak phasicPressure]; 
         
         % Start block
         fprintf('\n\n=======BLOCK %d of %d=======\n',block,P.presentation.CPM.blocks);
@@ -73,7 +73,11 @@ while ~abort
         if ~O.debug.toggleVisual
             upperHalf = P.display.screenRes.height/2;
             Screen('TextSize', P.display.w, 50);
-            [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, ['Block ' num2str(block)], 'center', upperHalf, P.style.white);
+            if strcmp(P.language,'de')
+                [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, ['Teil ' num2str(block)], 'center', upperHalf, P.style.white);
+            elseif strcmp(P.language,'en')
+                [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, ['Part ' num2str(block)], 'center', upperHalf, P.style.white);
+            end
             [P.display.screenRes.width, upperHalf]=DrawFormattedText(P.display.w, ' ', 'center', upperHalf+P.style.lineheight, P.style.white);
             introTextOn = Screen('Flip',P.display.w);
         else
@@ -137,6 +141,11 @@ while ~abort
             % Start trial
             fprintf('\n\n=======TRIAL %d of %d=======\n',trial,P.presentation.CPM.trialsPerBlock);
             
+            if P.pain.CPM.phasicStim.on(trial) == 0 % if no phasic stimulus, then there is a continuous rating - instruction for participants presented here
+                abort = ShowInstruction(P,O,6,P.presentation.CPM.contRatingInstructionDuration);
+            end
+            if abort; break; end
+
             % Red fixation cross
             if ~O.debug.toggleVisual
                 Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
@@ -183,12 +192,16 @@ while ~abort
         end
         
         if abort; break; end
-
+        
         % Interblock interval
         if block ~= P.presentation.CPM.blocks
             % Text for finishing a block
             if ~O.debug.toggleVisual
-                [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Stimulus block finished. Wait for the next block.', 'center', upperHalf, P.style.white);
+                if strcmp(P.language,'de')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Dieser Teil ist nun beendet. Bitte warten Sie auf den Beginn des nächsten Teils.', 'center', upperHalf, P.style.white);
+                elseif strcmp(P.language,'en')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'This part is now finished. Please wait for the next part to start.', 'center', upperHalf, P.style.white);
+                end
                 outroTextOn = Screen('Flip',P.display.w);
             else
                 outroTextOn = GetSecs;
@@ -223,8 +236,11 @@ while ~abort
         elseif block == P.presentation.CPM.blocks % if last block, show end of the experiment screen
             
             if ~O.debug.toggleVisual
-                [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'This part of the test has ended. Please wait for further instruction.', 'center', upperHalf, P.style.white);
-                %             endTextOn = Screen('Flip',P.display.w);
+                if strcmp(P.language,'de')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Das Experiment ist beendet. Vielen Dank für Ihre Zeit!', 'center', upperHalf, P.style.white);
+                elseif strcmp(P.language,'en')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'The experiment has ended. Thank you for your time!', 'center', upperHalf, P.style.white);
+                end
             end
             
             fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
@@ -241,7 +257,7 @@ while ~abort
                 end
             end
             
-            fprintf('\n==========================\nCPM test has ended. ');
+            fprintf('\n==========================\nCPM experiment has ended. ');
             
         end
         

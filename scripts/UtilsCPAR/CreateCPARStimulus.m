@@ -1,6 +1,6 @@
 % Creationg of CPAR pressure cuff stimuli
 % 
-% [stimulus1, stimulus2] = CreateCPARStimulus(varargin)
+% [stimulus1, stimulus2, cuff] = CreateCPARStimulus(varargin)
 %
 % Varargin:
 %   1. type - pre-exposure, calibration or CPM stimulus
@@ -24,9 +24,9 @@
                     
 % Version: 1.0
 % Author: Karita Ojala, University Medical Center Hamburg-Eppendorf
-% Date: 2021-05-03
+% Date: 2021-06-09
 
-function [stimulus1, stimulus2] = CreateCPARStimulus(varargin)
+function [stimulus1, stimulus2, cuff] = CreateCPARStimulus(varargin)
 
 varargin = varargin{:};
 type = varargin{1}; % pre-exposure, conditioning, or test stimulus
@@ -38,23 +38,22 @@ if strcmp(type,'preExp')
     pressure = varargin{4}; % target pressure (kPa)
     cuff = varargin{5};
     
-    cuff_left = settings.pain.preExposure.cuff_left; 
-    cuff_right = settings.pain.preExposure.cuff_right;
+    if cuff == 1
+        cuff_off = 2;
+    elseif cuff == 2
+        cuff_off = 1;
+    end
+    
 
     stim_pressure = pressure(1);
     ramp_up_duration = duration(1); % duration of ramp-up (target pressure/ramping up speed)
-%     plateau_onset = ramp_up_duration; % onset of constant pressure
+    ramp_up_rate = stim_pressure/ramp_up_duration;
     plateau_duration = duration(2);
     
-    if cuff == 1
-        stimulus1 = cparCreateWaveform(cuff_left,1); % combined stimulus
-        stimulus2 = cparCreateWaveform(cuff_right,1); % off cuff set to zero
-    elseif cuff == 2
-        stimulus1 = cparCreateWaveform(cuff_right,1); % combined stimulus
-        stimulus2 = cparCreateWaveform(cuff_left,1); % off cuff set to zero
-    end
+    stimulus1 = cparCreateWaveform(cuff,1); % combined stimulus
+    stimulus2 = cparCreateWaveform(cuff_off,1); % off cuff set to zero
     
-    cparWaveform_Inc(stimulus1, stim_pressure, ramp_up_duration); % ramp up
+    cparWaveform_Inc(stimulus1, ramp_up_rate, ramp_up_duration); % ramp up
     cparWaveform_Step(stimulus1, stim_pressure, plateau_duration); % constant pressure
     
 elseif strcmp(type,'Calibration')
@@ -63,39 +62,41 @@ elseif strcmp(type,'Calibration')
     stimulusType = varargin{4};
     cuff = varargin{5};
 
-    cuff1 = settings.pain.preExposure.cuff_left;
-    cuff2 = settings.pain.preExposure.cuff_right;
+    if cuff == 1
+        cuff_off = 2;
+    elseif cuff == 2
+        cuff_off = 1;
+    end
     
     if stimulusType == 1
-        duration = settings.pain.Calibration.tonicStim.stimDuration;
-        rampUp = settings.pain.CPM.tonicStim.startendRampDuration;
         
-        stimulus1 = cparCreateWaveform(cuff1,1); % combined stimulus
-        stimulus2 = cparCreateWaveform(cuff2,1); % off cuff set to zero
+        stimDuration = settings.pain.Calibration.tonicStim.stimDuration;
+        duration = CalcStimDuration(settings,pressure,stimDuration);
+        
+        rampUp = duration(1);
+        
+        stimulus1 = cparCreateWaveform(cuff,1); % combined stimulus
+        stimulus2 = cparCreateWaveform(cuff_off,1); % off cuff set to zero
         
         rateRampUp = pressure/rampUp;
         
         cparWaveform_Inc(stimulus1,rateRampUp,rampUp); % first ramping up to pressure of the tonic stimulus
-        cparWaveform_Step(stimulus1,pressure,duration); % create constant pressure part
+        cparWaveform_Step(stimulus1,pressure,stimDuration); % create constant pressure part
         
     else
+        
         duration = settings.pain.Calibration.phasicStim.stimDuration;
-        %rampUp = 0;
         
-        if cuff == 1
-            stimulus1 = cparCreateWaveform(cuff1,1); % combined stimulus
-            stimulus2 = cparCreateWaveform(cuff2,1); % off cuff set to zero
-        elseif cuff == 2
-            stimulus1 = cparCreateWaveform(cuff2,1); % combined stimulus
-            stimulus2 = cparCreateWaveform(cuff1,1); % off cuff set to zero
-        end
-        
+        stimulus1 = cparCreateWaveform(cuff,1); % combined stimulus
+        stimulus2 = cparCreateWaveform(cuff_off,1); % off cuff set to zero
         cparWaveform_Step(stimulus1,pressure,duration);
 
     end
 
 elseif strcmp(type,'CPM')
    
+    cuff = settings.pain.CPM.tonicStim.cuff;
+    
     pressure = varargin{3}; % target pressure (kPa)
     
     troughPressure = pressure(1);
@@ -122,15 +123,16 @@ elseif strcmp(type,'CPM')
 
     % PHASIC STIMULUS
 
-    phasicOn = varargin{4};
+    phasic_on = varargin{4};
     block = varargin{5};
     trial = varargin{6};
     phasicPressure = pressure(3);
     phasicStimDuration = settings.pain.CPM.phasicStim.duration;
     
-    if phasicOn % if phasic stimuli on for this block
+    stimulus2 = cparCreateWaveform(settings.pain.CPM.phasicStim.cuff, 1);
+    
+    if phasic_on % if phasic stimuli on for this trial
         
-        stimulus2 = cparCreateWaveform(settings.pain.CPM.phasicStim.cuff, 1);
         stimulusTime = 0; % counter to keep track of stimulus time
         
         for cycle = 1:settings.pain.CPM.tonicStim.cycles
@@ -159,11 +161,7 @@ elseif strcmp(type,'CPM')
             end
 
         end
-        
-    else
-        
-        stimulus2 = cparCreateWaveform(settings.pain.CPM.phasicStim.cuff, 1);
-        
+
     end
     
 end

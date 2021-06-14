@@ -88,8 +88,7 @@ while numberOfSecondsRemaining  > 0
     [keyIsDown,secs,keyCode] = KbCheck; % this checks the keyboard very, very briefly.
         
         if keyIsDown % only if a key was pressed we check which key it was
-            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.buttonPress); % log key/button press as a marker
-            response = 1;          
+            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.buttonPress); % log key/button press as a marker          
             if keyCode(moreKey) % if it was the key we named key1 at the top then...
                 currentRating = currentRating + 1;
                 if currentRating > nRatingSteps
@@ -99,6 +98,7 @@ while numberOfSecondsRemaining  > 0
                 conRating(end+1) = finalRating;
                 conTime(end+1) = GetSecs - startTime;
                 keyId(end+1) = 1;
+                response = 1;
             elseif keyCode(lessKey)
                 currentRating = currentRating - 1;                
                 if currentRating < 1
@@ -108,6 +108,7 @@ while numberOfSecondsRemaining  > 0
                 conRating(end+1) = finalRating;
                 conTime(end+1) = GetSecs - startTime;
                 keyId(end+1) = -1;
+                response = 1;
             elseif keyCode(escapeKey)
                 abort = 1;
                 break;

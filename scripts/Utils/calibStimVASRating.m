@@ -33,7 +33,7 @@ while ~abort
         P.calibration.rating(cuff,itemNo) = finalRating;
     end
     
-    VAS(calibStep).calibStep(trial) = calibData;
+    VAS(calibStep,cuff).calibStep(trial) = calibData;
     
     % Save on every trial
     % fprintf(' Saving VAS data... ')

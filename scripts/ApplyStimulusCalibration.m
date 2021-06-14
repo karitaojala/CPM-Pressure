@@ -10,23 +10,28 @@ while ~abort
     
     if stimType == 1
         rampDuration = trialPressure/P.pain.preExposure.riseSpeed;
-        stimDuration = rampDuration+P.pain.Calibration.tonicStim.stimDuration+5;
+        stimDuration = rampDuration+P.pain.Calibration.tonicStim.stimDuration;
     elseif stimType == 2
         stimDuration = P.pain.Calibration.phasicStim.stimDuration;
     end
     
-    P.time.calibStart(trial) = GetSecs-P.time.scriptStart;
+    P.time.calibStart(calibStep,stimType,trial) = GetSecs-P.time.scriptStart;
     
     if P.devices.arduino
         
         clear data
-        [abort,dev] = InitCPAR; % initialize CPAR
-        abort = UseCPAR('Set',dev,'Calibration',P,trialPressure,stimType,cuff,trial); % set stimulus
-        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
-        [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
-        P.CPAR.dev = dev;
+        [abort,initSuccess,dev] = InitCPAR; % initialize CPAR
+        if initSuccess
+            abort = UseCPAR('Set',dev,'Calibration',P,trialPressure,stimType,cuff,trial); % set stimulus
+            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
+            [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+            P.CPAR.dev = dev;
+        else
+            abort = 1;
+            return;
+        end
         if abort; return; end
-        P.time.calibStimStart(trial) = GetSecs-P.time.scriptStart;
+        P.time.calibStimStart(calibStep,stimType,trial) = GetSecs-P.time.scriptStart;
         
         tStimStart = GetSecs;
         while GetSecs < tStimStart+stimDuration
@@ -37,10 +42,10 @@ while ~abort
         % VAS
         fprintf(' VAS... ');
         tVASStart = GetSecs;
-        P.time.calibStimVASStart(trial) = GetSecs-P.time.scriptStart;
+        P.time.calibStimVASStart(calibStep,stimType,trial) = GetSecs-P.time.scriptStart;
         SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
         if ~O.debug.toggleVisual; [abort,P] = calibStimVASRating(P,O,calibStep,cuff,trial,trialPressure); end
-        P.time.calibStimVASEnd(trial) = GetSecs-P.time.scriptStart;
+        P.time.calibStimVASEnd(calibStep,stimType,trial) = GetSecs-P.time.scriptStart;
         if abort; return; end
         
         while GetSecs < tVASStart+P.presentation.Calibration.durationVAS
@@ -59,8 +64,8 @@ while ~abort
         
         countedDown = 1;
         tStimStart = GetSecs;
-        P.time.calibStart(stimType,trial) = tStimStart-P.time.scriptStart;
-        while GetSecs < tStimStart+stimDuration+5+P.presentation.Calibration.durationVAS
+        P.time.calibStart(calibStep,stimType,trial) = tStimStart-P.time.scriptStart;
+        while GetSecs < tStimStart+stimDuration+P.presentation.Calibration.durationVAS
             tmp=num2str(SecureRound(GetSecs-tStimStart,0));
             [abort,countedDown]=CountDown(P,GetSecs-tStimStart,countedDown,[tmp ' ']);
             if abort; break; end

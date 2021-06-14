@@ -64,7 +64,7 @@ while ~abort
 end
 
 if ~abort
-    fprintf(' VAS training finished. \n');
+    fprintf('\nVAS training finished. \n');
 else
     return;
 end

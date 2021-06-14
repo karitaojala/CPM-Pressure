@@ -163,7 +163,7 @@ if abort;QuickCleanup(P);return;end
 
 if P.startSection == 6
     fprintf('\nExperiment ending.');
-    [abort]=ShowInstruction(P,O,6);
+    [abort]=ShowInstruction(P,O,7); % intentional 7 (not 6), as instructions section 6 corresponds to CPM tonic ratings instruction
     if abort;return;end
 end
 
@@ -207,8 +207,8 @@ if strcmp(P.env.hostname,'stimpc1') % curdes button box single diamond (HID NAR 
     end
 else
     KbName('UnifyKeyNames');
-    P.keys.painful            = KbName('y');
-    P.keys.notPainful         = KbName('n');
+    P.keys.painful            = KbName('RightArrow');
+    P.keys.notPainful         = KbName('LeftArrow');
     P.keys.pause              = KbName('Space');
     P.keys.resume             = KbName('Return');
     P.keys.confirm            = KbName('Return');
@@ -403,7 +403,7 @@ if P.devices.arduino && isfield(P.cpar,'dev')
     cparStop(P.cpar.dev);
     fprintf(' CPAR device was stopped.\n');
 else
-    fprintf(' CPAR already stopped\n.');
+    fprintf(' CPAR already stopped.\n');
 end
 
 sca; % close window; also closes io64

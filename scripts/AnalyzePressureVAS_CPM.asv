@@ -147,12 +147,13 @@ bar(bardata,'LineWidth',1);
 hold on
 errorbar(1:2,bardata',errorbars,'k','LineStyle','none','LineWidth',2,'CapSize',0)
 hold on
-xdata = repmat([1 2],size(cpm_data,1),1);
-jitter_amount = 0.2;
+xdata = repmat([1 2],size(cpm_data),1);
+jitter_amount = 0.05;
 jittered_xdata = xdata + (rand(size(xdata))-0.5)*(2*jitter_amount);
+jittered_xdata = jittered_xdata';
 
 for cond = 1:2
-    scatter(jittered_xdata(:,cond),cpm_data(:,cond),'filled','MarkerEdgeColor','k');
+    scatter(jittered_xdata(cond,:),cpm_data(cond,:),'filled','MarkerEdgeColor','k');
 end
         
 ylim([0 100])

@@ -5,8 +5,9 @@ abort = 0;
 
 KbName('UnifyKeyNames');
 keys        = P.keys;
-lessKey     =  keys.left; % yellow button
-moreKey     =  keys.right; % red button
+lessKey     = keys.left; % yellow button
+moreKey     = keys.right; % red button
+confirmKey  = keys.confirm;
 escapeKey   = keys.esc;
 
 window      = P.display.w;
@@ -19,13 +20,13 @@ if isempty(durRating); error('Duration length of rating has to be specified!'); 
 
 %% Default values
 nRatingSteps = 101;
-scaleWidth = 700; 
-textSize = 20; 
+scaleWidth = 700;
+textSize = 20;
 lineWidth = 6;
-scaleColor = [255 255 255]; 
-activeColor = [255 0 0]; 
+scaleColor = [255 255 255];
+activeColor = [255 0 0];
 defaultRating = 1;
-backgroundColor = P.style.backgr; 
+backgroundColor = P.style.backgr;
 startY = P.style.startY;
 
 % if length(ratingLabels) ~= nRatingSteps
@@ -51,77 +52,92 @@ Screen('TextColor',window,[255 255 255]);
 Screen('TextFont', window, 'Arial');
 currentRating = defaultRating;
 ratings = currentRating;
+finalRating = 0;
+reactionTime = 0;
 response = 0;
 
 numberOfSecondsRemaining = durRating;
 keyTime = 0;
 keyId = 0;
 
-
 %%%%%%%%%%%%%%%%%%%%%%% loop while there is time %%%%%%%%%%%%%%%%%%%%%
 % tic; % control if timing is as long as durRating
 
 startTime = GetSecs;
 while numberOfSecondsRemaining  > 0
-   
-    Screen('FillRect',window,backgroundColor); 
-    Screen('FillRect',window,activeColor,[activeTicRects(1,1)+3 activeTicRects(2,1)+ 5 activeTicRects(3,currentRating)-3 activeTicRects(4,1)-5]);   
-    Screen('FillRect',window,scaleColor,lowLabelRect);   
-    Screen('FillRect',window,scaleColor,highLabelRect);    
-    Screen('FillRect',window,scaleColor,midLabelRect); 
-    Screen('FillRect',window,scaleColor,midlLabelRect);  
+    
+    Screen('FillRect',window,backgroundColor);
+    Screen('FillRect',window,activeColor,[activeTicRects(1,1)+3 activeTicRects(2,1)+ 5 activeTicRects(3,currentRating)-3 activeTicRects(4,1)-5]);
+    Screen('FillRect',window,scaleColor,lowLabelRect);
+    Screen('FillRect',window,scaleColor,highLabelRect);
+    Screen('FillRect',window,scaleColor,midLabelRect);
+    Screen('FillRect',window,scaleColor,midlLabelRect);
     Screen('FillRect',window,scaleColor,midhLabelRect);
-  
-    DrawFormattedText(window, 'Bitte bewerten Sie die Schmerzhaftigkeit des Druckreizes', 'center',yCenter-100, scaleColor);  
-    DrawFormattedText(window, '(so schnell wie möglich, maximal 5 Sekunden Zeit)', 'center',yCenter-70, scaleColor);   
+    
+    DrawFormattedText(window, 'Bitte bewerten Sie die Schmerzhaftigkeit des Druckreizes', 'center',yCenter-100, scaleColor);
+    DrawFormattedText(window, '(so schnell wie möglich, maximal 5 Sekunden Zeit)', 'center',yCenter-70, scaleColor);
     
     Screen('DrawText',window,'kein',axesRect(1)-17,yCenter+25,scaleColor);
     Screen('DrawText',window,'Schmerz',axesRect(1)-40,yCenter+45,scaleColor);
-      
-    Screen('DrawText',window,'unerträglicher',axesRect(3)-55,yCenter+25,scaleColor); 
+    
+    Screen('DrawText',window,'unerträglicher',axesRect(3)-55,yCenter+25,scaleColor);
     Screen('DrawText',window,'Schmerz',axesRect(3)-40,yCenter+45,scaleColor);
     
     Screen('Flip', window);
     Screen('TextSize',window,textSize);
-        
+    
     [keyIsDown,secs,keyCode] = KbCheck; % this checks the keyboard very, very briefly.
-        
-        if keyIsDown % only if a key was pressed we check which key it was
-            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.buttonPress); % log key/button press as a marker
-            response = 1;          
-            if keyCode(moreKey) % if it was the key we named key1 at the top then...
-                currentRating = currentRating + 1;
-                if currentRating > nRatingSteps
-                    currentRating = nRatingSteps;
-                end  
-                ratings(end+1) = currentRating - 1;
-                keyTime(end+1) = GetSecs - startTime;
-                keyId(end+1) = 1;
-            elseif keyCode(lessKey)
-                currentRating = currentRating - 1;                
-                if currentRating < 1
-                    currentRating = 1;
-                end
-                finalRating = currentRating - 1;
-                ratings(end+1) = finalRating;
-                keyTime(end+1) = GetSecs - startTime;
-                keyId(end+1) = -1;
-            elseif keyCode(escapeKey)
-                abort = 1;
-                break;
+    
+    if keyIsDown % only if a key was pressed we check which key it was
+        SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.buttonPress); % log key/button press as a marker
+        if keyCode(moreKey) % if it was the key we named key1 at the top then...
+            currentRating = currentRating + 1;
+            if currentRating > nRatingSteps
+                currentRating = nRatingSteps;
             end
+            ratings(end+1) = currentRating;
+            keyTime(end+1) = secs - startTime;
+            keyId(end+1) = 1;
+            finalRating = currentRating;
+            reactionTime = secs - startTime;
+            response = 1;
+        elseif keyCode(lessKey)
+            currentRating = currentRating - 1;
+            if currentRating < 1
+                currentRating = 1;
+            end
+            ratings(end+1) = currentRating;
+            keyTime(end+1) = secs - startTime;
+            keyId(end+1) = -1;
+            finalRating = currentRating;
+            reactionTime = secs - startTime;
+            response = 1;
+%         elseif keyCode(confirmKey)
+%             finalRating = currentRating;
+%             fprintf('Rating %d\n',finalRating);
+%             reactionTime = secs - startTime;
+%             response = 1;
+%             break;
+        elseif keyCode(escapeKey)
+            abort = 1;
+            break;
         end
-      
-        keyId(end+1) = 0;
-        keyTime(end+1) = 0;
-   
-        numberOfSecondsElapsed   = (GetSecs - startTime);
-        numberOfSecondsRemaining = durRating - numberOfSecondsElapsed;
+    end
+    
+    keyId(end+1) = 0;
+    keyTime(end+1) = 0;
+    
+    numberOfSecondsElapsed   = (GetSecs - startTime);
+    numberOfSecondsRemaining = durRating - numberOfSecondsElapsed;
     
 end
 
-finalRating = ratings(end);  
-reactionTime = keyTime(find(keyTime,1,'first'));
+% if ~keyIsDown
+%     fprintf('No response!');
+%     keyTime(end+1) = NaN;
+%     keyId(end+1) = 0;
+%     ratings(end+1) = NaN;
+% end
 
 end
 

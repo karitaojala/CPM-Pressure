@@ -38,12 +38,12 @@ if strcmpi(action,'set')
     % varargin{3} = pressure in kPa
     
     if ~exist('dev','var') || ~strcmpi(class(dev),'LabBench.Instruments.CPAR.CPARDevice') % add: or not correct type
-        warning('\nDev structure from cparInitialize and cparGetDevice required to start CPAR.');
+        warning('Dev structure from cparInitialize and cparGetDevice required to start CPAR.');
         abort = 1; varargout{1} = abort; return;
     elseif isempty(varargin{3})
         error('Input pressure required.');
     elseif ~isnumeric(varargin{3})
-        warning('\nInput pressure needs to be in numeric format. Attempting conversion.');
+        warning('Input pressure needs to be in numeric format. Attempting conversion.');
         try
             pressure_num = str2double(varargin{3});
             varargin{3} = pressure_num;
@@ -60,14 +60,20 @@ if strcmpi(action,'set')
     end
     
     try
-        [created_stim_cuff1, created_stim_cuff2] = CreateCPARStimulus(varargin);
+        [created_stim1, created_stim2, cuff] = CreateCPARStimulus(varargin);
     catch
         warning('Creating stimulus for CPAR failed - check stimulus parameters.');
         abort = 1; varargout{1} = abort; return;
     end
     
     try
-        cparSetWaveform(dev,created_stim_cuff1,created_stim_cuff2); 
+        %settings = varargin{1};
+%         if cuff == 1
+            cparSetWaveform(dev,created_stim1,created_stim2); 
+%         elseif cuff == 2
+%             cparSetWaveform(dev,created_stim2,created_stim1); 
+%         end
+        
     catch
         warning('Setting stimulus for CPAR failed - check created stimulus.');
         abort = 1; varargout{1} = abort; return;
@@ -99,18 +105,6 @@ elseif strcmpi(action,'trigger')
         varargout{2} = data;
     end
    
-% elseif strcmpi(action,'data')
-%     
-%     data = varargin{1};
-%     
-%     try
-%         data = cparGetData(data,dev);
-%         varargout{2} = data;
-%     catch
-%         cparClose(dev);
-%         warning('Getting CPAR data failed.');
-%         abort = 1; varargout{1} = abort; return;
-%     end
 end
 
 end

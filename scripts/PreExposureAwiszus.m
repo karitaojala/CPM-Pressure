@@ -69,9 +69,12 @@ while ~abort
             end
                 
             fprintf(' concluded.\n');
-            data = cparGetData(P.cpar.dev, data);
-            preExpCPARdata = cparFinalizeSampling(P.cpar.dev, data);
-            saveCPARData(preExpCPARdata,cparFile,cuff,trial);
+            
+            if P.devices.arduino && P.cpar.init
+                data = cparGetData(P.cpar.dev, data);
+                preExpCPARdata = cparFinalizeSampling(P.cpar.dev, data);
+                saveCPARData(preExpCPARdata,cparFile,cuff,trial);
+            end
             
             if ~O.debug.toggleVisual
                 Screen('Flip',P.display.w);
