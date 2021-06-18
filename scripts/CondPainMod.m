@@ -47,6 +47,10 @@ while ~abort
         
     end
     
+    P.pain.CPM.experimentPressure.tonicStimTrough = tonicPressure_trough_Exp;
+    P.pain.CPM.experimentPressure.tonicStimPeak = tonicPressure_peak_Exp;
+    P.pain.CPM.experimentPressure.phasicStim = phasicPressure;
+    
     tonicPressure_trough_Control = P.pain.CPM.tonicStim.pressureTroughControl;
     tonicPressure_peak_Control = P.pain.CPM.tonicStim.pressurePeakControl;
         
