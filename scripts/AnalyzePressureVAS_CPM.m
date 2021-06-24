@@ -24,10 +24,10 @@ path.code = pwd;
 path.main = fullfile(path.code,'..');
 path.data = fullfile(path.main,'data',project.name,project.phase,'logs');
 
-subjects = [1:2 4:6];
-block_order = [1 2; 1 2; 1 2; 2 1; 2 1]; % exp (2) or control (1) block first
+subjects = [1:2 4 6 7 10];
+block_order = [1 2; 1 2; 1 2; 2 1; 2 1; 2 1]; % exp (2) or control (1) block first
 % stim_cuff_subs = [1 1 NaN 1 1]; % 1 = tonic stim cuff 1 (left), phasic stim cuff 2 (right); 2 = phasic stim cuff 1, tonic stim cuff 2
-phasicStimPressure = [80 67 50 43 46];
+phasicStimPressure = [80 67 50 46 41 43];
 % totalTrials = 14;
 % calibTrials = {1:4; 5:7; 8:14};
 % samplingRate = 0.005; % 200 Hz

@@ -35,10 +35,10 @@ addpath(P.path.experiment)
 addpath(genpath(P.path.PTB))
 addpath(fullfile(P.path.PTB,'PsychBasic','MatlabWindowsFilesR2007a'))
 
-if ~O.debug.toggleVisual
-%     Screen('Preference', 'TextRenderer', 0);
-    %Screen('Preference', 'SkipSyncTests', 1);
-end
+% if ~O.debug.toggleVisual
+% %     Screen('Preference', 'TextRenderer', 0);
+%     %Screen('Preference', 'SkipSyncTests', 1);
+% end
 
 P.time.stamp = datestr(now,30);
 P.time.scriptStart = GetSecs;
@@ -79,7 +79,6 @@ end
 if exist(P.out.file.param,'file')
     loadParams = load(P.out.file.param);
     P = loadParams.P;
-    O = loadParams.O;
 else
     save(P.out.file.param,'P','O');
 end
@@ -129,7 +128,7 @@ if abort;QuickCleanup(P);return;end
 if P.startSection == 3
     [abort]=ShowInstruction(P,O,3,1);
     if abort;return;end
-    load(P.out.file.param,'P','O');
+    load(P.out.file.param,'P');
     [abort]=PsychometricScaling(P,O);
 end
 if abort;QuickCleanup(P);return;end
@@ -139,7 +138,7 @@ if abort;QuickCleanup(P);return;end
 if P.startSection == 4
     [abort]=ShowInstruction(P,O,4,1);
     if abort;return;end
-    load(P.out.file.param,'P','O');
+    load(P.out.file.param,'P');
     [abort]=TargetRegressionVAS(P,O);
 end
 if abort;QuickCleanup(P);return;end
@@ -153,7 +152,7 @@ if P.startSection == 5
     pressure_input=input('\nHow to define pressure levels for the experiment: ... 1 = From calibration, 2 = From input, 3 = From instantiated parameters file\n');
     ListenChar(2); % deactivate keyboard input
     
-    load(P.out.file.param,'P','O');
+    load(P.out.file.param,'P');
     [abort]=ShowInstruction(P,O,5,1);
     if abort;return;end
     [abort]=CondPainMod(P,O,pressure_input);
@@ -394,17 +393,19 @@ end
 
 %% Cleanup when aborting script
 function QuickCleanup(P)
-fprintf('\n\nAborting...');
+fprintf('\n\nAborting... ');
 
 Screen('CloseAll');
 
-if P.devices.arduino && isfield(P.cpar,'dev')
-    cparStopSampling(P.cpar.dev);
-    cparStop(P.cpar.dev);
-    fprintf(' CPAR device was stopped.\n');
-else
-    fprintf(' CPAR already stopped.\n');
-end
+% load(P.out.file.param,'P');
+
+% if P.devices.arduino && isfield(P.cpar,'dev')
+%     cparStopSampling(P.cpar.dev);
+%     cparStop(P.cpar.dev);
+%     fprintf('CPAR device was stopped.\n');
+% else
+%     fprintf('CPAR already stopped.\n');
+% end
 
 sca; % close window; also closes io64
 ListenChar(0); % use keys again

@@ -55,7 +55,7 @@ function [nextStim,varargout] = CalibValidation(x,y,bins,minNInBins,linOrSig,var
     %----------------------------------------------
     % Possible input variables
     if ~nargin || ( isempty(x) && isempty(y) )% get some defaults
-        x = [5  7 -3 10]+30; % not sure of these for pressure
+        x = [5  7 -3 10]+35; % not sure of these for pressure
         y = [61 67 39 70];
     end    
     if nargin<3 || ( nargin>2 && isempty(bins) )

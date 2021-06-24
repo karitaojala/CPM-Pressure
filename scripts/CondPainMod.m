@@ -50,6 +50,7 @@ while ~abort
     P.pain.CPM.experimentPressure.tonicStimTrough = tonicPressure_trough_Exp;
     P.pain.CPM.experimentPressure.tonicStimPeak = tonicPressure_peak_Exp;
     P.pain.CPM.experimentPressure.phasicStim = phasicPressure;
+    save(P.out.file.param,'P','O');
     
     tonicPressure_trough_Control = P.pain.CPM.tonicStim.pressureTroughControl;
     tonicPressure_peak_Control = P.pain.CPM.tonicStim.pressurePeakControl;
@@ -218,6 +219,8 @@ while ~abort
 %                 WaitSecs(1);
             end
         
+            if abort; return; end
+            
             if ~O.debug.toggleVisual
                 Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
                 Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
@@ -225,6 +228,7 @@ while ~abort
             else
                 tCrossOn = GetSecs;
             end
+            
             fprintf('\nInterblock interval... ');
             countedDown = 1;
             while GetSecs < tCrossOn + (P.presentation.CPM.blockBetweenTime - P.presentation.CPM.blockBetweenText) % wait the time between blocks

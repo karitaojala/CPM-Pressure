@@ -21,14 +21,21 @@ while ~abort
     calibData.response = response;
     
     if calibStep == 1
-        P.calibration.pressure(cuff,trial) = trialPressure;
-        P.calibration.rating(cuff,trial) = finalRating;
+        if size(P.calibration.pressure) == P.pain.psychScaling.trials
+            P.calibration.pressure(cuff,P.pain.psychScaling.trials+trial) = trialPressure;
+            P.calibration.rating(cuff,P.pain.psychScaling.trials+trial) = finalRating;
+        else
+            P.calibration.pressure(cuff,trial) = trialPressure;
+            P.calibration.rating(cuff,trial) = finalRating;
+        end
     elseif calibStep == 2
-        itemNo = P.pain.psychScaling.trials+trial; % start from after Psychometric Scaling trials
+        itemNo = size(P.calibration.pressure,2) + 1; 
+%         itemNo = P.pain.psychScaling.trials+trial; % start from after Psychometric Scaling trials
         P.calibration.pressure(cuff,itemNo) = trialPressure;
         P.calibration.rating(cuff,itemNo) = finalRating;
     elseif calibStep == 3
-        itemNo = P.pain.psychScaling.trials+numel(P.pain.Calibration.VASTargetsFixed)+trial; % start from after Psychometric Scaling and Fixed Intensity trials
+        itemNo = size(P.calibration.pressure,2) + 1; 
+%         itemNo = P.pain.psychScaling.trials+numel(P.pain.Calibration.VASTargetsFixed)+trial; % start from after Psychometric Scaling and Fixed Intensity trials
         P.calibration.pressure(cuff,itemNo) = trialPressure;
         P.calibration.rating(cuff,itemNo) = finalRating;
     end

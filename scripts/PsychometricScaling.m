@@ -29,14 +29,64 @@ while ~abort
         
         fprintf(['\n' P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
         
+        fprintf('Displaying instructions... ');
+        
+        if ~O.debug.toggleVisual
+            upperHalf = P.display.screenRes.height/2;
+            Screen('TextSize', P.display.w, 50);
+            if stimType == 1
+                if strcmp(P.language,'de')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, den ' P.presentation.armname_long_de ' Arm'], 'center', upperHalf, P.style.white);
+                elseif strcmp(P.language,'en')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long pain stimuli, the ' P.presentation.armname_long_en ' arm'], 'center', upperHalf, P.style.white);
+                end
+            else
+                if strcmp(P.language,'de')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, den ' P.presentation.armname_short_de ' Arm'], 'center', upperHalf, P.style.white);
+                elseif strcmp(P.language,'en')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, the ' P.presentation.armname_short_en ' arm'], 'center', upperHalf, P.style.white);
+                end
+            end
+            Screen('TextSize', P.display.w, 30);
+            introTextOn = Screen('Flip',P.display.w);
+        else
+            introTextOn = GetSecs;
+        end
+        
+        while GetSecs < introTextOn + P.presentation.BlockStopDuration
+            [abort]=LoopBreaker(P);
+            if abort; break; end
+        end
+        
+        % Wait for input from experiment to continue
+        fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
+        
+        while 1
+            [keyIsDown, ~, keyCode] = KbCheck();
+            if keyIsDown
+                if find(keyCode) == P.keys.resume
+                    break;
+                elseif find(keyCode) == P.keys.esc
+                    abort = 1;
+                    break;
+                end
+            end
+        end
+        if abort; break; end
+        
+        WaitSecs(0.2);
+        
         if stimType == 1
             durationITI = P.presentation.Calibration.tonicStim.ITI;
         else
             durationITI = P.presentation.Calibration.phasicStim.ITI;
         end
         
-        %         P.awiszus.painThresholdFinal = [30 35];
-        painThreshold = P.awiszus.painThresholdFinal(cuff);
+        if exist('P.awiszus.painThresholdFinal','var')
+            painThreshold = P.awiszus.painThresholdFinal(cuff);
+        else
+            painThreshold = P.awiszus.mu(stimType);
+        end
         stepSize = P.pain.psychScaling.thresholdMultiplier*painThreshold;
         
         clear scalingPressures
@@ -86,7 +136,6 @@ while ~abort
             trialPressure = scalingPressures(trial);
             [abort,P] = ApplyStimulusCalibration(P,O,trialPressure,calibStep,stimType,cuff,trial); % run stimulus
             save(P.out.file.param,'P','O'); % Save instantiated parameters and overrides after each trial
-            
             if abort; break; end
             
             % White fixation cross
@@ -118,6 +167,8 @@ while ~abort
             
         end
         
+        if abort; break; end
+        
         % Intercuff interval between 1st and 2nd cuff
         if cuff2process == 1
             fprintf('\nIntercuff interval... ');
@@ -140,6 +191,7 @@ end
 
 if ~abort
     fprintf('\nPsychometric perceptual scaling finished. \n');
+    abort = 1;
 else
     return;
 end

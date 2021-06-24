@@ -17,11 +17,12 @@ while ~abort
     if P.devices.arduino
         
         [abort,initSuccess,dev] = InitCPAR; % initialize CPAR
+        P.cpar.dev = dev;
+        save(P.out.file.param, 'P', 'O');
         if initSuccess
             data = UseCPAR('Set',dev,'CPM',P,trialPressure,phasic_on,block,trial); % set stimulus
             SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.pressureOnset);
             [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
-            P.CPAR.dev = dev;
         else
             abort = 1;
             return;
