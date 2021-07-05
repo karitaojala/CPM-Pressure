@@ -6,7 +6,7 @@ fprintf('\n==========================\nRunning VAS target regression.\n=========
 
 while ~abort
     
-    cuff2process = 0;
+    cuff2process = 1;
     
     % Separately for long tonic stimuli and short phasic stimuli
     for cuff = P.pain.Calibration.cuff_order % randomized order
@@ -27,13 +27,13 @@ while ~abort
                 if strcmp(P.language,'de')
                     [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, den ' P.presentation.armname_long_de ' Arm'], 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, the ' P.presentation.armname_long_en ' arm'], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long pain stimuli, the ' P.presentation.armname_long_en ' arm'], 'center', upperHalf, P.style.white);
                 end
             else
                 if strcmp(P.language,'de')
                     [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, den ' P.presentation.armname_short_de ' Arm'], 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, the ' P.presentation.armname_en ' arm'], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, the ' P.presentation.armname_short_en ' arm'], 'center', upperHalf, P.style.white);
                 end
             end
             Screen('TextSize', P.display.w, 30);
@@ -71,7 +71,7 @@ while ~abort
         end
         
         fprintf('\n')
-        if isempty(P.calibration.pressure) || isempty(P.calibration.rating)% || ~exist('P.calibration.pressure') || ~exist('P.calibration.rating') %#ok<EXIST>
+        if isempty(P.calibration.pressure) || isempty(P.calibration.rating) || numel(P.calibration.pressure(cuff,:)) < P.pain.psychScaling.trials % || ~exist('P.calibration.pressure') || ~exist('P.calibration.rating') %#ok<EXIST>
             fprintf('No valid previous data from psychometric scaling.');
             fprintf('\nTake preset values to continue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
             
@@ -95,9 +95,9 @@ while ~abort
             ratingData = P.calibration.rating(cuff,:);
             x = pressureData(pressureData>0 | ratingData>0); % take only non-zero data
             y = ratingData(pressureData>0 | ratingData>0); % take only ratings associated with non-zero pressures
-            [P.pain.Calibration.VASTargetsFixedPressure,~] = FitData(x,y,P.pain.Calibration.VASTargetsFixed,0);  % last vargin, 0 = figure+text, 2 = text only output
+            [P.pain.Calibration.VASTargetsFixedPressure,~,~,linreg,~,~] = FitData(x,y,P.pain.Calibration.VASTargetsFixed,0);  % last vargin, 0 = figure+text, 2 = text only output
             
-            if any(P.pain.Calibration.VASTargetsFixedPressure < 0) || any(P.pain.Calibration.VASTargetsFixedPressure > 100)
+            if any(P.pain.Calibration.VASTargetsFixedPressure < 0) || any(P.pain.Calibration.VASTargetsFixedPressure > 100) || linreg(2) <= 0
                 fprintf('Invalid fit based on psychometric scaling data!\n');
                 fprintf('\nTake preset values to continue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
                 
@@ -206,7 +206,7 @@ while ~abort
         
         % Start trial
         nextStim = NaN;
-        varTrial = 0;
+        varTrial = 3;%0;
         nH = figure;
         while ~isempty(nextStim)
             
@@ -219,7 +219,7 @@ while ~abort
                 tCrossOn = GetSecs;
             end
             
-            if trial == 1 % first trial no intertrial interval
+            if varTrial == 1 % first trial no intertrial interval
                 
                 fprintf('\nWaiting for the first stimulus to start... ');
                 countedDown = 1;
@@ -247,6 +247,8 @@ while ~abort
             %                     linOrSig = 'sig';
             %                 end
             [nextStim,~,~,~] = CalibValidation(ex,ey,[],[],linOrSig,P.toggles.doConfirmAdaptive,1,1,nH,num2cell([zeros(1,numel(ex)-1) varTrial]),['s' num2str(numel(varTrial)+1)]);
+            
+            if isempty(nextStim); break; end
             
             % Red fixation cross during the trial
             if ~O.debug.toggleVisual

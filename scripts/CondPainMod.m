@@ -10,7 +10,7 @@ while ~abort
     
     if pressure_input == 1
         
-        % Find VAS70 and VAS90 from tonic stimulus calibration
+        % Find CPM trough and peak from tonic stimulus calibration
         predPressureTonic = P.calibration.results(1).fitData.predPressureLinear;
         TonicVASTrough = predPressureTonic(P.pain.CPM.tonicStim.VASindexPeak);
         TonicVASPeak = predPressureTonic(P.pain.CPM.tonicStim.VASindexTrough);
@@ -134,7 +134,6 @@ while ~abort
                     tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
                     [abort,countedDown] = CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
                     if abort; break; end
-%                     WaitSecs(1);
                 end
                 
                 if abort; return; end
@@ -212,6 +211,7 @@ while ~abort
                 outroTextOn = GetSecs;
             end
             
+            countedDown = 1;
             while GetSecs < outroTextOn + P.presentation.CPM.blockBetweenText % wait the time between blocks
                 tmp=num2str(SecureRound(GetSecs-outroTextOn,0));
                 [abort,countedDown]=CountDown(P,GetSecs-outroTextOn,countedDown,[tmp ' ']);

@@ -1,5 +1,7 @@
 function [abort]=PreExposureAwiszus(P,O,varargin)
 
+global dev
+
 cparFile = fullfile(P.out.dir,[P.out.file.CPAR '_PreExposure.mat']);
 
 abort=0;
@@ -58,8 +60,8 @@ while ~abort
             
             if P.devices.arduino && P.cpar.init
 
-                abort = UseCPAR('Set',P.cpar.dev,'preExp',P,stimDuration,preExpInt,cuff); % set stimulus
-                [abort,data] = UseCPAR('Trigger',P.cpar.dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
+                abort = UseCPAR('Set',dev,'preExp',P,stimDuration,preExpInt,cuff); % set stimulus
+                [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
    
             end
             
@@ -71,8 +73,8 @@ while ~abort
             fprintf(' concluded.\n');
             
             if P.devices.arduino && P.cpar.init
-                data = cparGetData(P.cpar.dev, data);
-                preExpCPARdata = cparFinalizeSampling(P.cpar.dev, data);
+                data = cparGetData(dev, data);
+                preExpCPARdata = cparFinalizeSampling(dev, data);
                 saveCPARData(preExpCPARdata,cparFile,cuff,trial);
             end
             

@@ -6,7 +6,7 @@ while ~abort
     
     [abort,conRating,conTime,keyId,response] = onlineScale(P);
     
-    VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '.mat']);
+    VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '_tonicstim.mat']);
     if exist(VASFile,'file')
         VASData = load(VASFile);
         VAS = VASData.VAS;
@@ -17,7 +17,7 @@ while ~abort
     tonicStim.keyId = keyId;
     tonicStim.response = response;
     
-    VAS(trial).tonicStim = tonicStim;
+    VAS(block).tonicStim = tonicStim;
     
     % Save on every trial
     % fprintf(' Saving VAS data... ')

@@ -258,7 +258,7 @@ function [nextStim,varargout] = CalibValidation(x,y,bins,minNInBins,linOrSig,var
         end
         fprintf('Suggested next stimulus %1.1f kPa.\n',nextStim);        
     else
-        fprintf('All bins covered! No more suggestions.\n'); 
+        fprintf('\nAll bins covered! No more suggestions.\n\n'); 
     end
 
     if confirm

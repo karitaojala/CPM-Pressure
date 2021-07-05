@@ -8,7 +8,7 @@ while ~abort
     
     [abort,finalRating,reactionTime,keyId,keyTime,response] = singleratingScale(P);
     
-    VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '.mat']);
+    VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '_phasicstim.mat']);
     if exist(VASFile,'file')
         VASData = load(VASFile);
         VAS = VASData.VAS;

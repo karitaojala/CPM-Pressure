@@ -8,9 +8,9 @@ end
 x = P.calibration.pressure(cuff,:);
 y = P.calibration.rating(cuff,:);
 x = x(x > 0);
+y = y(y > 0);
 y = y(x > 0);
 x = x(y > 0);
-y = y(y > 0);
 [predPressureLin,predPressureSig,predPressureRob,betaLin,betaSig,betaRob] = FitData(x,y,[thresholdVAS P.pain.Calibration.VASTargetsVisual],2);
 
 painThresholdLin = predPressureLin(1);
@@ -19,7 +19,8 @@ predPressureLin(1) = []; % remove threshold pressure, retain only VASTargets
 predPressureSig(1) = []; % remove threshold pressure, retain only VASTargets
 
 if betaLin(2)<0
-    warning('\n\n********************\nNEGATIVE SLOPE. This is physiologically highly implausible. Exclude participant.\n********************\n');
+    fprintf('\n')
+    warning('******************** NEGATIVE SLOPE. This is physiologically highly implausible. Exclude participant.********************');
 end
 
 % construct regression results output file

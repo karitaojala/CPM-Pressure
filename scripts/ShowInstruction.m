@@ -2,6 +2,7 @@ function [abort]=ShowInstruction(P,O,section,displayDuration)
 
 if ~O.debug.toggleVisual
     Screen('Preference', 'TextRenderer', 0);
+    Screen('TextFont', P.display.w, 'Arial', 1);
 end
 
 abort = 0;
@@ -174,11 +175,13 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['langanhaltenden Reizes am ' P.presentation.armname_long_de ' Arm'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'auf der gleichen Skala wie zuvor bewerten, aber', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'kontinuierlich während der gesamten Dauer des Reizes.', 'center', upperEight+P.style.lineheight, P.style.white);
-%             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Ändern Sie bitte die Bewertung in eine der beiden Richtungen,', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Wichtig: ändern Sie bitte die Bewertung in eine der beiden Richtungen,', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'wenn Sie das Gefühl haben, dass sich Ihr Schmerzempfinden', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'auch nur ein wenig verändert hat.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Wenn Sie keinen Schmerz empfinden, denken Sie bitte daran, die Bewertung auf Null zu setzen.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Wenn Sie keinen Schmerz empfinden, denken Sie bitte daran', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'die Bewertung auf Null zu setzen.', 'center', upperEight+P.style.lineheight, P.style.white);
         elseif strcmp(P.language,'en')
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Now you should rate the pain intensity of the long stimulus on the ' P.presentation.armname_long_en ' arm'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'on the same scale as before but continuously during the whole stimulus.', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -228,6 +231,8 @@ while 1
         [countedDown] = CountDown(P,GetSecs-introTextTime,countedDown,[tmp ' ']);
     end
 end
+
+if abort; return; end
 
 if displayDuration==1; fprintf('\nInstructions were displayed for %d seconds.\n',SecureRound(GetSecs-introTextTime,0)); end
 

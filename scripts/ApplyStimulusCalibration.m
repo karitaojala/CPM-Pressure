@@ -1,5 +1,7 @@
 function [abort,P]=ApplyStimulusCalibration(P,O,trialPressure,calibStep,stimType,cuff,trial)
 
+global dev
+
 cparFile = fullfile(P.out.dir,[P.out.file.CPAR '_calibration.mat']);
 
 abort = 0;

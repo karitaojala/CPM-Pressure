@@ -23,6 +23,7 @@ function Experiment_CPM_Pressure_Fluct
 
 clear all %#ok<CLALL>
 restoredefaultpath
+global dev
 
 addpath(cd);
 
@@ -93,7 +94,7 @@ if P.devices.arduino
     [abort,initSuccess,dev] = InitCPAR; % initialize CPAR
     if initSuccess
         P.cpar.init = initSuccess;
-        P.cpar.dev = dev;
+        %P.cpar.dev = dev;
     else
         warning('\nCPAR initialization not successful, aborting!');
         abort = 1;
@@ -237,8 +238,8 @@ if ~exist(P.out.dir,'dir')
 end
 
 fprintf('\n\nSaving parameters to %s.\n',P.out.file.param);
-fprintf('Saving CPAR data to %s%s.\n',P.out.dir,P.out.file.CPAR);
-fprintf('Saving VAS data to %s%s.\n\n',P.out.dir,P.out.file.VAS);
+fprintf('Saving CPAR data to %s.\n',[P.out.dir '\' P.out.file.CPAR]);
+fprintf('Saving VAS data to %s.\n\n',[P.out.dir '\' P.out.file.VAS]);
 
 end
 
@@ -393,19 +394,24 @@ end
 
 %% Cleanup when aborting script
 function QuickCleanup(P)
+
+global dev
+
 fprintf('\n\nAborting... ');
 
 Screen('CloseAll');
+close all
 
 % load(P.out.file.param,'P');
 
-% if P.devices.arduino && isfield(P.cpar,'dev')
-%     cparStopSampling(P.cpar.dev);
-%     cparStop(P.cpar.dev);
-%     fprintf('CPAR device was stopped.\n');
-% else
-%     fprintf('CPAR already stopped.\n');
-% end
+if ~isempty(dev)
+    cparStopSampling(dev);
+    cparStop(dev);
+    clear dev
+    fprintf('CPAR device was stopped.\n');
+else
+    fprintf('CPAR already stopped or dev does not exist.\n');
+end
 
 sca; % close window; also closes io64
 ListenChar(0); % use keys again
