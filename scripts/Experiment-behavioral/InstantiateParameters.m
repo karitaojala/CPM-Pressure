@@ -1,11 +1,11 @@
 function P = InstantiateParameters
 
-P.protocol.sbId         = 12; % subject ID
+P.protocol.sbId         = 17; % subject ID
 P.protocol.session      = 1;
 P.language              = 'de'; % de or en
 P.project.name          = 'CPM-Pressure-01';
 P.project.part          = 'Pilot-02';
-P.devices.arduino        = 1; % if '' or [], will not try to use Arduino
+P.devices.arduino       = 1; % if '' or [], will not try to use Arduino
 P.devices.eyetracker    = 0;
 P.devices.trigger       = 0; % 1 single parallel port, arduino; rest undefined
 P.toggles.doPainOnly    = 1; % VAS rating painful from 0 (not 50)
@@ -145,8 +145,8 @@ end
 P.awiszus.N     = 6; % number of trials
 P.awiszus.X     = P.pain.preExposure.pressureIntensity(1):1:P.pain.preExposure.pressureIntensity(end);  % kPa range to be covered
 P.awiszus.mu  = [30 35]; % assumed population mean (also become first stimulus to be tested), tonic + phasic
-P.awiszus.sd  = [6 8]; % assumed population std, kPa
-P.awiszus.sp  = [3 3]; % assumed individual spread, kPa
+P.awiszus.sd  = [8 8]; % assumed population std, kPa
+P.awiszus.sp  = [1 1]; % assumed individual spread, kPa
 P.awiszus.nextX = P.awiszus.mu; % first phasic stimulus
 
 % VAS training

@@ -24,10 +24,10 @@ path.code = pwd;
 path.main = fullfile(path.code,'..');
 path.data = fullfile(path.main,'data',project.name,project.phase,'logs');
 
-subjects = [1:2 4 6 7 10];
-block_order = [1 2; 1 2; 1 2; 2 1; 2 1; 2 1]; % exp (2) or control (1) block first
+subjects = [1:2 4 6 7 10:17];
+block_order = {[0 1]; [0 1]; [0 1]; [1 0]; [1 0]; [1 0]; [1 0 0 1]; [1 0 1 0]; [1 0 0 1]; [0 1 0 1]; [1,0,1,0]; [0,1,1,0]; [1,0,0,1]}; % exp (2) or control (1) block
 % stim_cuff_subs = [1 1 NaN 1 1]; % 1 = tonic stim cuff 1 (left), phasic stim cuff 2 (right); 2 = phasic stim cuff 1, tonic stim cuff 2
-phasicStimPressure = [80 67 50 46 41 43];
+phasicStimPressure = [80 67 50 46 41 43 80 81 48 73 64 72 90];
 % totalTrials = 14;
 % calibTrials = {1:4; 5:7; 8:14};
 % samplingRate = 0.005; % 200 Hz
@@ -46,19 +46,23 @@ for sub = 1:numel(subjects)
     
     path.sub = fullfile(path.data,subID,'pain');
     
-    blocks_sub = block_order(sub,:);
+    blocks_sub = block_order{sub};
     
     row_no = 1;
     
-    for cond = blocks_sub
+    for cond = 1:numel(blocks_sub)
         
-        path.datafile =  fullfile(path.sub,[subID '_VAS_rating_block' num2str(cond) '.mat']);
-        
+        if subjects(sub) < 11
+            path.datafile =  fullfile(path.sub,[subID '_VAS_rating_block' num2str(cond) '.mat']);
+        else
+            path.datafile =  fullfile(path.sub,[subID '_VAS_rating_block' num2str(cond) '_phasicstim.mat']);
+        end
+
         data = load(path.datafile,'VAS');
         data = data.VAS;
         
         trials = size(data,1);
-        if trials > 3; trials = trials(1:3,:); end % 4th trial (if exists) rating for tonic stimulus
+        if trials > 3; trials = trials(1:3,:); end % 4th trial (if exists) rating for tonic stimulus only (not phasic)
         stimuli = size(data,2);
         
         ratings = [];
@@ -89,38 +93,44 @@ for sub = 1:numel(subjects)
 %     yCalc = X*b;
     
 
-    if plotIndividual
-        
-        figure %#ok<UNRCH>
-        bar(mean(ratings_blocks,2),'LineWidth',1); 
-        hold on
-        
-        xdata = repmat([1 2],size(ratings_blocks,2),1);
-        jitter_amount = 0.05;
-        jittered_xdata = xdata + (rand(size(xdata))-0.5)*(2*jitter_amount);
-        jittered_xdata = jittered_xdata';
-        
-        for cond = 1:2
-            scatter(jittered_xdata(cond,:),ratings_blocks(cond,:),'filled','MarkerEdgeColor','k');
-        end
-        
-        ylim([0 100])
-        ylabel('VAS pain rating')
-        set(gca,'xTickLabel', {'Control','Experimental'})
-        
-%         legend('Control','Experimental')
-        title(['Conditioned pain modulation - / ' project.phase ' - ' subID])
-        
-    end
+%     if plotIndividual
+%         
+%         figure %#ok<UNRCH>
+%         bar(mean(ratings_blocks,2),'LineWidth',1); 
+%         hold on
+%         
+%         xdata = repmat([1 2],size(ratings_blocks,2),1);
+%         jitter_amount = 0.05;
+%         jittered_xdata = xdata + (rand(size(xdata))-0.5)*(2*jitter_amount);
+%         jittered_xdata = jittered_xdata';
+%         
+%         for cond = 1:2
+%             scatter(jittered_xdata(cond,:),ratings_blocks(cond,:),'filled','MarkerEdgeColor','k');
+%         end
+%         
+%         ylim([0 100])
+%         ylabel('VAS pain rating')
+%         set(gca,'xTickLabel', {'Control','Experimental'})
+%         
+% %         legend('Control','Experimental')
+%         title(['Conditioned pain modulation - / ' project.phase ' - ' subID])
+%         
+%     end
     
     ratings_allsubs{sub} = ratings; %#ok<NASGU,AGROW>
     pressure_allsubs{sub} = pressure; %#ok<NASGU,AGROW>
-    ratings_allsubs_mean_exp(sub) = mean(ratings_blocks(1,:));
-    ratings_allsubs_mean_control(sub) = mean(ratings_blocks(2,:));
+
+    exp_ratings = ratings_blocks(blocks_sub==1,:);
+    exp_ratings = exp_ratings(:);
+    control_ratings = ratings_blocks(blocks_sub==0,:);
+    control_ratings = control_ratings(:);
+    
+    ratings_allsubs_mean_exp(sub) = mean(exp_ratings);
+    ratings_allsubs_mean_control(sub) = mean(control_ratings);
     
 end
 
-cpm_data = [ratings_allsubs_mean_exp; ratings_allsubs_mean_control]';
+cpm_data = [ratings_allsubs_mean_control; ratings_allsubs_mean_exp]';
 
 % Calculate within-subject error bars
 subavg = nanmean(cpm_data,2); % mean over conditions for each sub
@@ -142,24 +152,35 @@ errorbars = squeeze(tvalue*(sqrt(newvar)./sqrt(numel(subjects)))); % calculate e
 % Averaged plot over subjects
 figure;
 
-bardata = [mean(ratings_allsubs_mean_exp); mean(ratings_allsubs_mean_control)];
-bar(bardata,'LineWidth',1);  
-hold on
-errorbar(1:2,bardata',errorbars,'k','LineStyle','none','LineWidth',2,'CapSize',0)
+bardata = [mean(ratings_allsubs_mean_control); mean(ratings_allsubs_mean_exp)];
+b = bar(bardata,'LineWidth',1);  
+b.FaceColor = 'flat';
+b.CData(1,:) = [253, 216, 110]./255;
+b.CData(2,:) = [239, 123, 5]./255;
 hold on
 xdata = repmat([1 2],size(cpm_data,1),1);
 jitter_amount = 0.2;
 jittered_xdata = xdata + (rand(size(xdata))-0.5)*(2*jitter_amount);
 
+scattercolors = [252, 190, 14; 179, 92, 4]./255;
+
 for cond = 1:2
-    scatter(jittered_xdata(:,cond),cpm_data(:,cond),'filled','MarkerEdgeColor','k');
+    scatter(jittered_xdata(:,cond),cpm_data(:,cond),'filled','MarkerEdgeColor','k','MarkerFaceColor',scattercolors(cond,:));
 end
+
+hold on
+errorbar(1:2,bardata',errorbars,'k','LineStyle','none','LineWidth',2,'CapSize',0)
         
 ylim([0 100])
-ylabel('VAS pain rating')
-set(gca,'xTickLabel', {'Control','Experimental'})
+set(gca,'yTick',0:20:100)
+ylabel('Test stimulus pain rating (VAS)','FontSize',14)
+set(gca,'xTickLabel', {'Control','Experimental'},'FontSize',14)
+box off
+title('Average CPM effect','FontSize',14)
+%title(['Conditioned pain modulation / ' project.phase ' - N = ' num2str(numel(subjects))])
 
-title(['Conditioned pain modulation / ' project.phase ' - N = ' num2str(numel(subjects))])
-
+[~,ttest_p,~,ttest_stats] = ttest(cpm_data(:,1),cpm_data(:,2),'Tail','right')
+addpath(cd,'Utils')
+d = computeCohen_d(cpm_data(:,1),cpm_data(:,2),'paired')
 
 end

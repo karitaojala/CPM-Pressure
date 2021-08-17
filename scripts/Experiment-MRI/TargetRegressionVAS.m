@@ -105,7 +105,7 @@ while ~abort
                     [keyIsDown, ~, keyCode] = KbCheck();
                     if keyIsDown
                         if find(keyCode) == P.keys.resume
-                            painThreshold = P.awiszus.painThresholdFinal(cuff);
+                            painThreshold = P.awiszus.mu(cuff);
                             P.pain.Calibration.VASTargetsFixedPressure = painThreshold + P.pain.Calibration.VASTargetsFixedPresetSteps;
                             break;
                         elseif find(keyCode) == P.keys.esc

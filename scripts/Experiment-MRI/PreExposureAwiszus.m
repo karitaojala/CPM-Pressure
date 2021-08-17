@@ -106,8 +106,14 @@ while ~abort
 
         end
         
-        % last suggested value from Awiszus is the pain threshold
-        P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial);
+        % Pain threshold
+        if preexPainful % if last stimulus rated as painful
+            P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial); % last rated value is the pain threshold
+        elseif ~preexPainful && ~any(P.awiszus.threshRatings.ratings(cuff,:)) % not painful and no previous painful ratings
+            P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial); % last rated value is the pain threshold
+        else
+            P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial-1); % previous rated value from Awiszus (usually painful)
+        end
         save(P.out.file.param,'P','O');
         fprintf(['\nPain threshold ' P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS : ' num2str(P.awiszus.painThresholdFinal(cuff)) ' kPa\n\n']);
         
