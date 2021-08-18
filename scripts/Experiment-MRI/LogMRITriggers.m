@@ -1,4 +1,4 @@
-function P = LogMRITriggers(P)
+function P = LogMRITriggers(P,run)
 
 [~,keyTimestamps] = KbQueueDump(P);
 
@@ -9,20 +9,20 @@ else
 end
 
 for i = 1:length(keyTimestamps)
-    P.mri.nTrigger = P.mri.nTrigger + 1; 
-    P = PutLogFMRI(P, keyTimestamps(i), ['Trigger ' num2str(P.mri.nTrigger)]);
+    P.mri.nTrigger(run) = P.mri.nTrigger + 1; 
+    P = PutLogFMRI(P, keyTimestamps(i), ['Trigger ' num2str(P.mri.nTrigger)], run);
 end
 
 KbQueueFlush;
 
 end
 
-function P = PutLogFMRI(P, tEvent, eventInfo)
+function P = PutLogFMRI(P, tEvent, eventInfo, run)
 
-P.mri.fMRIEventCount                     = P.mri.fMRIEventCount + 1;
-P.mri.fMRIEvents(P.mri.fMRIEventCount,1) = {P.mri.fMRIEventCount};
-P.mri.fMRIEvents(P.mri.fMRIEventCount,2) = {tEvent};
-P.mri.fMRIEvents(P.mri.fMRIEventCount,3) = {tEvent-P.mri.mriExpStartTime};
-P.mri.fMRIEvents(P.mri.fMRIEventCount,4) = {eventInfo};
+P.mri.fMRIEventCount(run)                                       = P.mri.fMRIEventCount(run) + 1;
+P.mri.fMRIEvents(run).eventCount(P.mri.fMRIEventCount)          = {P.mri.fMRIEventCount(run)};
+P.mri.fMRIEvents(run).timeEvent(P.mri.fMRIEventCount)           = {tEvent};
+P.mri.fMRIEvents(run).timeEventFromStart(P.mri.fMRIEventCount)  = {tEvent-P.mri.mriExpStartTime(run)};
+P.mri.fMRIEvents(run).eventInfo(P.mri.fMRIEventCount)           = {eventInfo};
 
 end

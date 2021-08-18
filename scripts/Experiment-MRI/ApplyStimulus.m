@@ -19,6 +19,7 @@ while ~abort
     if P.devices.arduino
         
         [abort,initSuccess,dev] = InitCPAR; % initialize CPAR
+        if abort; return; end
         P.cpar.dev = dev;
         save(P.out.file.param, 'P', 'O');
         if initSuccess

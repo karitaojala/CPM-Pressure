@@ -9,7 +9,7 @@ pressed = [];
 while KbEventAvail(P.devices.input)
     [evt, n] = KbEventGet(P.devices.input);
     n = n + 1;
-    keycode(n) = evt.Keycode;
+    keycode(n) = evt.Keycode; %#ok<*AGROW>
     pressed(n) = evt.Pressed;
     secs(n) = evt.Time;
     %   fprintf('Event is: %d\n',keycode(n));

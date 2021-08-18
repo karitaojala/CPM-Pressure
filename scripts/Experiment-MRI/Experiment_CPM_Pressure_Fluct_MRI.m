@@ -32,8 +32,6 @@ addpath(cd);
 P = InstantiateParameters; % load default parameters for comparable projects (should not ever be changed)
 O = InstantiateOverrides; % load overrides used for testing (e.g., deactivating PTB output or other troubleshooting)
 
-KbQueueRelease(P.devices.input); % just to make sure
-
 addpath(genpath(P.path.scriptBase))
 addpath(P.path.experiment)
 addpath(genpath(P.path.PTB))
@@ -308,7 +306,6 @@ end
 
 % Define outgoing port address
 if strcmp(P.env.hostname,'stimpc1')
-    %P.com.lpt.CEDAddressThermode = 888; % CHECK IF STILL ACCURATE
     P.com.lpt.CEDAddressSCR     = 36912; % as per new stimPC; used to be =P.com.lpt.CEDAddressThermode;
 else
     P.com.lpt.CEDAddressSCR = 888;
@@ -316,15 +313,11 @@ end
 P.com.lpt.CEDDuration           = 0.005; % wait time between triggers
 
 if strcmp(P.env.hostname,'stimpc1')
-    P.com.lpt.pressureOnsetTHE      = 36; % this covers both CHEPS trigger (4) and SCR/Spike (32)
-    if P.devices.arduino
-        P.com.lpt.pressureOnset      = 32;
-    else % note: without arduino, this is NOT necessary on stimpc setup because there is no separate SCR recording device, just spike; therefore, do it with pressureOnsetTHE
-        P.com.lpt.pressureOnset      = 0;
-    end
-    P.com.lpt.VASOnset          = 128; % we'll figure this out later
-    P.com.lpt.ITIOnset          = 128; % we'll figure this out later
-    P.com.lpt.cueOnset          = 128; % we'll figure this out later
+    %P.com.lpt.pressureOnset = 36; % this covers both CHEPS trigger (4) and SCR/Spike (32)
+    P.com.lpt.pressureOnset = 1; %4; % bit 3; pressure trigger for SCR
+    P.com.lpt.VASOnset      = 2; %8; % bit 5;
+    P.com.lpt.ITIOnset      = 3; %16; % bit 6; white fixation cross
+    P.com.lpt.buttonPress   = 4; % button press
 else
     %     P.com.lpt.cueOnset      = 1; % bit 1; cue onset
     P.com.lpt.pressureOnset = 1; %4; % bit 3; pressure trigger for SCR
@@ -424,4 +417,5 @@ end
 sca; % close window; also closes io64
 ListenChar(0); % use keys again
 commandwindow;
+
 end

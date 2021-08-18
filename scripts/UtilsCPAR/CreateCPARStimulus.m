@@ -93,6 +93,37 @@ elseif strcmp(type,'Calibration')
 
     end
 
+elseif strcmp(type,'TonicRating')
+    
+    cuff = settings.pain.CPM.tonicStim.cuff;
+    
+    pressure = varargin{3}; % target pressure (kPa)
+    
+    troughPressure = pressure(1);
+    peakPressure = pressure(2);
+    diffPressure = peakPressure-troughPressure;
+    startendRampDuration = settings.pain.CPM.tonicStim.startendRampDuration;
+    rampDuration = settings.pain.CPM.tonicStim.rampDuration;
+    
+    startendRampRate = troughPressure/startendRampDuration;
+    diffRampRate = diffPressure/rampDuration;
+    
+    % TONIC STIMULUS
+    stimulus1 = cparCreateWaveform(settings.pain.CPM.tonicStim.cuff, 1);
+    cparWaveform_Inc(stimulus1, startendRampRate, startendRampDuration); % first ramping up to trough pressure of the tonic stimulus
+    
+    for cycle = 1:settings.pain.CPM.tonicStim.cycles
+        
+        cparWaveform_Inc(stimulus1, diffRampRate, rampDuration);
+        cparWaveform_Dec(stimulus1, diffRampRate, rampDuration);
+        
+    end
+    
+    cparWaveform_Dec(stimulus1, startendRampRate, startendRampDuration); % last ramping down to zero
+       
+    % OTHER CUFF NO STIMULUS
+    stimulus2 = cparCreateWaveform(settings.pain.CPM.phasicStim.cuff, 1);
+    
 elseif strcmp(type,'CPM')
    
     cuff = settings.pain.CPM.tonicStim.cuff;

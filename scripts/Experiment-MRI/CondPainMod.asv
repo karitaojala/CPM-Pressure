@@ -62,7 +62,6 @@ while ~abort
     run = 1;
     
     % Wait for MRI dummy scans
-    KbQueueRelease(P.devices.input); % just to make sure
     WaitDummyScans(P);
     P.mri.mriExpStartTime = GetSecs;
     P.mri.mriRunStartTime(run) = GetSecs;
@@ -79,8 +78,8 @@ while ~abort
     
     % Wait for final pulse
     if strcmp(P.env.hostname,'stimpc1')
-        fprintf('=================\n=================\nWait for last scanner pulse of the run!...\n');
-        P.mri.mriRunEndTime(run) = KbTriggerWait(P.keys.trigger,P.devices.input);
+        fprintf('=================\n=================\nWait for last scanner pulse of experiment!...\n');
+        P.mri.mriEnd(run) = KbTriggerWait(P.keys.trigger,P.devices.input);
         P = LogMRITriggers(P,run); % save last data
     end
         
@@ -105,12 +104,6 @@ while ~abort
         fprintf('Displaying instructions... ');
         
         if ~O.debug.toggleVisual
-            
-            if block == 1
-                abort = ShowInstruction(P,O,6,P.presentation.CPM.contRatingInstructionDuration);
-            end
-            if abort; return; end
-            
             upperHalf = P.display.screenRes.height/2;
             Screen('TextSize', P.display.w, 50);
             if strcmp(P.language,'de')
@@ -290,7 +283,7 @@ while ~abort
             
             % Wait for final pulse
             if strcmp(P.env.hostname,'stimpc1')
-                fprintf('=================\n=================\nWait for last scanner pulse of the run!...\n');
+                fprintf('=================\n=================\nWait for last scanner pulse of ru!...\n');
                 P.mri.mriRunEndTime(run) = KbTriggerWait(P.keys.trigger,P.devices.input);
                 P = LogMRITriggers(P); % save last data
             end
@@ -304,13 +297,14 @@ while ~abort
         
         % Wait for MRI dummy scans
         WaitDummyScans(P);
+        P.mri.mriExpStartTime = GetSecs;
         P.mri.mriRunStartTime(run) = GetSecs;
         
         % Experimental tonic stimulus pressures
         tonicPressure_trough = tonicPressure_trough_Exp;
         tonicPressure_peak = tonicPressure_peak_Exp;
         trialPressure = [tonicPressure_trough tonicPressure_peak];
-        [P, abort] = TonicStimRating(P,O,trialPressure,'post');
+        [P, abort] = TonicStimRating(P,O,trialPressure,'pre');
         
         % Log MRI triggers
         P = LogMRITriggers(P);
@@ -319,11 +313,9 @@ while ~abort
         % Wait for final pulse
         if strcmp(P.env.hostname,'stimpc1')
             fprintf('=================\n=================\nWait for last scanner pulse of experiment!...\n');
-            P.mri.mriRunEndTime(run) = KbTriggerWait(P.keys.trigger,P.devices.input);
+            P.mri.mriEnd(run) = KbTriggerWait(P.keys.trigger,P.devices.input);
             P = LogMRITriggers(P,run); % save last data
         end
-        
-        P.mri.mriExpEndTime = GetSecs;
         
         % Show end of the experiment screen
         if ~O.debug.toggleVisual
