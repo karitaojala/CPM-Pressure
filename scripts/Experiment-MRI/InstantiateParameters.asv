@@ -291,8 +291,7 @@ P.pain.CPM.phasicStim.onsets = onsets;
 % last trial of the block no phasic stimulus, tonic only
 % these are also the trials with online VAS rating of tonic stimulus
 P.presentation.CPM.contRatingInstructionDuration = 30;
-P.pain.CPM.tonicRating.cycles              = 1;
-P.pain.CPM.tonicRating.totalDuration       = P.pain.CPM.tonicStim.fullCycleDuration + 2*P.pain.CPM.tonicStim.startendRampDuration;
+P.presentation.CPM.contRatingDuration            = P.pain.CPM.tonicStim.fullCycleDuration + 2*;
 
 %% VAS rating parameters
 % Rating of pressure pain stimuli

@@ -162,13 +162,11 @@ if P.startSection == 5
 end
 if abort;QuickCleanup(P);return;end
 
-if P.startSection == 6
-    fprintf('\nExperiment ending.');
-    [abort]=ShowInstruction(P,O,7); % intentional 7 (not 6), as instructions section 6 corresponds to CPM tonic ratings instruction
-    if abort;return;end
-end
+% fprintf('\nExperiment ending.');
+% [abort]=ShowInstruction(P,O,7); 
+% if abort;return;end
 
-if abort;QuickCleanup(P);return;end
+% if abort;QuickCleanup(P);return;end
 
 sca;
 ListenChar(0);

@@ -112,7 +112,7 @@ elseif strcmp(type,'TonicRating')
     stimulus1 = cparCreateWaveform(settings.pain.CPM.tonicStim.cuff, 1);
     cparWaveform_Inc(stimulus1, startendRampRate, startendRampDuration); % first ramping up to trough pressure of the tonic stimulus
     
-    for cycle = 1:settings.pain.CPM.tonicStim.cycles
+    for cycle = settings.pain.CPM.tonicRating.cycles
         
         cparWaveform_Inc(stimulus1, diffRampRate, rampDuration);
         cparWaveform_Dec(stimulus1, diffRampRate, rampDuration);

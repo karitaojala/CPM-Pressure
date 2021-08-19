@@ -7,7 +7,7 @@ KbName('UnifyKeyNames');
 keys        = P.keys;
 lessKey     = keys.left; % yellow button
 moreKey     = keys.right; % red button
-confirmKey  = keys.confirm;
+% confirmKey  = keys.confirm;
 escapeKey   = keys.esc;
 
 window      = P.display.w;

@@ -61,11 +61,12 @@ while ~abort
     KbQueueRelease(); % essential or KbTriggerWait below won't work
     
     % Wait for final pulse
-    if strcmp(P.env.hostname,'stimpc1')
+%     if strcmp(P.env.hostname,'stimpc1')
         fprintf('=================\n=================\nWait for last scanner pulse of the run!...\n');
         P.mri.mriRunEndTime(run) = KbTriggerWait(P.keys.trigger);
-        P = LogMRITriggers(P,run); % save last data
-    end
+%         P = LogMRITriggers(P,run); % save last data -> cannot do anymore
+%         since queue released
+%     end
     
     %% Loop over blocks/runs
     for block = 1:P.presentation.CPM.blocks
@@ -257,13 +258,7 @@ while ~abort
         
         fprintf('\nInterblock interval... ');
         countedDown = 1;
-        if block == P.presentation.CPM.blocks
-            blockBetweenTime = 40;
-        else
-            blockBetweenTime = P.presentation.CPM.blockBetweenTime;
-        end
-        
-        while GetSecs < tCrossOn + (blockBetweenTime - P.presentation.CPM.blockBetweenText) % wait the time between blocks
+        while GetSecs < tCrossOn + (P.presentation.CPM.blockBetweenTime - P.presentation.CPM.blockBetweenText) % wait the time between blocks
             tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
             [abort,countedDown]=CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
             if abort; break; end
@@ -282,7 +277,7 @@ while ~abort
             if strcmp(P.env.hostname,'stimpc1')
                 fprintf('=================\n=================\nWait for last scanner pulse of the run!...\n');
                 P.mri.mriRunEndTime(run) = KbTriggerWait(P.keys.trigger);
-                P = LogMRITriggers(P,run); % save last data
+%                 P = LogMRITriggers(P,run); % save last data
             end
             
         end
@@ -306,13 +301,15 @@ while ~abort
     
     % Log MRI triggers
     P = LogMRITriggers(P,run);
+    fprintf('\nEntering %ds post-experiment wait for BOLD to catch up.\n',P.mri.finalWait);
+    WaitSecs(P.mri.finalWait); % arbitrary duration to wait out final BOLD
     KbQueueRelease(); % essential or KbTriggerWait below won't work
     
     % Wait for final pulse
     if strcmp(P.env.hostname,'stimpc1')
         fprintf('=================\n=================\nWait for last scanner pulse of experiment!...\n');
         P.mri.mriRunEndTime(run) = KbTriggerWait(P.keys.trigger);
-        P = LogMRITriggers(P,run); % save last data
+%         P = LogMRITriggers(P,run); % save last data
     end
     
     P.mri.mriExpEndTime = GetSecs;
