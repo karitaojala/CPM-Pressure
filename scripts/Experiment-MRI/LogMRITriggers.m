@@ -9,7 +9,7 @@ else
 end
 
 for i = 1:length(keyTimestamps)
-    P.mri.nTrigger(run) = P.mri.nTrigger + 1; 
+    P.mri.nTrigger = P.mri.nTrigger + 1; 
     P = PutLogFMRI(P, keyTimestamps(i), ['Trigger ' num2str(P.mri.nTrigger)], run);
 end
 
@@ -19,10 +19,11 @@ end
 
 function P = PutLogFMRI(P, tEvent, eventInfo, run)
 
-P.mri.fMRIEventCount(run)                                       = P.mri.fMRIEventCount(run) + 1;
-P.mri.fMRIEvents(run).eventCount(P.mri.fMRIEventCount)          = {P.mri.fMRIEventCount(run)};
-P.mri.fMRIEvents(run).timeEvent(P.mri.fMRIEventCount)           = {tEvent};
-P.mri.fMRIEvents(run).timeEventFromStart(P.mri.fMRIEventCount)  = {tEvent-P.mri.mriExpStartTime(run)};
-P.mri.fMRIEvents(run).eventInfo(P.mri.fMRIEventCount)           = {eventInfo};
+P.mri.fMRIEventCount(run)                                               = P.mri.fMRIEventCount(run) + 1;
+P.mri.fMRIEvents(run).eventCount(P.mri.fMRIEventCount(run))             = {P.mri.fMRIEventCount(run)};
+P.mri.fMRIEvents(run).timeEvent(P.mri.fMRIEventCount(run))              = {tEvent};
+P.mri.fMRIEvents(run).timeEventFromStartExp(P.mri.fMRIEventCount(run))  = {tEvent-P.mri.mriExpStartTime};
+P.mri.fMRIEvents(run).timeEventFromStartRun(P.mri.fMRIEventCount(run))  = {tEvent-P.mri.mriRunStartTime(run)};
+P.mri.fMRIEvents(run).eventInfo(P.mri.fMRIEventCount(run))              = {eventInfo};
 
 end

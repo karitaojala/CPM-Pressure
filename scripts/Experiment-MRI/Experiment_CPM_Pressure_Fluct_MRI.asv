@@ -154,10 +154,15 @@ if abort;QuickCleanup(P);return;end
 % CONDITIONED PAIN MODULATION EXPERIMENT
 if P.startSection == 5
     
+%     ListenChar(0); % activate keyboard input
+    commandwindow;
+    pressure_input=input('\nHow to define pressure levels for the experiment: ... 1 = From calibration, 2 = From input, 3 = From instantiated parameters file\n');
+    ListenChar(2); % deactivate keyboard input
+    
     load(P.out.file.param,'P');
     [abort]=ShowInstruction(P,O,5,1);
     if abort;return;end
-    [abort]=CondPainMod(P,O);
+    [abort]=CondPainMod(P,O,pressure_input);
     
 end
 if abort;QuickCleanup(P);return;end

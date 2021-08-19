@@ -6,8 +6,8 @@ keycode = [];
 secs = [];
 pressed = [];
 %fprintf('there are %03d events\n',KbEventAvail(p_input_device));
-while KbEventAvail(P.devices.input)
-    [evt, n] = KbEventGet(P.devices.input);
+while KbEventAvail()
+    [evt, n] = KbEventGet();
     n = n + 1;
     keycode(n) = evt.Keycode; %#ok<*AGROW>
     pressed(n) = evt.Pressed;

@@ -1,7 +1,7 @@
 function [P,abort] = TonicStimRating(P,O,trialPressure,rating)
 
 % Start trial
-fprintf('\n\n=======TONIC STIMULUS POST-EXPERIMENT RATING=======\n');
+fprintf('\n=======TONIC STIMULUS RATING=======\n');
 
 % Red fixation cross
 if ~O.debug.toggleVisual
@@ -23,10 +23,11 @@ save(P.out.file.param,'P','O'); % Save instantiated parameters and overrides aft
 
 % Interblock interval
 if ~O.debug.toggleVisual
+    upperHalf = P.display.screenRes.height/2;
     if strcmp(P.language,'de')
         [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Dieser Teil ist nun beendet. Bitte warten Sie auf den Beginn des nächsten Teils.', 'center', upperHalf, P.style.white);
     elseif strcmp(P.language,'en')
-        [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'This part is now finished. Please wait for the next part to start.', 'center', upperHalf, P.style.white);
+        [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'There will now be a break before the next part starts. Please wait.', 'center', upperHalf, P.style.white);
     end
     outroTextOn = Screen('Flip',P.display.w);
 else

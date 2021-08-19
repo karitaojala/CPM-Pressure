@@ -25,18 +25,17 @@ P.env.hostIPaddress     = char(P.env.hostaddress.getHostAddress);
 P.mri.dummyScans        = 5;
 P.mri.finalWait         = 10; % add more time? or check ITI
 P.mri.nTrigger          = 0;
-P.mri.fMRIEventCount    = 0;
 
 if strcmp(P.env.hostname,'stimpc1')
-    P.path.scriptBase           = fullfile(cd,'..');
+    P.path.scriptBase           = cd;
     P.path.experiment           = fullfile('D:\ojala','CPM-Pressure','data',P.project.name,P.project.part);
     P.path.PTB                  = 'D:\ojala\Psychtoolbox';
 elseif strcmp(P.env.hostname,'isnb05cda5ba721')
-    P.path.scriptBase           = fullfile(cd,'..');
+    P.path.scriptBase           = cd;
     P.path.experiment           = fullfile('C:\Data','CPM-Pressure','data',P.project.name,P.project.part);
     P.path.PTB                  = 'C:\Data\Toolboxes\Psychtoolbox';
 else
-    P.path.scriptBase           = fullfile(cd,'..');
+    P.path.scriptBase           = cd;
     P.path.experiment           = fullfile(cd,'..','..','..','data',P.project.name,P.project.part);
     P.path.PTB                  = 'C:\toolbox\Psychtoolbox';
 end
@@ -192,6 +191,7 @@ P.presentation.Calibration.durationVAS          = 5;
 % Conditioned pain modulation
 P.presentation.CPM.blocks                   = 4; % number of blocks/runs in the CPM experiment - plan: 4 blocks/runs
 P.presentation.CPM.trialsPerBlock           = 2; % 3 stimuli of 3 min per block -> 9 min + 3 x 20 s ITI + 60 s between blocks = 11 min per block/run -> 4 blocks = 44 min
+P.mri.fMRIEventCount                        = zeros(1,P.presentation.CPM.blocks+2);
 % Tonic stimulus ratings only at the beginning and end
 % P.pain.CPM.phasicStim.on                    = [ones(1,P.presentation.CPM.trialsPerBlock-1) 0]; % on which trials the phasic test stimuli will be delivered to the other cuff, in addition to the tonic conditioning stimulus
 % last trial of the block no phasic stimulus, tonic only
