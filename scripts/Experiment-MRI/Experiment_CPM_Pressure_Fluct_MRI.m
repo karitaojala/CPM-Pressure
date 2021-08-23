@@ -306,16 +306,16 @@ end
 if strcmp(P.env.hostname,'stimpc1')
     P.com.lpt.CEDAddressSCR     = 36912; % as per new stimPC; used to be =P.com.lpt.CEDAddressThermode;
 else
-    P.com.lpt.CEDAddressSCR = 888;
+    P.com.lpt.CEDAddressSCR     = 888;
 end
 P.com.lpt.CEDDuration           = 0.005; % wait time between triggers
 
 if strcmp(P.env.hostname,'stimpc1')
     %P.com.lpt.pressureOnset = 36; % this covers both CHEPS trigger (4) and SCR/Spike (32)
-    P.com.lpt.pressureOnset = 1; %4; % bit 3; pressure trigger for SCR
-    P.com.lpt.VASOnset      = 2; %8; % bit 5;
-    P.com.lpt.ITIOnset      = 3; %16; % bit 6; white fixation cross
-    P.com.lpt.buttonPress   = 4; % button press
+    P.com.lpt.pressureOnset = 32; %4; % bit 3; pressure trigger for SCR
+    P.com.lpt.VASOnset      = 64; %8; % bit 5;
+    P.com.lpt.ITIOnset      = 0; %16; % bit 6; white fixation cross
+    P.com.lpt.buttonPress   = 128; % button press
 else
     %     P.com.lpt.cueOnset      = 1; % bit 1; cue onset
     P.com.lpt.pressureOnset = 1; %4; % bit 3; pressure trigger for SCR
