@@ -29,7 +29,7 @@ P.mri.nTrigger          = 0;
 if strcmp(P.env.hostname,'stimpc1')
     P.path.scriptBase           = cd;
     P.path.experiment           = fullfile('D:\ojala','CPM-Pressure','data',P.project.name,P.project.part);
-    P.path.PTB                  = 'D:\ojala\Psychtoolbox';
+    P.path.PTB                  = 'C:\toolbox\Psychtoolbox';
 elseif strcmp(P.env.hostname,'isnb05cda5ba721')
     P.path.scriptBase           = cd;
     P.path.experiment           = fullfile('C:\Data','CPM-Pressure','data',P.project.name,P.project.part);
@@ -49,7 +49,7 @@ P.out.file.VAS = ['sub' sprintf('%03d',P.protocol.sbId) '_VAS'];
 
 if P.devices.arduino
     if strcmp(P.env.hostname,'stimpc1')
-        P.com.arduino = 'COMX'; % find out
+        P.com.arduino = 'COM14'; % find out
         P.path.cpar = fullfile(cd,'..','LabBench.CPAR-0.1.0');
         disp('stimpc1');
     elseif strcmp(P.env.hostname,'isnb05cda5ba721')

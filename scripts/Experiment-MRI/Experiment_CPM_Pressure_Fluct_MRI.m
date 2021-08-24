@@ -256,7 +256,9 @@ if isempty(O.display.screen)
     P.display.screenNumber  =  max(screens);                       % The maximum is the second monitor
 else
     P.display.screenNumber  =  O.display.screen;
+    
 end
+
 P.display.screenRes = Screen('resolution',P.display.screenNumber);
 
 P.style.fontname                = 'Arial';
