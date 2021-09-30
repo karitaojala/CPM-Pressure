@@ -1,4 +1,4 @@
-function [abort,conRating,conTime,keyId,response] = onlineScale(P)
+function [abort,startTime,conRating,conTime,keyId,response] = onlineScale(P)
 
 %% key settings
 abort = 0;
@@ -88,7 +88,7 @@ while numberOfSecondsRemaining  > 0
     [keyIsDown,secs,keyCode] = KbCheck; % this checks the keyboard very, very briefly.
         
         if keyIsDown % only if a key was pressed we check which key it was
-            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.buttonPress); % log key/button press as a marker          
+%             SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.buttonPress); % log key/button press as a marker          
             if keyCode(moreKey) % if it was the key we named key1 at the top then...
                 currentRating = currentRating + 1;
                 if currentRating > nRatingSteps

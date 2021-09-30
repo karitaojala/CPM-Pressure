@@ -307,6 +307,7 @@ end
 % Define outgoing port address
 if strcmp(P.env.hostname,'stimpc1')
     P.com.lpt.CEDAddressSCR     = 36912; % as per new stimPC; used to be =P.com.lpt.CEDAddressThermode;
+    %36944 another possible port address?
 else
     P.com.lpt.CEDAddressSCR     = 888;
 end

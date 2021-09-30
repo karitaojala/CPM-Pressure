@@ -189,7 +189,7 @@ P.presentation.Calibration.phasicStim.ITI       = 10;
 P.presentation.Calibration.durationVAS          = 5;
 
 % Conditioned pain modulation
-P.presentation.CPM.blocks                   = 4; % number of blocks/runs in the CPM experiment - plan: 4 blocks/runs
+P.presentation.CPM.blocks                   = 2; % number of blocks/runs in the CPM experiment - plan: 4 blocks/runs
 P.presentation.CPM.trialsPerBlock           = 2; % 3 stimuli of 3 min per block -> 9 min + 3 x 20 s ITI + 60 s between blocks = 11 min per block/run -> 4 blocks = 44 min
 P.mri.fMRIEventCount                        = zeros(1,P.presentation.CPM.blocks+2);
 
@@ -213,7 +213,7 @@ else
 end
 
 % Pick out the condition for the participant
-conditions_participant = conditions_list_rand(P.protocol.sbId,:);
+conditions_participant = [1 0];%conditions_list_rand(P.protocol.sbId,:);
 % conditions_participant = conditions;
 P.pain.CPM.tonicStim.condition = conditions_participant;
 
