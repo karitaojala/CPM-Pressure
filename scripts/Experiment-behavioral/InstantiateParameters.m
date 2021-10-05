@@ -1,13 +1,13 @@
 function P = InstantiateParameters
 
-P.protocol.sbId         = 17; % subject ID
+P.protocol.sbId         = 01; % subject ID
 P.protocol.session      = 1;
 P.language              = 'de'; % de or en
 P.project.name          = 'CPM-Pressure-01';
-P.project.part          = 'Pilot-02';
+P.project.part          = 'Pilot-04';
 P.devices.arduino       = 1; % if '' or [], will not try to use Arduino
 P.devices.eyetracker    = 0;
-P.devices.trigger       = 0; % 1 single parallel port, arduino; rest undefined
+P.devices.trigger       = 1; % 1 single parallel port, arduino; rest undefined
 P.toggles.doPainOnly    = 1; % VAS rating painful from 0 (not 50)
 P.toggles.doConfirmAdaptive = 1; % do adaptive VAS target regression with confirmation
 
@@ -21,9 +21,11 @@ P.env.hostname                  = deblank(tmp);
 P.env.hostaddress               = java.net.InetAddress.getLocalHost;
 P.env.hostIPaddress             = char(P.env.hostaddress.getHostAddress);
 
-if strcmp(P.env.hostname,'stimpc1')
-
-elseif strcmp(P.env.hostname,'isnb05cda5ba721')
+if strcmp(P.env.hostname,'isn5065f3ba0745') % LPT experiment laptop
+    P.path.scriptBase           = cd;
+    P.path.experiment           = fullfile('C:\Users\grahl\Desktop\Ojala\','CPM-Pressure','data',P.project.name);
+    P.path.PTB                  = 'C:\toolbox\Psychtoolbox';    
+elseif strcmp(P.env.hostname,'isnb05cda5ba721') % own laptop
     P.path.scriptBase           = cd;
     P.path.experiment           = fullfile('C:\Data','CPM-Pressure','data',P.project.name);
     P.path.PTB                  = 'C:\Data\Toolboxes\Psychtoolbox';
@@ -32,19 +34,25 @@ else
     P.path.experiment           = fullfile(cd,'..','..','data',P.project.name);
     P.path.PTB                  = 'C:\toolbox\Psychtoolbox';
 end
+
 if ~exist(P.path.experiment,'dir')
     mkdir(P.path.experiment);
 end
+
+if ~exist(fullfile(P.path.experiment,P.project.part),'dir')
+    mkdir(fullfile(P.path.experiment,P.project.part));
+end
+
 P.out.dir = fullfile(P.path.experiment,P.project.part,'logs',['sub' sprintf('%03d',P.protocol.sbId)],'pain');
 P.out.file.param = fullfile(P.out.dir,['parameters_sub' sprintf('%03d',P.protocol.sbId) '.mat']);
 P.out.file.CPAR = ['sub' sprintf('%03d',P.protocol.sbId) '_CPAR'];
 P.out.file.VAS = ['sub' sprintf('%03d',P.protocol.sbId) '_VAS'];
 
 if P.devices.arduino
-    if strcmp(P.env.hostname,'stimpc1')
-        %             P.com.arduino = 'COM12'; % Mario COM11, Luigi COM12
-        %             P.path.arduino = '';
-        %             disp('stimpc1');
+    if strcmp(P.env.hostname,'isn5065f3ba0745') % LPT experiment laptop
+        P.com.arduino = 'COM7'; 
+        P.path.cpar = fullfile(cd,'..','LabBench.CPAR-master');
+        disp('lpt-laptop');
     elseif strcmp(P.env.hostname,'isnb05cda5ba721')
         P.com.arduino = 'COM3'; 
         P.path.cpar = fullfile(cd,'LabBench.CPAR-0.1.0');
@@ -52,12 +60,12 @@ if P.devices.arduino
     else
         P.com.arduino = 'COM5'; % CPAR: depends on PC - work laptop COM3 - experiment laptop COM5
         P.path.cpar = fullfile(cd,'..','CPAR');
-        disp('vamplaptop');
+        disp('otherpc');
     end
 end
 
 %% Stimulus parameters
-goal_N = 60;
+goal_N = 40;
 
 orders_file = fullfile(P.path.experiment,P.project.part,'cufforders_list.mat');
 
@@ -74,20 +82,20 @@ end
 P.protocol.sbOrder = cufforders_list_rand(P.protocol.sbId);
 
 % Subject calibration order + stimulus arms
-arm_cuff = [1 2]; % 1 = left arm CPAR cuff 1, 2 = right arm CPAR cuff 2 - DO NOT EDIT - HARDCODED FOR A REASON
+cuff_no = [1 2]; % 1 = left CPAR cuff 1, 2 = right CPAR cuff 2 - DO NOT EDIT - HARDCODED FOR A REASON
 
 if P.protocol.sbOrder == 1
-    arm_stim = [1 2]; % [1 2] = tonic stimulus left arm & phasic stimulus right arm, [2 1] = phasic stimulus left arm & tonic stimulus right arm
-    arm_order = [1 2]; % [1 2] = left arm first, right arm second, [2 1] = right arm first, left arm second
+    limb_stim = [1 2]; % [1 2] = tonic stimulus LEFT LEG & phasic stimulus RIGHT ARM, [2 1] = phasic stimulus LEFT ARM & tonic stimulus RIGHT LEG
+    limb_order = [1 2]; % [1 2] = LEFT limb first, RIGHT limb second, [2 1] = RIGHT limb first, LEFT limb second
 elseif P.protocol.sbOrder == 2
-    arm_stim = [2 1]; % [1 2] = tonic stimulus left arm & phasic stimulus right arm, [2 1] = phasic stimulus left arm & tonic stimulus right arm
-    arm_order = [1 2]; % [1 2] = left arm first, right arm second, [2 1] = right arm first, left arm second
+    limb_stim = [2 1]; % [1 2] = tonic stimulus LEFT LEG & phasic stimulus RIGHT ARM, [2 1] = phasic stimulus LEFT ARM & tonic stimulus RIGHT LEG
+    limb_order = [1 2]; % [1 2] = LEFT limb first, RIGHT limb second, [2 1] = RIGHT limb first, LEFT limb second
 elseif P.protocol.sbOrder == 3
-    arm_stim = [2 1]; % [1 2] = tonic stimulus left arm & phasic stimulus right arm, [2 1] = phasic stimulus left arm & tonic stimulus right arm
-    arm_order = [2 1]; % [1 2] = left arm first, right arm second, [2 1] = right arm first, left arm second
+    limb_stim = [2 1]; % [1 2] = tonic stimulus LEFT LEG & phasic stimulus RIGHT ARM, [2 1] = phasic stimulus LEFT ARM & tonic stimulus RIGHT LEG
+    limb_order = [2 1]; % [1 2] = LEFT limb first, RIGHT limb second, [2 1] = RIGHT limb first, LEFT limb second
 elseif P.protocol.sbOrder == 4
-    arm_stim = [1 2]; % [1 2] = tonic stimulus left arm & phasic stimulus right arm, [2 1] = phasic stimulus left arm & tonic stimulus right arm
-    arm_order = [2 1]; % [1 2] = left arm first, right arm second, [2 1] = right arm first, left arm second
+    limb_stim = [1 2]; % [1 2] = tonic stimulus LEFT LEG & phasic stimulus RIGHT ARM, [2 1] = phasic stimulus LEFT ARM & tonic stimulus RIGHT LEG
+    limb_order = [2 1]; % [1 2] = LEFT limb first, RIGHT limb second, [2 1] = RIGHT limb first, LEFT limb second
 end
 
 % General CPAR
@@ -96,17 +104,18 @@ P.cpar.stoprule                      = 'bp';  % CPAR stops only at button press 
 P.cpar.initdone                      = 0;
 
 % Pre-exposure
-P.pain.cuffSide = {'LEFT' 'RIGHT'}; % cuff 1: left arm, cuff 2: right arm
+P.pain.cuffSide = {'LEFT' 'RIGHT'}; % cuff 1: left limb, cuff 2: right limb
+P.pain.cuffLimb = {'LEG' 'ARM'};
 P.pain.stimName = {'TONIC' 'PHASIC'};
-P.pain.cuffStim = arm_stim;%randperm(2);
+P.pain.cuffStim = limb_stim;%randperm(2);
 
-P.pain.preExposure.cuff_left            = arm_cuff(1); % 1: left, 2: right - depends on how cuffs plugged into the CPAR unit and put on participant's arm
-P.pain.preExposure.cuff_right           = arm_cuff(2); % hardcoded on purpose!
-P.pain.preExposure.cuff_order           = arm_order;%randperm(2);
+P.pain.preExposure.cuff_left            = cuff_no(1); % 1: left, 2: right - depends on how cuffs plugged into the CPAR unit and put on participant's arm
+P.pain.preExposure.cuff_right           = cuff_no(2); % hardcoded on purpose!
+P.pain.preExposure.cuff_order           = limb_order;%randperm(2);
 
 % CPAR cuff IDs
-P.pain.CPM.tonicStim.cuff   = arm_stim(1); %P.pain.preExposure.cuff_order(P.pain.cuffStim==1); 
-P.pain.CPM.phasicStim.cuff  = arm_stim(2); %P.pain.preExposure.cuff_order(P.pain.cuffStim==2);
+P.pain.CPM.tonicStim.cuff   = limb_stim(1); 
+P.pain.CPM.phasicStim.cuff  = limb_stim(2); %P.pain.preExposure.cuff_order(P.pain.cuffStim==2);
 
 P.pain.preExposure.repeat               = 1; % number of repeats of each stimulus
 P.pain.preExposure.pressureIntensity    = [25 30 35 40 45 50 55 60 65 70 75 80 85 90 95]; % preexposure pressure intensities (kPa)
@@ -118,26 +127,34 @@ P.presentation.sPreexpITI               = 10; % pre-exposure intertrial interval
 P.presentation.sPreexpCue               = P.presentation.sStimPlateauPreexp/P.pain.preExposure.riseSpeed+P.presentation.sStimPlateauPreexp; % pre-exposure cue duration (stimulus duration with rise time included)
 P.presentation.sStimPlateau             = P.presentation.sStimPlateauPreexp; % duration of the constant pressure plateau after rise time for pressure test (part 2)
 
-leftarm_de = 'linken';
-rightarm_de = 'rechten';
-leftarm_en = 'left';
-rightarm_en = 'right';
+left_de = 'linken';
+left_de_s = 'linke';
+right_de = 'rechten';
+right_de_s = 'rechte';
+left_en = 'left';
+right_en = 'right';
 
-if arm_stim(1) == 1 % tonic left / phasic right
+if limb_stim(1) == 1 % tonic/leg left - phasic/arm right
     
-    P.presentation.armname_long_de = leftarm_de;
-    P.presentation.armname_short_de = rightarm_de;
+    P.presentation.armname_long_de = [left_de ' Bein'];
+    P.presentation.armname_short_de = [right_de ' Arm'];
     
-    P.presentation.armname_long_en = leftarm_en;
-    P.presentation.armname_short_en = rightarm_en;
+    P.presentation.armname_long_de_s = ['das ' left_de_s ' Bein'];
+    P.presentation.armname_short_de_s = ['der ' right_de_s ' Arm'];
     
-elseif arm_stim(1) == 2 % tonic right / phasic left
+    P.presentation.armname_long_en = [left_en ' leg'];
+    P.presentation.armname_short_en = [right_en ' arm'];
     
-    P.presentation.armname_long_de = rightarm_de;
-    P.presentation.armname_short_de = leftarm_de;
+elseif limb_stim(1) == 2 % tonic right / phasic left
     
-    P.presentation.armname_long_en = rightarm_en;
-    P.presentation.armname_short_en = leftarm_en;
+    P.presentation.armname_long_de = [right_de ' Bein'];
+    P.presentation.armname_short_de = [left_de ' Arm'];
+    
+    P.presentation.armname_long_de = ['das ' right_de_s ' Bein'];
+    P.presentation.armname_short_de = ['der ' left_de_s ' Arm'];
+    
+    P.presentation.armname_long_en = [right_en ' leg'];
+    P.presentation.armname_short_en = [left_en ' arm'];
     
 end
 

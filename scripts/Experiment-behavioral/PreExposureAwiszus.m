@@ -14,7 +14,7 @@ while ~abort
         
         stimType = P.pain.cuffStim(cuff);
 
-        fprintf([P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
+        fprintf([P.pain.cuffSide{cuff} P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
         
         for trial = 1:(numel(P.pain.preExposure.startSimuli)+P.awiszus.N) % pre-exposure + Awiszus trials
             
@@ -115,7 +115,7 @@ while ~abort
             P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial-1); % previous rated value from Awiszus (usually painful)
         end
         save(P.out.file.param,'P','O');
-        fprintf(['\nPain threshold ' P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS : ' num2str(P.awiszus.painThresholdFinal(cuff)) ' kPa\n\n']);
+        fprintf(['\nPain threshold ' P.pain.cuffSide{cuff} P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS : ' num2str(P.awiszus.painThresholdFinal(cuff)) ' kPa\n\n']);
         
     end
     

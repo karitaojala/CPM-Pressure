@@ -22,8 +22,8 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Die Reize werden Sie jeweils an einem Arm erhalten.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Mit welchem Arm begonnen wird, wird zufällig entschieden. ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Die Reize am ' P.presentation.armname_long_de ' Arm sind langanhaltend'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['und die Reize am ' P.presentation.armname_short_de ' Arm sind kurz.'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Die Reize am ' P.presentation.armname_long_de ' sind langanhaltend'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['und die Reize am ' P.presentation.armname_short_de ' sind kurz.'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Nach jedem Reiz werden Sie gebeten, eine Taste zu drücken,', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'um zu bewerten, ob der Reiz schmerzhaft oder nicht schmerzhaft war.', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -37,8 +37,8 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'The stimuli will be on one arm at a time but', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'the starting arm is different for each participant.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['The stimuli on your ' P.presentation.armname_long_en ' arm will be long'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['and the the stimuli on your ' P.presentation.armname_short_en ' arm will be short.'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['The stimuli on your ' P.presentation.armname_long_en ' will be long'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['and the the stimuli on your ' P.presentation.armname_short_en ' will be short.'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'After each stimulus, you will be asked to press a button', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'to indicate whether the stimulus was painful or not', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -55,7 +55,6 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'zu bewerten, wobei noch kein Druck auf Ihren Arm ausgeübt wird.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, '0 bedeutet kein Schmerz', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, '1 bedeutet minimaler Schmerz', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, '100 bedeutet unerträglicher Schmerz', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Die linke Pfeiltaste verringert die Bewertung und', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -67,7 +66,7 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You will now train in rating the pressure stimuli with', 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'a visual scale on the screen but with no pressure applied to the arm.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, '0 is no pain, 1 is minimal pain, 100 is intolerable pain.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, '0 is no pain, 100 is intolerable pain.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Left arrow decreases the pain rating, right arrow increases rating.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Later during the experiment, you should rate each stimulus on their painfulness in this way.', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -80,11 +79,11 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Sie erhalten nun weitere Druckreize, die in ihrer Intensität', 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'von geringem Schmerz bis zu hohem Schmerz reichen.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Zuerst werden alle Reize auf einen Arm angewendet', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'und dann auf den anderen Arm.', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Zuerst werden alle Reize auf eine Gliedmaße angewendet', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'und dann auf die andere Gliedmaße.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Wie bereits bekannt, wird der ' P.presentation.armname_long_de(1:end-1) ' Arm langanhaltende Reize'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['und der ' P.presentation.armname_short_de(1:end-1) ' Arm kurze Reize erhalten.'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Wie bereits bekannt, wird ' P.presentation.armname_long_de_s ' langanhaltende Reize'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['und ' P.presentation.armname_short_de_s ' kurze Reize erhalten.'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Sie sollen die Reize, wie zuvor, auf einer Skala nach ihrer Schmerzhaftigkeit bewerten.', 'center', upperEight+P.style.lineheight, P.style.white);
         elseif strcmp(P.language,'en')
@@ -92,7 +91,7 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'in their intensity from low to high pain.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'First, all stimuli will be applied on one arm, and then on the other.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Again, ' P.presentation.armname_long_en ' arm will get long stimuli and ' P.presentation.armname_short_en ' arm short stimuli.'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Again, the ' P.presentation.armname_long_en ' will get long stimuli and the ' P.presentation.armname_short_en ' short stimuli.'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'You should rate these stimuli on their painfulness on a scale, as instructed before.', 'center', upperEight+P.style.lineheight, P.style.white);
         end
@@ -104,8 +103,8 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Sie erhalten nun weitere verschiedene Druckreize, ', 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'die für Sie schmerzhaft oder nicht schmerzhaft sein können.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Wie bereits bekannt, wird der  ' P.presentation.armname_long_de(1:end-1) ' Arm langanhaltende Reize'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['und der ' P.presentation.armname_short_de(1:end-1) ' Arm kurze Reize erhalten.'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Wie bereits bekannt, wird ' P.presentation.armname_long_de_s ' langanhaltende Reize'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['und ' P.presentation.armname_short_de_s ' kurze Reize erhalten.'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Sie sollen die Reize, wie zuvor, auf einer', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Skala nach ihrer Schmerzhaftigkeit bewerten.', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -113,7 +112,7 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You will now receive more different pressure stimuli,', 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'which may or may not be painful for you.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Again, ' P.presentation.armname_long_en ' arm will get long stimuli and ' P.presentation.armname_short_en ' arm short stimuli.'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Again, the ' P.presentation.armname_long_en ' will get long stimuli and the ' P.presentation.armname_short_en ' short stimuli.'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'You should rate these stimuli on their painfulness on a scale, as before.', 'center', upperEight+P.style.lineheight, P.style.white);
         end
@@ -125,10 +124,10 @@ if ~O.debug.toggleVisual
             upperEight = 0.5*upperEight;
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Das Experiment wird in wenigen Augenblicken starten...', 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Es werden jeweils einige Minuten langanhaltende Druckreize auf', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['auf den ' P.presentation.armname_long_de ' Arm ausgeübt und'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Es werden jeweils einige Minuten langanhaltende Druckreize', 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['auf ' P.presentation.armname_long_de_s ' ausgeübt und'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'gleichzeitig erhalten Sie mit dem langanhaltenden Reiz', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['alle paar Sekunden kurze Druckreize auf den ' P.presentation.armname_short_de ' Arm.'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['alle paar Sekunden kurze Druckreize auf ' P.presentation.armname_short_de_s '.'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Die langanhaltenden Reize können zu verschiedenen', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Zeitpunkten schmerzhaft oder nicht schmerzhaft sein.', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -149,8 +148,8 @@ if ~O.debug.toggleVisual
         elseif strcmp(P.language,'en')
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'In a moment, the experiment will start.', 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['There will be long pressure stimuli on the ' P.presentation.armname_long_en ' arm for some minutes at a time,'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['and at the same time with the long stimulus, you will get short pressure stimuli on the ' P.presentation.armname_short_en ' arm every few seconds.'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['There will be long pressure stimuli on the ' P.presentation.armname_long_en ' for some minutes at a time,'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['and at the same time with the long stimulus, you will get short pressure stimuli on the ' P.presentation.armname_short_en ' every few seconds.'], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'The long stimuli may be painful or not painful at different times. The short stimuli will always be painful.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -172,7 +171,7 @@ if ~O.debug.toggleVisual
         Screen('TextSize', P.display.w, P.style.fontsize);
         if strcmp(P.language,'de')
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Nun sollen Sie bitte die Schmerzhaftigkeit des', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['langanhaltenden Reizes am ' P.presentation.armname_long_de ' Arm'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['langanhaltenden Reizes am ' P.presentation.armname_long_de], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'auf der gleichen Skala wie zuvor bewerten, aber', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'kontinuierlich während der gesamten Dauer des Reizes.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -183,7 +182,7 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Wenn Sie keinen Schmerz empfinden, denken Sie bitte daran', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'die Bewertung auf Null zu setzen.', 'center', upperEight+P.style.lineheight, P.style.white);
         elseif strcmp(P.language,'en')
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Now you should rate the pain intensity of the long stimulus on the ' P.presentation.armname_long_en ' arm'], 'center', upperEight+P.style.lineheight, P.style.white);
+            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Now you should rate the pain intensity of the long stimulus on the ' P.presentation.armname_long_en], 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'on the same scale as before but continuously during the whole stimulus.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Change the rating in either direction whenever you feel that your sensation of pain has changed even a little.', 'center', upperEight+P.style.lineheight, P.style.white);
