@@ -202,7 +202,7 @@ while ~abort
             % Text for finishing a block
             if ~O.debug.toggleVisual
                 if strcmp(P.language,'de')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Dieser Teil ist nun beendet. Bitte warten Sie auf den Beginn des nÃ¤chsten Teils.', 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Dieser Teil ist nun beendet. Bitte warten Sie auf den Beginn des nächsten Teils.', 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
                     [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'This part is now finished. Please wait for the next part to start.', 'center', upperHalf, P.style.white);
                 end
@@ -245,7 +245,7 @@ while ~abort
             
             if ~O.debug.toggleVisual
                 if strcmp(P.language,'de')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Das Experiment ist beendet. Vielen Dank fÃ¼r Ihre Zeit!', 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Das Experiment ist beendet. Vielen Dank für Ihre Zeit!', 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
                     [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'The experiment has ended. Thank you for your time!', 'center', upperHalf, P.style.white);
                 end

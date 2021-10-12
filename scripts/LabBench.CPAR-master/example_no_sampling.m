@@ -63,11 +63,11 @@ try
     % This creates a linearly increasing pressure with a slope of 30kPa/s
     % for onle second. It is possible to set its duration to 0s, but
     % then the instruction would have no effect.
-    cparWaveform_Inc(waveform01, 30, 1);
+    cparWaveform_Inc(waveform01, 30, 5);
     
     % This creates a linearly decreasing pressure with a slope of 20kPa/s
     % for one second.
-    cparWaveform_Dec(waveform01, 20, 1);
+    cparWaveform_Dec(waveform01, 20, 5);
    
     % We create an empty waveform for the second pressure outlet of the
     % CPAR device. This is to ensure that there is no waveform configured

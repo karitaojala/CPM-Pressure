@@ -10,10 +10,14 @@ O.debug.toggle          = 0; % 0 is default (full protocol - ports etc. toggled 
 O.debug.toggleVisual    = 0; % 0 is default (full protocol - visual interface toggled on)
 O.language              = 'de';
 O.path.experiment       = [];
-O.display.screen        = 2; % 2 is default; use [] for one screen setup...
+if O.debug.toggleVisual
+    O.display.screen    = []; % to avoid PTB error when debugging without visuals on one screen setup
+else
+    O.display.screen    = 2; % 2 is default; use [] for one screen setup...
+end
 O.sound.deviceId        = [];
 O.sound.step2Range      = [];
 O.pain.step2Range       = [];
-% O.devices.arduino       = 1; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress arduino initialization
+% O.devices.arduino       = 0; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress arduino initialization
 % O.devices.trigger  = 0;
 O.devices.eyetracker    = 0; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress eyetracker initialization

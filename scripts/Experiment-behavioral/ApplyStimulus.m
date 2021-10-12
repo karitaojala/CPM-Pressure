@@ -58,7 +58,7 @@ while ~abort
                 if abort; break; end
             end
             fprintf([' VAS (' num2str(phasicStim) '/' num2str(P.pain.CPM.tonicStim.cycles*P.pain.CPM.phasicStim.stimPerCycle) ')... ']);
-            P.time.phasiccStimVASStart(block,trial,phasicStim) = GetSecs-P.time.scriptStart;
+            P.time.phasicStimVASStart(block,trial,phasicStim) = GetSecs-P.time.scriptStart;
             SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
             if ~O.debug.toggleVisual; [abort,P] = phasicStimVASRating(P,O,block,trial,phasicStim); end
             P.time.phasicStimVASEnd(block,trial,phasicStim) = GetSecs-P.time.scriptStart;

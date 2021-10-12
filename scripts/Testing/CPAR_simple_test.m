@@ -30,7 +30,7 @@ end
 stimulus1 = cparCreateWaveform(1, 1); % cuff 1
 stimulus2 = cparCreateWaveform(2, 1); % cuff 2
 
-pressure = 10; % kPa
+pressure = 30; % kPa
 duration = 5; % seconds
 cparWaveform_Step(stimulus1, pressure, duration);
 cparWaveform_Step(stimulus2, 1, duration);

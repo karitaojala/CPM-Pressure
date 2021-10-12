@@ -27,7 +27,7 @@ while ~abort
         
         stimType = P.pain.cuffStim(cuff);
         
-        fprintf(['\n' P.pain.cuffSide{cuff} P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
+        fprintf(['\n' P.pain.cuffSide{cuff} ' ' P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
         
         fprintf('Displaying instructions... ');
         

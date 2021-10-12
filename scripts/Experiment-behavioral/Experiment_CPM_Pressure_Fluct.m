@@ -14,7 +14,7 @@
 % Author: Karita Ojala, k.ojala@uke.de, University Medical Center Hamburg-Eppendorf
 %   Original script for calibrating thermal pain (some parts used here):
 %   Bjoern Horing, University Medical Center Hamburg-Eppendorf
-% Date: 2021-05-04
+% Date: 2021-10-06
 %
 % Version notes
 % 1.0

@@ -22,9 +22,10 @@ P.env.hostaddress               = java.net.InetAddress.getLocalHost;
 P.env.hostIPaddress             = char(P.env.hostaddress.getHostAddress);
 
 if strcmp(P.env.hostname,'isn5065f3ba0745') % LPT experiment laptop
-    P.path.scriptBase           = cd;
+    P.path.scriptBase           = fullfile(cd,'..');
     P.path.experiment           = fullfile('C:\Users\grahl\Desktop\Ojala\','CPM-Pressure','data',P.project.name);
-    P.path.PTB                  = 'C:\toolbox\Psychtoolbox';    
+    P.path.PTB                  = 'C:\toolbox\Psychtoolbox';   
+%     P.path.Cogent               = 'C:\toolbox\Cogent';
 elseif strcmp(P.env.hostname,'isnb05cda5ba721') % own laptop
     P.path.scriptBase           = cd;
     P.path.experiment           = fullfile('C:\Data','CPM-Pressure','data',P.project.name);

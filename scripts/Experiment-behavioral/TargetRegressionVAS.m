@@ -9,14 +9,14 @@ while ~abort
     cuff2process = 1;
     
     % Separately for long tonic stimuli and short phasic stimuli
-    for cuff = P.pain.Calibration.cuff_order % randomized order
+    for cuff = P.pain.Calibration.cuff_order(2) % randomized order
         
         clear x y ex ey pressureData ratingData nextStim nH
         cuff2process = cuff2process + 1;
         
         stimType = P.pain.cuffStim(cuff);
         
-        fprintf(['\n' P.pain.cuffSide{cuff} P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
+        fprintf(['\n' P.pain.cuffSide{cuff} ' ' P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
         
         fprintf('Displaying instructions... ');
         
