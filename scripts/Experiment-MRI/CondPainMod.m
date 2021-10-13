@@ -171,11 +171,6 @@ while ~abort
             % Start trial
             fprintf('\n\n=======TRIAL %d of %d=======\n',trial,P.presentation.CPM.trialsPerBlock);
             
-            %             if P.pain.CPM.phasicStim.on(trial) == 0 % if no phasic stimulus, then there is a continuous rating - instruction for participants presented here
-            %                 abort = ShowInstruction(P,O,6,P.presentation.CPM.contRatingInstructionDuration);
-            %             end
-            %             if abort; break; end
-            
             % Red fixation cross
             if ~O.debug.toggleVisual
                 Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);

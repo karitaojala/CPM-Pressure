@@ -151,8 +151,8 @@ elseif limb_stim(1) == 2 % tonic right / phasic left
     P.presentation.armname_long_de = [right_de ' Bein'];
     P.presentation.armname_short_de = [left_de ' Arm'];
     
-    P.presentation.armname_long_de = ['das ' right_de_s ' Bein'];
-    P.presentation.armname_short_de = ['der ' left_de_s ' Arm'];
+    P.presentation.armname_long_de_s = ['das ' right_de_s ' Bein'];
+    P.presentation.armname_short_de_s = ['der ' left_de_s ' Arm'];
     
     P.presentation.armname_long_en = [right_en ' leg'];
     P.presentation.armname_short_en = [left_en ' arm'];
@@ -162,7 +162,7 @@ end
 % Awiszus pain threshold search
 P.awiszus.N     = 6; % number of trials
 P.awiszus.X     = P.pain.preExposure.pressureIntensity(1):1:P.pain.preExposure.pressureIntensity(end);  % kPa range to be covered
-P.awiszus.mu  = [30 35]; % assumed population mean (also become first stimulus to be tested), tonic + phasic
+P.awiszus.mu  = [25 35]; % assumed population mean (also become first stimulus to be tested), tonic + phasic
 P.awiszus.sd  = [8 8]; % assumed population std, kPa
 P.awiszus.sp  = [1 1]; % assumed individual spread, kPa
 P.awiszus.nextX = P.awiszus.mu; % first phasic stimulus
@@ -201,11 +201,11 @@ P.presentation.Calibration.durationVAS          = 5;
 
 % Conditioned pain modulation
 P.presentation.CPM.blocks                   = 4; % number of blocks/runs in the CPM experiment - plan: 4 blocks/runs
-P.presentation.CPM.trialsPerBlock           = 3; % 3 stimuli of 3 min per block -> 9 min + 3 x 20 s ITI + 60 s between blocks = 11 min per block/run -> 4 blocks = 44 min
-P.pain.CPM.phasicStim.on                    = [ones(1,P.presentation.CPM.trialsPerBlock-1) 0]; % on which trials the phasic test stimuli will be delivered to the other cuff, in addition to the tonic conditioning stimulus
+P.presentation.CPM.trialsPerBlock           = 2; % 3 stimuli of 3 min per block -> 9 min + 3 x 20 s ITI + 60 s between blocks = 11 min per block/run -> 4 blocks = 44 min
+P.pain.CPM.phasicStim.on                    = [ones(1,P.presentation.CPM.trialsPerBlock-1)]; % on which trials the phasic test stimuli will be delivered to the other cuff, in addition to the tonic conditioning stimulus
 % last trial of the block no phasic stimulus, tonic only
 % these are also the trials with online VAS rating of tonic stimulus
-P.presentation.CPM.contRatingInstructionDuration = 30;
+% P.presentation.CPM.contRatingInstructionDuration = 30;
 
 conditions                      = [zeros(1,P.presentation.CPM.blocks/2) ones(1,P.presentation.CPM.blocks/2)]; % 0 = control tonic stimulus (non-painful), 1 = experimental tonic stimulus (painful)
 % ordering                        = randperm(P.presentation.CPM.blocks);
@@ -300,46 +300,26 @@ end
 % Concatenate cycle timings
 P.pain.CPM.phasicStim.onsets = onsets;
 
+% Tonic stimulus ratings only at the beginning and end
+% P.pain.CPM.phasicStim.on                    = [ones(1,P.presentation.CPM.trialsPerBlock-1) 0]; % on which trials the phasic test stimuli will be delivered to the other cuff, in addition to the tonic conditioning stimulus
+% last trial of the block no phasic stimulus, tonic only
+% these are also the trials with online VAS rating of tonic stimulus
+P.presentation.CPM.contRatingInstructionDuration = 30;
+P.pain.CPM.tonicRating.cycles              = 1;
+P.pain.CPM.tonicRating.totalDuration       = P.pain.CPM.tonicStim.fullCycleDuration + 2*P.pain.CPM.tonicStim.startendRampDuration;
 
 %% VAS rating parameters
 % Rating of pressure pain stimuli
 P.presentation.CPM.tonicStim.firstTrialWait = 5; 
-P.presentation.CPM.tonicStim.durationVAS    = P.pain.CPM.tonicStim.totalDuration; % Presentation duration of VAS rating scale for tonic stimuli (continous, online) when no phasic stimuli
+P.presentation.CPM.tonicStim.durationVAS    = P.pain.CPM.tonicRating.totalDuration;%P.pain.CPM.tonicStim.totalDuration; % Presentation duration of VAS rating scale for tonic stimuli (continous, online) when no phasic stimuli
 P.presentation.CPM.tonicStim.durationBuffer = 0; % Seconds to wait until VAS finishes for CPAR to have finished, to save CPAR data
-P.presentation.CPM.tonicStim.totalITI       = 20; % total ITI between conditioning stimuli
+P.presentation.CPM.tonicStim.totalITI       = 30; % total ITI between conditioning stimuli
 P.presentation.CPM.blockBetweenTime         = 40; % time in between blocks/runs
 P.presentation.CPM.blockBetweenText         = 3; % time to show end of block text
 P.presentation.BlockStopDuration            = 2;  % time to stop at the block display
 
 P.presentation.CPM.phasicStim.durationVAS   = 5; % time to rate VAS for test stimuli during ISI
 P.presentation.CPM.phasicStim.waitforVAS    = 1; % time to wait until VAS onset after stimulus end
-% P.presentation.phasicStim.totalISI      = 20; % total ISI between test stimuli
-
-% P.CPM_CondStimTroughPressure    = 1; % tonic conditioning stimulus intensity trough (kPa); overridden by calibration
-% P.CPM_CondStimTonicPeakPressure = 20; % tonic conditioning stimulus intensity peak (kPa)
-% P.CPM_TestStimPressure          = 40; % phasic test stimulus intensity (kPa); overridden by calibration
-% P.CPM_Blocks                    = 1;  % blocks number of times the whole set of stimuli is repeated - will be 4, 1 for testing
-% P.CondStimCyclesPerBlock        = 1; % number of cycles for conditioning stimuli per experiment block
-% P.CondStimCycleDuration         = 20; % 60 seconds
-% P.TestStimPerCondStimCycle      = 3; % number of phasic test stimuli per cycle of conditioning stimulus
-% P.CondStimDuration              = P.CondStimCyclesPerBlock*P.CondStimCycleDuration; % 3 minutes
-% %P.CondStimTroughDuration        = P.CondStimDuration/P.CondStimCyclesPerBlock/10;
-% P.FirstRiseDuration             = P.CPM_CondStimTroughPressure/P.pain.riseSpeed;
-% % P.CondStimSlopeFrequency        = 2; % Hz -> increments in slope per second
-% % P.CondStimStepDuration          = 1/P.CondStimSlopeFrequency;
-% % P.CondStimStepNumber            = (P.CondStimCycleDuration/2)/P.CondStimStepDuration;
-% % P.CondStimStepPressure          = (P.CPM_CondStimTonicPeakPressure-P.CPM_CondStimTroughPressure)/P.CondStimStepNumber;
-% P.CondStimPeakTroughDuration    = 0; %P.CondStimDuration/P.CondStimCyclesPerBlock/10; % 6 s with 60 s cycle
-% P.CondStimSlopeDuration         = P.CondStimDuration/P.CondStimCyclesPerBlock/2; % 2.5; 24 s with 60 s cycle
-% P.CondStimRampUpSpeed           = (P.CPM_CondStimTonicPeakPressure-P.CPM_CondStimTroughPressure)/P.CondStimSlopeDuration; % kPa/s
-% P.TestStimOnset                 = [0 0.25 0.75 1]; % onset for test stimuli with regard to conditioning stimulus cycle (0 trough, 0.5 peak, 1 trough)
-% P.TestStimJitter                = [-0.1 -0.05 0 0.05 0.1]; % amount of jittering relative to the onset, e.g. with 60 s conditioning stimulus jitter is +-0, 3 or 6 s
-% P.TestStimRampUpSpeed           = 30; % kPa/s
-% P.TestStimPlateauDuration       = 5; % 5 seconds
-% P.TestStimRampUpDuration        = P.CPM_TestStimPressure/P.TestStimRampUpSpeed;
-% P.FullBlockDuration             = P.FirstRiseDuration + P.CondStimPeakTroughDuration*2*P.CondStimCyclesPerBlock + P.CondStimSlopeDuration*2*P.CondStimCyclesPerBlock;
-% P.presentation.CPM_ITI               = 20; % ITI for in between 3 min conditioning stimuli + 10 seconds from rating time
-% P.presentation.CPM_ISI               = 10; % interstimulus interval (ISI) between phasic test stimuli + 10 seconds from rating time
 
 end
 
