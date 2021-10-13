@@ -1,6 +1,6 @@
 function P = InstantiateParameters
 
-P.protocol.sbId         = 01; % subject ID
+P.protocol.sbId         = 05; % subject ID
 P.protocol.session      = 1;
 P.language              = 'de'; % de or en
 P.project.name          = 'CPM-Pressure-01';

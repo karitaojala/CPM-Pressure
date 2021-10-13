@@ -12,7 +12,7 @@ while ~abort
     
     % whether phasic stimulus on or not (last trial of the block
     % only long stimulus + continuous rating of it)
-    phasic_on = P.pain.CPM.phasicStim.on(trial);
+    phasic_on = 1;%P.pain.CPM.phasicStim.on(trial);
     
     P.time.trialStart(block,trial) = GetSecs-P.time.scriptStart;
     

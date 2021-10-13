@@ -57,12 +57,15 @@ while ~abort
     
     %% Pre-experiment tonic stimulus rating
     % Experimental tonic stimulus pressures
-    tonicPressure_trough = tonicPressure_trough_Exp;
-    tonicPressure_peak = tonicPressure_peak_Exp;
-    trialPressure = [tonicPressure_trough tonicPressure_peak];
-    % Applying stimulus and rating
-    [P, abort] = TonicStimRating(P,O,trialPressure,'pre');
+%     tonicPressure_trough = tonicPressure_trough_Exp;
+%     tonicPressure_peak = tonicPressure_peak_Exp;
+%     trialPressure = [tonicPressure_trough tonicPressure_peak];
+%     % Applying stimulus and rating
+%     [P, abort] = TonicStimRating(P,O,trialPressure,'pre');
     
+        
+    trials4block = [1 2 2 2];
+        
     %% Loop over blocks/runs
     for block = 1:P.presentation.CPM.blocks
         
@@ -131,7 +134,7 @@ while ~abort
         end
         
         % Loop over trials
-        for trial = 1:P.presentation.CPM.trialsPerBlock
+        for trial = 1:trials4block(block)
             
             if ~O.debug.toggleVisual
                 Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
