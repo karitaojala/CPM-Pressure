@@ -14,9 +14,56 @@ while ~abort
         
         stimType = P.pain.cuffStim(cuff);
 
-        fprintf([P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
+        preExpStim = P.pain.preExposure.startSimuli(stimType,:);
         
-        for trial = 1:(numel(P.pain.preExposure.startSimuli)+P.awiszus.N) % pre-exposure + Awiszus trials
+        fprintf([P.pain.cuffSide{cuff} ' ' P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
+        
+        if ~O.debug.toggleVisual
+            upperHalf = P.display.screenRes.height/2;
+            Screen('TextSize', P.display.w, 50);
+            if stimType == 1
+                if strcmp(P.language,'de')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, dem ' P.presentation.armname_long_de], 'center', upperHalf, P.style.white);
+                elseif strcmp(P.language,'en')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long pain stimuli, the ' P.presentation.armname_long_en], 'center', upperHalf, P.style.white);
+                end
+            else
+                if strcmp(P.language,'de')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, den ' P.presentation.armname_short_de], 'center', upperHalf, P.style.white);
+                elseif strcmp(P.language,'en')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, the ' P.presentation.armname_short_en], 'center', upperHalf, P.style.white);
+                end
+            end
+            Screen('TextSize', P.display.w, 30);
+            introTextOn = Screen('Flip',P.display.w);
+        else
+            introTextOn = GetSecs;
+        end
+        
+        while GetSecs < introTextOn + P.presentation.BlockStopDuration
+            [abort]=LoopBreaker(P);
+            if abort; break; end
+        end
+        
+        % Wait for input from experiment to continue
+        fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
+        
+        while 1
+            [keyIsDown, ~, keyCode] = KbCheck();
+            if keyIsDown
+                if find(keyCode) == P.keys.resume
+                    break;
+                elseif find(keyCode) == P.keys.esc
+                    abort = 1;
+                    break;
+                end
+            end
+        end
+        if abort; break; end
+        
+        WaitSecs(0.2);
+        
+        for trial = 1:(numel(preExpStim)+P.awiszus.N) % pre-exposure + Awiszus trials
             
             if ~O.debug.toggleVisual
                 Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
@@ -40,16 +87,16 @@ while ~abort
                 Screen('Flip',P.display.w);
             end
             
-            if trial <= numel(P.pain.preExposure.startSimuli) % pure pre-exposure to get used to the feeling
-                preExpInt = P.pain.preExposure.startSimuli(trial);
+            if trial <= numel(preExpStim) % pure pre-exposure to get used to the feeling
+                preExpInt = preExpStim(trial);
                 preExpPhase = 'pre-exposure';
-            elseif trial == numel(P.pain.preExposure.startSimuli)+1 % first trial of Awiszus procedure starts from the pre-defined population mean
+            elseif trial == numel(preExpStim)+1 % first trial of Awiszus procedure starts from the pre-defined population mean
                 preExpInt = P.awiszus.mu(stimType);
                 preExpPhase = 'Awiszus';
             else % rest of the trials pressure is adjusted according to participant's rating and the Awiszus procedure
                 preExpInt = P.awiszus.nextX(stimType);
                 preExpPhase = 'Awiszus';
-            end 
+            end
             fprintf('%1.1f kPa %s stimulus initiated.',preExpInt,preExpPhase);
             
             stimDuration = CalcStimDuration(P,preExpInt,P.presentation.sStimPlateauPreexp(stimType));
@@ -84,7 +131,7 @@ while ~abort
             SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
             
             % Next pressure (nextX) updated based on ratings
-            if trial <= numel(P.pain.preExposure.startSimuli) % pre-exposure trials no ratings, only to get subject used to the feeling
+            if trial <= numel(preExpStim) % pre-exposure trials no ratings, only to get subject used to the feeling
                 preexPainful = NaN;
             else
                 P = Awiszus('init',P,stimType);
@@ -115,7 +162,7 @@ while ~abort
             P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial-1); % previous rated value from Awiszus (usually painful)
         end
         save(P.out.file.param,'P','O');
-        fprintf(['\nPain threshold ' P.pain.cuffSide{cuff} ' ARM - ' P.pain.stimName{stimType} ' STIMULUS : ' num2str(P.awiszus.painThresholdFinal(cuff)) ' kPa\n\n']);
+        fprintf(['\nPain threshold ' P.pain.cuffSide{cuff} ' ' P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS : ' num2str(P.awiszus.painThresholdFinal(cuff)) ' kPa\n\n']);
         
     end
     

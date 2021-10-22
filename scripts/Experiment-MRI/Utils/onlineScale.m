@@ -73,8 +73,8 @@ while numberOfSecondsRemaining  > 0
     Screen('FillRect',window,scaleColor,midlLabelRect);  
     Screen('FillRect',window,scaleColor,midhLabelRect);
   
-    DrawFormattedText(window, 'Bitte bewerten Sie die Schmerzhaftigkeit des Druckreizes', 'center',yCenter-100, scaleColor);  
-    DrawFormattedText(window, '(kontinuierlich während der gesamten Dauer des Reizes)', 'center',yCenter-70, scaleColor);   
+%     DrawFormattedText(window, 'Bitte bewerten Sie die Schmerzhaftigkeit', 'center',yCenter-100, scaleColor);  
+%     DrawFormattedText(window, 'des Hitzereizes', 'center',yCenter-70, scaleColor);   
     
     Screen('DrawText',window,'kein',axesRect(1)-17,yCenter+25,scaleColor);
     Screen('DrawText',window,'Schmerz',axesRect(1)-40,yCenter+45,scaleColor);
@@ -88,7 +88,7 @@ while numberOfSecondsRemaining  > 0
     [keyIsDown,secs,keyCode] = KbCheck; % this checks the keyboard very, very briefly.
         
         if keyIsDown % only if a key was pressed we check which key it was
-%             SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.buttonPress); % log key/button press as a marker          
+            SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.buttonPress); % log key/button press as a marker          
             if keyCode(moreKey) % if it was the key we named key1 at the top then...
                 currentRating = currentRating + 1;
                 if currentRating > nRatingSteps

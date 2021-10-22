@@ -206,7 +206,7 @@ while ~abort
         
         % Start trial
         nextStim = NaN;
-        varTrial = 3;%0;
+        varTrial = 1;
         nH = figure;
         while ~isempty(nextStim)
             
@@ -258,10 +258,10 @@ while ~abort
             end
             
             % Apply stimulus
-            varTrial = varTrial+1;
             fprintf('\n=======VARIABLE TRIAL %d=======\n',varTrial);
             [abort,P] = ApplyStimulusCalibration(P,O,nextStim,calibStep,stimType,cuff,varTrial); % run stimulus
             save(P.out.file.param,'P','O'); % Save instantiated parameters and overrides after each trial
+            varTrial = varTrial+1;
             if abort; break; end
             
             % White fixation cross during ITI

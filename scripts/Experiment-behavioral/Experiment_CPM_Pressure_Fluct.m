@@ -25,13 +25,15 @@ clear all %#ok<CLALL>
 restoredefaultpath
 global dev
 
-addpath(cd);
+addpath(genpath(cd));
 
 % clear mex global functions;         %#ok<CLMEX,CLFUNC>
 P = InstantiateParameters; % load default parameters for comparable projects (should not ever be changed)
 O = InstantiateOverrides; % load overrides used for testing (e.g., deactivating PTB output or other troubleshooting)
 
-addpath(genpath(P.path.scriptBase))
+% addpath(P.path.scriptBase)
+addpath(P.path.Cogent)
+addpath(P.path.cpar)
 addpath(P.path.experiment)
 addpath(genpath(P.path.PTB))
 addpath(fullfile(P.path.PTB,'PsychBasic','MatlabWindowsFilesR2007a'))
@@ -298,6 +300,10 @@ if isfield(O.devices,'arduino') % then no arduino use is desired
     P.devices.arduino = 0;
 end
 
+if ~O.devices.trigger
+   P.devices.trigger = 0;
+end
+
 % Define outgoing port address
 if strcmp(P.env.hostname,'stimpc1')
     %P.com.lpt.CEDAddressThermode = 888; % CHECK IF STILL ACCURATE
@@ -326,11 +332,20 @@ else
 end
 
 % Establish parallel port communication.
-if P.devices.trigger
-    config_io;
-    WaitSecs(P.com.lpt.CEDDuration);
-    outp(P.com.lpt.CEDAddressSCR,0);
-    WaitSecs(P.com.lpt.CEDDuration);
+if O.devices.trigger
+    
+    if strcmp(P.env.hostname,'isnb05cda5ba721') % use COM port for triggering
+        fopen(P.com.trigger);
+        WaitSecs(P.com.lpt.CEDDuration);
+        fprintf(P.com.trigger,0);
+        WaitSecs(P.com.lpt.CEDDuration);
+    else
+        config_io;
+        WaitSecs(P.com.lpt.CEDDuration);
+        outp(P.com.lpt.CEDAddressSCR,0);
+        WaitSecs(P.com.lpt.CEDDuration);
+    end
+    
 end
 
 if P.devices.arduino
@@ -402,6 +417,10 @@ fprintf('\n\nAborting... ');
 Screen('CloseAll');
 close all
 
+if strcmp(P.env.hostname,'isnb05cda5ba721')
+    fclose(P.com.trigger);
+end
+
 % load(P.out.file.param,'P');
 
 if ~isempty(dev)
@@ -416,4 +435,5 @@ end
 sca; % close window; also closes io64
 ListenChar(0); % use keys again
 commandwindow;
+
 end

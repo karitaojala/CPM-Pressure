@@ -18,20 +18,22 @@ close all; clear all
 plotIndividual = false; % plot individual subjects' data
 
 project.name = 'CPM-Pressure-01';
-project.phase = 'Pilot-02';
+project.phase = 'Pilot-04';
 
 path.code = pwd;
 path.main = fullfile(path.code,'..','..');
 path.data = fullfile(path.main,'data',project.name,project.phase,'logs');
 
-subjects = [1:2 4 6 7 10:17];
-block_order = {[0 1]; [0 1]; [0 1]; [1 0]; [1 0]; [1 0]; [1 0 0 1]; [1 0 1 0]; [1 0 0 1]; [0 1 0 1]; [1,0,1,0]; [0,1,1,0]; [1,0,0,1]}; % exp (2) or control (1) block
-% stim_cuff_subs = [1 1 NaN 1 1]; % 1 = tonic stim cuff 1 (left), phasic stim cuff 2 (right); 2 = phasic stim cuff 1, tonic stim cuff 2
-phasicStimPressure = [80 67 50 46 41 43 80 81 48 73 64 72 90];
-% totalTrials = 14;
-% calibTrials = {1:4; 5:7; 8:14};
-% samplingRate = 0.005; % 200 Hz
-% samplingRate_to_10 = 0.1/samplingRate;
+if strcmp(project.phase,'Pilot-02')
+    subjects = [1:2 4 6 7 10:17];
+    block_order = {[0 1]; [0 1]; [0 1]; [1 0]; [1 0]; [1 0]; [1 0 0 1]; [1 0 1 0]; [1 0 0 1]; [0 1 0 1]; [1,0,1,0]; [0,1,1,0]; [1,0,0,1]}; % exp (2) or control (1) block
+    % stim_cuff_subs = [1 1 NaN 1 1]; % 1 = tonic stim cuff 1 (left), phasic stim cuff 2 (right); 2 = phasic stim cuff 1, tonic stim cuff 2
+    phasicStimPressure = [80 67 50 46 41 43 80 81 48 73 64 72 90];
+elseif strcmp(project.phase,'Pilot-04')
+    subjects = 1:6; %[1 2 5 6]; subjects 3 and 4 had extremely high pain threshold
+    block_order = {[0 1 1 0]; [1 0 0 1]; [1 0]; [0 1]; [1 0 1 0]; [0 0 1 1]};
+%     phasicStimPressure = [];
+end
 % colors = [45, 0, 179; 89, 0, 179; 134, 0, 179; 179, 0, 179; 179, 0, 134; 179, 0, 89; 179, 0, 45]/255; % 7 different colors for different pressure levels
 % colors = [0, 51, 153; 0, 102, 255; 153, 102, 255; 204, 0, 204; 255, 51, 153; 255, 102, 0; 204, 51, 0]/255;
 % colors = [0, 0, 153; 0, 0, 255; 102, 102, 255; ...
@@ -52,14 +54,20 @@ for sub = 1:numel(subjects)
     
     for cond = 1:numel(blocks_sub)
         
-        if subjects(sub) < 11
+        if strcmp(project.phase,'Pilot-02') && subjects(sub) < 11
             path.datafile =  fullfile(path.sub,[subID '_VAS_rating_block' num2str(cond) '.mat']);
         else
             path.datafile =  fullfile(path.sub,[subID '_VAS_rating_block' num2str(cond) '_phasicstim.mat']);
         end
+        path.paramfile = fullfile(path.sub,['parameters_' subID '.mat']);
 
         data = load(path.datafile,'VAS');
         data = data.VAS;
+        
+        param = load(path.paramfile,'P');
+        param = param.P;
+        
+        phasicStimPressure(sub) = param.pain.CPM.experimentPressure.phasicStim;
         
         trials = size(data,1);
         if trials > 3; trials = trials(1:3,:); end % 4th trial (if exists) rating for tonic stimulus only (not phasic)
@@ -79,6 +87,9 @@ for sub = 1:numel(subjects)
         
         ratings_blocks(row_no,:) = ratings; %#ok<AGROW>
         
+        if strcmp(subID,'sub005') && row_no == 1
+            ratings_blocks(row_no,stimuli+1:stimuli*2) = NaN;% accidentally overwrote first trial with second trial values
+        end
         row_no = row_no + 1;
         
     end
@@ -125,8 +136,8 @@ for sub = 1:numel(subjects)
     control_ratings = ratings_blocks(blocks_sub==0,:);
     control_ratings = control_ratings(:);
     
-    ratings_allsubs_mean_exp(sub) = mean(exp_ratings);
-    ratings_allsubs_mean_control(sub) = mean(control_ratings);
+    ratings_allsubs_mean_exp(sub) = nanmean(exp_ratings);
+    ratings_allsubs_mean_control(sub) = nanmean(control_ratings);
     
 end
 
@@ -187,7 +198,7 @@ title('Average CPM effect','FontSize',14)
 %title(['Conditioned pain modulation / ' project.phase ' - N = ' num2str(numel(subjects))])
 
 [~,ttest_p,~,ttest_stats] = ttest(cpm_data(:,1),cpm_data(:,2),'Tail','right')
-addpath(cd,'Utils')
+% addpath(cd,'..','Utils')
 d = computeCohen_d(cpm_data(:,1),cpm_data(:,2),'paired')
 
 end

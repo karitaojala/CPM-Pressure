@@ -1,4 +1,4 @@
-function [abort,conRating,conTime,keyId,response] = onlineScale(P)
+function [abort,startTime,conRating,conTime,keyId,response] = onlineScale(P)
 
 %% key settings
 abort = 0;

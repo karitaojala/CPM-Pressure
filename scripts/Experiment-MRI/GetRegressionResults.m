@@ -9,7 +9,7 @@ x = P.calibration.pressure(cuff,:);
 y = P.calibration.rating(cuff,:);
 x = x(x > 0);
 y = y(y > 0);
-y = y(x > 0);
+% y = y(x > 0);
 x = x(y > 0);
 [predPressureLin,predPressureSig,predPressureRob,betaLin,betaSig,betaRob] = FitData(x,y,[thresholdVAS P.pain.Calibration.VASTargetsVisual],2);
 

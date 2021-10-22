@@ -12,8 +12,8 @@ while ~abort
         
         % Find CPM trough and peak from tonic stimulus calibration
         predPressureTonic = P.calibration.results(1).fitData.predPressureLinear;
-        TonicVASTrough = predPressureTonic(P.pain.CPM.tonicStim.VASindexPeak);
-        TonicVASPeak = predPressureTonic(P.pain.CPM.tonicStim.VASindexTrough);
+        TonicVASTrough = predPressureTonic(P.pain.CPM.tonicStim.VASindexTrough);
+        TonicVASPeak = predPressureTonic(P.pain.CPM.tonicStim.VASindexPeak);
         tonicPressure_trough_Exp = TonicVASTrough;
         tonicPressure_peak_Exp = TonicVASPeak;
         
@@ -57,14 +57,13 @@ while ~abort
     
     %% Pre-experiment tonic stimulus rating
     % Experimental tonic stimulus pressures
-%     tonicPressure_trough = tonicPressure_trough_Exp;
-%     tonicPressure_peak = tonicPressure_peak_Exp;
-%     trialPressure = [tonicPressure_trough tonicPressure_peak];
-%     % Applying stimulus and rating
-%     [P, abort] = TonicStimRating(P,O,trialPressure,'pre');
-    
-        
-    trials4block = [1 2 2 2];
+    tonicPressure_trough = tonicPressure_trough_Exp;
+    tonicPressure_peak = tonicPressure_peak_Exp;
+    trialPressure = [tonicPressure_trough tonicPressure_peak];
+    % Applying stimulus and rating
+    [P, abort] = TonicStimRating(P,O,trialPressure,'pre');
+ 
+%     trials4block = [1 2 2 2];
         
     %% Loop over blocks/runs
     for block = 1:P.presentation.CPM.blocks
@@ -89,7 +88,7 @@ while ~abort
         if ~O.debug.toggleVisual
             
             if block == 1
-                abort = ShowInstruction(P,O,6,P.presentation.CPM.contRatingInstructionDuration);
+                abort = ShowInstruction(P,O,6,1);
             end
             if abort; return; end
             
@@ -134,7 +133,7 @@ while ~abort
         end
         
         % Loop over trials
-        for trial = 1:trials4block(block)
+        for trial = 1:P.presentation.CPM.trialsPerBlock%trials4block(block)
             
             if ~O.debug.toggleVisual
                 Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
@@ -256,13 +255,16 @@ while ~abort
     end
     
     %% Post-experiment tonic stimulus rating
+    abort = ShowInstruction(P,O,5,1);
+    if abort; return; end
     % Experimental tonic stimulus pressures
     tonicPressure_trough = tonicPressure_trough_Exp;
     tonicPressure_peak = tonicPressure_peak_Exp;
     trialPressure = [tonicPressure_trough tonicPressure_peak];
     % Applying stimulus and rating
     [P, abort] = TonicStimRating(P,O,trialPressure,'post');
-    
+    if abort; return; end
+
     % Show end of the experiment screen
     if ~O.debug.toggleVisual
         if strcmp(P.language,'de')

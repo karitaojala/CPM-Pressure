@@ -14,9 +14,11 @@ while ~abort
         
         stimType = P.pain.cuffStim(cuff);
 
+        preExpStim = P.pain.preExposure.startSimuli(stimType,:);
+        
         fprintf([P.pain.cuffSide{cuff} ' ' P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
         
-        for trial = 1:(numel(P.pain.preExposure.startSimuli)+P.awiszus.N) % pre-exposure + Awiszus trials
+        for trial = 1:(numel(preExpStim)+P.awiszus.N) % pre-exposure + Awiszus trials
             
             if ~O.debug.toggleVisual
                 Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
@@ -40,10 +42,10 @@ while ~abort
                 Screen('Flip',P.display.w);
             end
             
-            if trial <= numel(P.pain.preExposure.startSimuli) % pure pre-exposure to get used to the feeling
-                preExpInt = P.pain.preExposure.startSimuli(trial);
+            if trial <= numel(preExpStim) % pure pre-exposure to get used to the feeling
+                preExpInt = preExpStim(trial);
                 preExpPhase = 'pre-exposure';
-            elseif trial == numel(P.pain.preExposure.startSimuli)+1 % first trial of Awiszus procedure starts from the pre-defined population mean
+            elseif trial == numel(preExpStim)+1 % first trial of Awiszus procedure starts from the pre-defined population mean
                 preExpInt = P.awiszus.mu(stimType);
                 preExpPhase = 'Awiszus';
             else % rest of the trials pressure is adjusted according to participant's rating and the Awiszus procedure
@@ -84,7 +86,7 @@ while ~abort
             SendTrigger(P,P.com.lpt.CEDAddressSCR,P.com.lpt.VASOnset);
             
             % Next pressure (nextX) updated based on ratings
-            if trial <= numel(P.pain.preExposure.startSimuli) % pre-exposure trials no ratings, only to get subject used to the feeling
+            if trial <= numel(preExpStim) % pre-exposure trials no ratings, only to get subject used to the feeling
                 preexPainful = NaN;
             else
                 P = Awiszus('init',P,stimType);

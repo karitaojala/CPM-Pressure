@@ -21,7 +21,7 @@ end
 [abort,P]=ApplyTonicStimulus(P,O,trialPressure,noRating); % run stimulus
 save(P.out.file.param,'P','O'); % Save instantiated parameters and overrides after each trial (includes timing information)
 
-if strcmp(rating,'pre') % IBI only for first rating, after last rating there is 30 seconds of BOLD wait time only
+if strcmp(rating,'pre') % IBI only for first rating
     % Interblock interval
     if ~O.debug.toggleVisual
         upperHalf = P.display.screenRes.height/2;

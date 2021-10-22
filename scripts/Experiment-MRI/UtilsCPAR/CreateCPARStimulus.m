@@ -112,7 +112,7 @@ elseif strcmp(type,'TonicRating')
     stimulus1 = cparCreateWaveform(settings.pain.CPM.tonicStim.cuff, 1);
     cparWaveform_Inc(stimulus1, startendRampRate, startendRampDuration); % first ramping up to trough pressure of the tonic stimulus
     
-    for cycle = settings.pain.CPM.tonicRating.cycles
+    for cycle = 1:settings.pain.CPM.tonicRating.cycles
         
         cparWaveform_Inc(stimulus1, diffRampRate, rampDuration);
         cparWaveform_Dec(stimulus1, diffRampRate, rampDuration);
@@ -153,6 +153,8 @@ elseif strcmp(type,'CPM')
     cparWaveform_Dec(stimulus1, startendRampRate, startendRampDuration); % last ramping down to zero
 
     % PHASIC STIMULUS
+
+    phasic_on = varargin{4};
     block = varargin{5};
     trial = varargin{6};
     phasicPressure = pressure(3);
@@ -160,33 +162,37 @@ elseif strcmp(type,'CPM')
     
     stimulus2 = cparCreateWaveform(settings.pain.CPM.phasicStim.cuff, 1);
     
-    stimulusTime = 0; % counter to keep track of stimulus time
-    
-    for cycle = 1:settings.pain.CPM.tonicStim.cycles
+    if phasic_on % if phasic stimuli on for this trial
         
-        phasicCycleTimings = squeeze(settings.pain.CPM.phasicStim.onsets(block,trial,cycle,:));
+        stimulusTime = 0; % counter to keep track of stimulus time
         
-        interCycleInterval = phasicCycleTimings(1)-stimulusTime;
-        cparWaveform_Step(stimulus2, 1, interCycleInterval);
-        stimulusTime = stimulusTime + interCycleInterval;
-        
-        for stim = 1:settings.pain.CPM.phasicStim.stimPerCycle
+        for cycle = 1:settings.pain.CPM.tonicStim.cycles
             
-            cparWaveform_Step(stimulus2, phasicPressure, phasicStimDuration);
-            stimulusTime = stimulusTime + phasicStimDuration;
+            phasicCycleTimings = squeeze(settings.pain.CPM.phasicStim.onsets(block,trial,cycle,:));
             
-            if stim < settings.pain.CPM.phasicStim.stimPerCycle % before last stimulus per cycle
-                interStimulusInterval = phasicCycleTimings(stim+1)-phasicCycleTimings(stim)-phasicStimDuration; % retrieve onset timing of the stimulus
-                cparWaveform_Step(stimulus2, 1, interStimulusInterval); % keep at 1 kPa between phasic stimuli
-                stimulusTime = stimulusTime + interStimulusInterval;
+            interCycleInterval = phasicCycleTimings(1)-stimulusTime;
+            cparWaveform_Step(stimulus2, 1, interCycleInterval);
+            stimulusTime = stimulusTime + interCycleInterval;
+            
+            for stim = 1:settings.pain.CPM.phasicStim.stimPerCycle
+                
+                cparWaveform_Step(stimulus2, phasicPressure, phasicStimDuration);
+                stimulusTime = stimulusTime + phasicStimDuration;
+                
+                if stim < settings.pain.CPM.phasicStim.stimPerCycle % before last stimulus per cycle
+                    interStimulusInterval = phasicCycleTimings(stim+1)-phasicCycleTimings(stim)-phasicStimDuration; % retrieve onset timing of the stimulus
+                    cparWaveform_Step(stimulus2, 1, interStimulusInterval); % keep at 1 kPa between phasic stimuli
+                    stimulusTime = stimulusTime + interStimulusInterval;
+                end
+                
             end
             
+            if cycle == settings.pain.CPM.tonicStim.cycles % fill in the end after last stimulus
+                cparWaveform_Step(stimulus2, 1, settings.pain.CPM.tonicStim.totalDuration-stimulusTime);
+            end
+
         end
-        
-        if cycle == settings.pain.CPM.tonicStim.cycles % fill in the end after last stimulus
-            cparWaveform_Step(stimulus2, 1, settings.pain.CPM.tonicStim.totalDuration-stimulusTime);
-        end
-        
+
     end
     
 end

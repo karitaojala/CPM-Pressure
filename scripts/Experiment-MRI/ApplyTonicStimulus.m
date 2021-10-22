@@ -43,7 +43,7 @@ while ~abort
     P.time.tonicVASEnd(noRating) = GetSecs-P.time.scriptStart;
     if abort; return; end
     
-    while GetSecs < tStimStart+P.pain.CPM.tonicRating.totalDuration%+P.presentation.CPM.tonicStim.durationBuffer
+    while GetSecs < tStimStart+P.presentation.CPM.tonicStim.durationVAS%+P.presentation.CPM.tonicStim.durationBuffer
         [abort]=LoopBreakerStim(P);
         if abort; break; end
     end
