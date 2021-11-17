@@ -263,9 +263,9 @@ P.pain.CPM.tonicStim.totalDuration   = P.pain.CPM.tonicStim.fullCycleDuration*P.
 %rampSpeed = 10; % kPa/s
 P.pain.CPM.phasicStim.pressure          = 50; % phasic stimulus pressure, e.g. at VAS 8
 P.pain.CPM.phasicStim.rampDuration      = 0; %phasicPressure/rampSpeed -> instant ramping up now
-P.pain.CPM.phasicStim.duration          = 5-P.pain.CPM.phasicStim.rampDuration; % duration of phasic stimulus in seconds
+P.pain.CPM.phasicStim.duration          = 10-P.pain.CPM.phasicStim.rampDuration; % duration of phasic stimulus in seconds
 P.pain.CPM.phasicStim.VASindex          = P.pain.Calibration.VASTargetsVisual==70;
-P.pain.CPM.phasicStim.stimPerCycle      = 3; % how many phasic stimuli per cycle of the tonic stimulus
+P.pain.CPM.phasicStim.stimPerCycle      = 2; % how many phasic stimuli per cycle of the tonic stimulus
 P.pain.CPM.phasicStim.jitter            = 0:0.5:2; % jitter for onset of phasic stimuli in seconds
 P.pain.CPM.phasicStim.stimInterval      = 15; % approximate interval between phasic stimuli onsets
 % 5 s stimulus + 2 s jitter from 0 onset -> offset at max. 7 s after ->
