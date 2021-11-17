@@ -1,6 +1,6 @@
 function P = InstantiateParameters
 
-P.protocol.sbId         = 08; % subject ID
+P.protocol.sbId         = 14; % subject ID
 P.protocol.session      = 1;
 P.language              = 'de'; % de or en
 P.project.name          = 'CPM-Pressure-01';
@@ -24,8 +24,8 @@ P.env.hostIPaddress             = char(P.env.hostaddress.getHostAddress);
 if strcmp(P.env.hostname,'isn5065f3ba0745') % LPT experiment laptop
     P.path.scriptBase           = fullfile(cd,'..');
     P.path.experiment           = fullfile('C:\Users\grahl\Desktop\Ojala\','CPM-Pressure','data',P.project.name);
-    P.path.PTB                  = 'C:\toolbox\Psychtoolbox';   
-    P.path.Cogent               = 'C:\toolbox\Cogent';
+    P.path.PTB                  = 'C:\toolbox\Psychtoolbox';
+    P.path.Cogent               = fullfile(P.path.scriptBase,'Cogent');
 elseif strcmp(P.env.hostname,'isnb05cda5ba721') % own laptop
     P.com.trigger               = serial('COM6','BaudRate',115200,'DataBits',8,'StopBits',1,'Parity','none');
     P.path.scriptBase           = cd;
@@ -144,7 +144,7 @@ if limb_stim(1) == 1 % tonic/leg left - phasic/arm right
     P.presentation.armname_short_de = [right_de ' Arm'];
     
     P.presentation.armname_long_de_s = ['das ' left_de_s ' Bein'];
-    P.presentation.armname_short_de_s = ['der ' right_de_s ' Arm'];
+    P.presentation.armname_short_de_s = ['den ' right_de_s ' Arm'];
     
     P.presentation.armname_long_en = [left_en ' leg'];
     P.presentation.armname_short_en = [right_en ' arm'];
@@ -155,7 +155,7 @@ elseif limb_stim(1) == 2 % tonic right / phasic left
     P.presentation.armname_short_de = [left_de ' Arm'];
     
     P.presentation.armname_long_de_s = ['das ' right_de_s ' Bein'];
-    P.presentation.armname_short_de_s = ['der ' left_de_s ' Arm'];
+    P.presentation.armname_short_de_s = ['den ' left_de_s ' Arm'];
     
     P.presentation.armname_long_en = [right_en ' leg'];
     P.presentation.armname_short_en = [left_en ' arm'];
@@ -178,7 +178,7 @@ P.presentation.VAStraining.durationITI = 5;
 P.pain.psychScaling.calibStep           = 1;
 P.pain.psychScaling.cuff_order          = P.pain.preExposure.cuff_order;%painThresholdFinal;%randperm(2);
 P.pain.psychScaling.trials              = 4;
-P.pain.psychScaling.thresholdMultiplier = 0.25; % multiplier for pain threshold to determine step size for pressure intensities
+P.pain.psychScaling.thresholdMultiplier = 0.4; % multiplier for pain threshold to determine step size for pressure intensities
     
 % Calibration
 P.calibration.pressure = [];
@@ -191,7 +191,7 @@ P.pain.Calibration.cuff_order                   = P.pain.preExposure.cuff_order;
 P.pain.Calibration.VASTargetsFixed              = [10,30,90];
 P.pain.Calibration.VASTargetsFixedPresetSteps   = [5,10,20];
 P.pain.Calibration.VASTargetsVisual             = [20,30,40,50,60,70,80];
-P.pain.Calibration.painTresholdPreset           = P.awiszus.mu; % first for tonic stimuli, second for phasic stimuli
+P.pain.Calibration.painThresholdPreset           = [50 60];%P.awiszus.mu; % first for tonic stimuli, second for phasic stimuli
 
 P.pain.Calibration.tonicStim.stimDuration       = 30;
 P.pain.Calibration.phasicStim.stimDuration      = 5;
@@ -261,10 +261,10 @@ P.pain.CPM.tonicStim.totalDuration   = P.pain.CPM.tonicStim.fullCycleDuration*P.
 % Goal: 3 x 5 seconds pulse but not possible with current CPAR firmware
 % (exceeds the maximum of possible components = 12)
 %rampSpeed = 10; % kPa/s
-P.pain.CPM.phasicStim.pressure          = 40; % phasic stimulus pressure, e.g. at VAS 8
+P.pain.CPM.phasicStim.pressure          = 50; % phasic stimulus pressure, e.g. at VAS 8
 P.pain.CPM.phasicStim.rampDuration      = 0; %phasicPressure/rampSpeed -> instant ramping up now
 P.pain.CPM.phasicStim.duration          = 5-P.pain.CPM.phasicStim.rampDuration; % duration of phasic stimulus in seconds
-P.pain.CPM.phasicStim.VASindex          = P.pain.Calibration.VASTargetsVisual==60;
+P.pain.CPM.phasicStim.VASindex          = P.pain.Calibration.VASTargetsVisual==70;
 P.pain.CPM.phasicStim.stimPerCycle      = 3; % how many phasic stimuli per cycle of the tonic stimulus
 P.pain.CPM.phasicStim.jitter            = 0:0.5:2; % jitter for onset of phasic stimuli in seconds
 P.pain.CPM.phasicStim.stimInterval      = 15; % approximate interval between phasic stimuli onsets

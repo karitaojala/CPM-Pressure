@@ -30,8 +30,8 @@ if strcmp(project.phase,'Pilot-02')
     % stim_cuff_subs = [1 1 NaN 1 1]; % 1 = tonic stim cuff 1 (left), phasic stim cuff 2 (right); 2 = phasic stim cuff 1, tonic stim cuff 2
     phasicStimPressure = [80 67 50 46 41 43 80 81 48 73 64 72 90];
 elseif strcmp(project.phase,'Pilot-04')
-    subjects = 1:6; %[1 2 5 6]; subjects 3 and 4 had extremely high pain threshold
-    block_order = {[0 1 1 0]; [1 0 0 1]; [1 0]; [0 1]; [1 0 1 0]; [0 0 1 1]};
+    subjects = [1:8 10:14]; %[1 4 6 7 10];% only CPM responders, [1:8 10:11]; all subjects %[1 2 5 6]; subjects 3 and 4 had extremely high pain threshold
+    block_order = {[0 1 1 0]; [1 0 0 1]; [1 0]; [0 1]; [1 0 1 0]; [0 0 1 1]; [0 1 0 1]; [1 0 0 1]; [0 1 0 1]; [1 0 0 1]; [1 1 0 0]; [1 0 1 0]; [1 1 0 0]};
 %     phasicStimPressure = [];
 end
 % colors = [45, 0, 179; 89, 0, 179; 134, 0, 179; 179, 0, 179; 179, 0, 134; 179, 0, 89; 179, 0, 45]/255; % 7 different colors for different pressure levels
@@ -132,8 +132,10 @@ for sub = 1:numel(subjects)
     pressure_allsubs{sub} = pressure; %#ok<NASGU,AGROW>
 
     exp_ratings = ratings_blocks(blocks_sub==1,:);
+    exp_ratings_block_mean(sub,:) = nanmean(exp_ratings,2);
     exp_ratings = exp_ratings(:);
     control_ratings = ratings_blocks(blocks_sub==0,:);
+    control_ratings_block_mean(sub,:) = nanmean(control_ratings,2);
     control_ratings = control_ratings(:);
     
     ratings_allsubs_mean_exp(sub) = nanmean(exp_ratings);
@@ -148,7 +150,7 @@ Experimental = ratings_allsubs_mean_exp';
 SubjectID = subjects';
 cpm_table = table(SubjectID,Control,Experimental);
 datafile = fullfile(path.main,'data',project.name,project.phase,'cpm_data.csv');
-writetable(cpm_table,datafile)
+% writetable(cpm_table,datafile)
 
 % Calculate within-subject error bars
 subavg = nanmean(cpm_data,2); % mean over conditions for each sub

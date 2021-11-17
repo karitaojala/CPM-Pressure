@@ -12,7 +12,6 @@ while ~abort
     for cuff = P.pain.Calibration.cuff_order % randomized order
         
         clear x y ex ey pressureData ratingData nextStim nH
-        cuff2process = cuff2process + 1;
         
         stimType = P.pain.cuffStim(cuff);
         
@@ -25,15 +24,15 @@ while ~abort
             Screen('TextSize', P.display.w, 50);
             if stimType == 1
                 if strcmp(P.language,'de')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, dem ' P.presentation.armname_long_de], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, ' P.presentation.armname_long_de], 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long pain stimuli, the ' P.presentation.armname_long_en], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long pain stimuli, ' P.presentation.armname_long_en], 'center', upperHalf, P.style.white);
                 end
             else
                 if strcmp(P.language,'de')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, den ' P.presentation.armname_short_de], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, ' P.presentation.armname_short_de], 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, the ' P.presentation.armname_short_en], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, ' P.presentation.armname_short_en], 'center', upperHalf, P.style.white);
                 end
             end
             Screen('TextSize', P.display.w, 30);
@@ -79,7 +78,7 @@ while ~abort
                 [keyIsDown, ~, keyCode] = KbCheck();
                 if keyIsDown
                     if find(keyCode) == P.keys.resume
-                        painThreshold = P.awiszus.mu(cuff);
+                        painThreshold = P.pain.Calibration.painThresholdPreset(cuff);
                         P.pain.Calibration.VASTargetsFixedPressure = painThreshold + P.pain.Calibration.VASTargetsFixedPresetSteps;
                         break;
                     elseif find(keyCode) == P.keys.esc
@@ -91,10 +90,11 @@ while ~abort
             
         else
             % Fit previous data and retrieve regression results
+            clear pressureData ratingData x y
             pressureData = P.calibration.pressure(cuff,:);
             ratingData = P.calibration.rating(cuff,:);
-            x = pressureData(pressureData>0 | ratingData>0); % take only non-zero data
-            y = ratingData(pressureData>0 | ratingData>0); % take only ratings associated with non-zero pressures
+            x = pressureData(pressureData>0 & ratingData>0); % take only non-zero data
+            y = ratingData(pressureData>0 & ratingData>0); % take only ratings associated with non-zero pressures
             [P.pain.Calibration.VASTargetsFixedPressure,~,~,linreg,~,~] = FitData(x,y,P.pain.Calibration.VASTargetsFixed,0);  % last vargin, 0 = figure+text, 2 = text only output
             
             if any(P.pain.Calibration.VASTargetsFixedPressure < 0) || any(P.pain.Calibration.VASTargetsFixedPressure > 100) || linreg(2) <= 0
@@ -105,7 +105,7 @@ while ~abort
                     [keyIsDown, ~, keyCode] = KbCheck();
                     if keyIsDown
                         if find(keyCode) == P.keys.resume
-                            painThreshold = P.awiszus.mu(cuff);
+                            painThreshold = P.pain.Calibration.painThresholdPreset(cuff);
                             P.pain.Calibration.VASTargetsFixedPressure = painThreshold + P.pain.Calibration.VASTargetsFixedPresetSteps;
                             break;
                         elseif find(keyCode) == P.keys.esc
@@ -236,10 +236,11 @@ while ~abort
             if abort; break; end
             
             % Find next stimulus pressure intensity based on previous VAS rating data
+            clear pressureData ratingData ex ey
             pressureData = P.calibration.pressure(cuff,:);
             ratingData = P.calibration.rating(cuff,:);
-            ex = pressureData(pressureData>0 | ratingData>0); % take only non-zero data
-            ey = ratingData(pressureData>0 | ratingData>0); % take only ratings associated with non-zero pressures
+            ex = pressureData(pressureData>0 & ratingData>0); % take only non-zero data
+            ey = ratingData(pressureData>0 & ratingData>0); % take only ratings associated with non-zero pressures
             linOrSig = 'lin';
             %                 if varTrial<2 % lin is more robust for the first additions; in the worst case [0 X 100], sig will get stuck in a step fct
             %                     linOrSig = 'lin';
@@ -310,6 +311,8 @@ while ~abort
             end
             fprintf('\n');
         end
+        
+        cuff2process = cuff2process + 1;
         
         if abort; break; end
         

@@ -119,9 +119,9 @@ if ~O.debug.toggleVisual
         end
         
     elseif section == 5 % continuous rating of tonic stimulus
-        fprintf('Ready PRE/POST-EXPERIMENT TONIC STIMULUS RATING protocol.\n');
-        Screen('TextSize', P.display.w, P.style.fontsize);
+        
         if strcmp(P.language,'de')
+            upperEight = 0.5*upperEight;
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Das Experiment wird nun in wenigen Augenblicken starten.', 'center', upperEight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
@@ -155,60 +155,60 @@ if ~O.debug.toggleVisual
             [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'If you feel no change in painfulness, keep the rating the same.', 'center', upperEight+P.style.lineheight, P.style.white);
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
         end
-        
-    elseif section == 6 % CPM experiment
-        fprintf('Ready CONDITIONED PAIN MODULATION protocol.\n');
-        Screen('TextSize', P.display.w, P.style.fontsize);
-        if strcmp(P.language,'de')
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Der nächste Teil des Experiments beginnt bald.', 'center', upperEight-100, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Das Experiment ist in ' CPM_BLOCK_NO ' kürzere Teile unterteilt, mit einer kurzen Pause dazwischen.'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Es werden jeweils einige Minuten langanhaltende Druckreize', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['auf ' P.presentation.armname_long_de_s ' ausgeübt und'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'gleichzeitig erhalten Sie während dieses langanhaltenden Reizes', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['alle paar Sekunden kurze Druckreize auf ' P.presentation.armname_short_de_s '.'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Die langanhaltenden Reize können zu verschiedenen', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Zeitpunkten schmerzhaft oder nicht schmerzhaft sein.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Die kurzen Reize werden immer schmerzhaft sein.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Nachdem ein kurzer Reiz beendet ist, bitten wir Sie jeden Reiz', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'so schnell wie möglich in seiner Schmerzhaftigkeit bewerten.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Sie brauchen den langen Stimulus zu diesem Zeitpunkt nicht zu bewerten.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Denken Sie bitte daran, dass Sie nur 5 Sekunden Zeit haben für die Bewertung!', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Es ist sehr wichtig, dass Sie bitte jeden einzelnen kurzen Reiz bewerten!', 'center', upperEight+P.style.lineheight, P.style.white);
-        elseif strcmp(P.language,'en')
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'The next part of the experiment will start soon.', 'center', upperEight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['The experiment is divided into ' CPM_BLOCK_NO ' parts with a short break in between.'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['There will be long pressure stimuli on the ' P.presentation.armname_long_en ' arm for some minutes at a time,'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['and at the same time, there are short pressure stimuli on the ' P.presentation.armname_short_en ' arm every few seconds.'], 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'The long stimuli may be painful or not painful at different times.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'The short stimuli will always be painful.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You should rate the painfulness of each SHORT stimulus quickly after it ends.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You do not need to rate the long stimulus this time.', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Remember that you have only 5 seconds to rate the stimulus!', 'center', upperEight+P.style.lineheight, P.style.white);
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'It is very important that you rate each and every short stimulus!', 'center', upperEight+P.style.lineheight, P.style.white);
-        end
-        
-    elseif section == 7 % end of the test
-        
-        if strcmp(P.language,'de')
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Das Experiment ist beendet. Vielen Dank für Ihre Zeit!', 'center', upperEight, P.style.white);
-        elseif strcmp(P.language,'en')
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'The experiment has ended. Thank you for your time!', 'center', upperEight, P.style.white);
-        end
-        
+    
+elseif section == 6 % CPM experiment
+    fprintf('Ready CONDITIONED PAIN MODULATION protocol.\n');
+    Screen('TextSize', P.display.w, P.style.fontsize);
+    if strcmp(P.language,'de')
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Der nächste Teil des Experiments beginnt bald.', 'center', upperEight-100, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['Das Experiment ist in ' CPM_BLOCK_NO ' kürzere Teile unterteilt, mit einer kurzen Pause dazwischen.'], 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Es werden jeweils einige Minuten langanhaltende Druckreize', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['auf ' P.presentation.armname_long_de_s ' ausgeübt und'], 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'gleichzeitig erhalten Sie während dieses langanhaltenden Reizes', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['alle paar Sekunden kurze Druckreize auf ' P.presentation.armname_short_de_s '.'], 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Die langanhaltenden Reize können zu verschiedenen', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Zeitpunkten schmerzhaft oder nicht schmerzhaft sein.', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Die kurzen Reize werden immer schmerzhaft sein.', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Nachdem ein kurzer Reiz beendet ist, bitten wir Sie jeden Reiz', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'so schnell wie möglich in seiner Schmerzhaftigkeit bewerten.', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Sie brauchen den langen Stimulus zu diesem Zeitpunkt nicht zu bewerten.', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Denken Sie bitte daran, dass Sie nur 5 Sekunden Zeit haben für die Bewertung!', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Es ist sehr wichtig, dass Sie bitte jeden einzelnen kurzen Reiz bewerten!', 'center', upperEight+P.style.lineheight, P.style.white);
+    elseif strcmp(P.language,'en')
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'The next part of the experiment will start soon.', 'center', upperEight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['The experiment is divided into ' CPM_BLOCK_NO ' parts with a short break in between.'], 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['There will be long pressure stimuli on the ' P.presentation.armname_long_en ' arm for some minutes at a time,'], 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ['and at the same time, there are short pressure stimuli on the ' P.presentation.armname_short_en ' arm every few seconds.'], 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'The long stimuli may be painful or not painful at different times.', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'The short stimuli will always be painful.', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You should rate the painfulness of each SHORT stimulus quickly after it ends.', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'You do not need to rate the long stimulus this time.', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, ' ', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, upperEight]=DrawFormattedText(P.display.w, 'Remember that you have only 5 seconds to rate the stimulus!', 'center', upperEight+P.style.lineheight, P.style.white);
+        [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'It is very important that you rate each and every short stimulus!', 'center', upperEight+P.style.lineheight, P.style.white);
     end
     
-    introTextTime = Screen('Flip',P.display.w);
+elseif section == 7 % end of the test
     
+    if strcmp(P.language,'de')
+        [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Das Experiment ist beendet. Vielen Dank für Ihre Zeit!', 'center', upperEight, P.style.white);
+    elseif strcmp(P.language,'en')
+        [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'The experiment has ended. Thank you for your time!', 'center', upperEight, P.style.white);
+    end
+    
+end
+
+introTextTime = Screen('Flip',P.display.w);
+
 else
     
     introTextTime = GetSecs;
