@@ -1,6 +1,6 @@
 clear all
 cparpath = fullfile(cd,'..');
-addpath(genpath(cparpath))
+addpath(genpath(fullfile(cparpath,'LabBench.CPAR-master')))
 
 % Create a device and open communication with the device.
 cparInitialize;
@@ -30,10 +30,12 @@ end
 stimulus1 = cparCreateWaveform(1, 1); % cuff 1
 stimulus2 = cparCreateWaveform(2, 1); % cuff 2
 
-pressure = 30; % kPa
-duration = 5; % seconds
+pressure = 70; % kPa
+duration = 40; % seconds
+% cparWaveform_Step(stimulus1, 1, duration);
 cparWaveform_Step(stimulus1, pressure, duration);
-cparWaveform_Step(stimulus2, 1, duration);
+% cparWaveform_Step(stimulus2, 1, duration);
+cparWaveform_Step(stimulus2, pressure, duration);
 
 % Set stimuli
 cparSetWaveform(dev, stimulus1, stimulus2);
