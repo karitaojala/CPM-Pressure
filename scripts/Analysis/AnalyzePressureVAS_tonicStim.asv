@@ -25,19 +25,22 @@ path.code = pwd;
 path.main = fullfile(path.code,'..');
 path.data = fullfile(path.main,'data',project.name,project.phase,'logs');
 
+rating_trials = [2 2 2 1 1 1 1 1 1 1];
+
 if strcmp(project.phase,'Pilot-02')
     subjects = [6 7 10:17];
     block_order = {[1 0]; [1 0]; [1 0]; [1 0 0 1]; [1 0 1 0]; [1 0 0 1]; [0 1 0 1]; [1,0,1,0]; [0,1,1,0]; [1,0,0,1]}; % exp (2) or control (1) block
-    rating_trials = [2 2 2 1 1 1 1 1 1 1];
+    % stim_cuff_subs = [1 1 NaN 1 1]; % 1 = tonic stim cuff 1 (left), phasic stim cuff 2 (right); 2 = phasic stim cuff 1, tonic stim cuff 2
+%     phasicStimPressure = [80 67 50 46 41 43 80 81 48 73 64 72 90];
 elseif strcmp(project.phase,'Pilot-04')
     subjects = [1:8 10:16]; %[1 4 6 7 10];% only CPM responders, [1:8 10:11]; all subjects %[1 2 5 6]; subjects 3 and 4 had extremely high pain threshold
     block_order = {[0 1 1 0]; [1 0 0 1]; [1 0]; [0 1]; [1 0 1 0]; [0 0 1 1]; [0 1 0 1]; ...
         [1 0 0 1]; [0 1 0 1]; [1 0 0 1]; [1 1 0 0]; [1 0 1 0]; [1 1 0 0]; [1 1 0 0]; ...
         [0 1 0 1];};
-    rating_trials = NaN;
+%     phasicStimPressure = [];
 end
 
-rows = ceil(numel(subjects)/5);
+rows = 2;
 cols = 5;
 figure; 
 
@@ -55,7 +58,7 @@ for sub = 1:numel(subjects)
     
     for cond = 1:numel(blocks_sub)
         
-        if strcmp(project.phase,'Pilot-02') && subjects(sub) < 11
+        if subjects(sub) < 11
             path.datafile =  fullfile(path.sub,[subID '_VAS_rating_block' num2str(cond) '.mat']);
         else
             path.datafile =  fullfile(path.sub,[subID '_VAS_rating_block' num2str(cond) '_tonicstim.mat']);
@@ -64,8 +67,9 @@ for sub = 1:numel(subjects)
         data = load(path.datafile,'VAS');
         data = data.VAS;
         
-        if strcmp(project.phase,'Pilot-02') && subjects(sub) < 11
-            trial = rating_trials(sub); % last trial of each block
+        trial = rating_trials(sub); % last trial of each block
+
+        if subjects(sub) < 11
             rating = [data(1,trial).tonicStim.conRating];
         else
             rating = [data(cond).tonicStim.conRating];
