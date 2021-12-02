@@ -24,13 +24,13 @@ while ~abort
             Screen('TextSize', P.display.w, 50);
             if stimType == 1
                 if strcmp(P.language,'de')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, ' P.presentation.armname_long_de], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, ' P.presentation.armname_long_de_c], 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
                     [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long pain stimuli, ' P.presentation.armname_long_en], 'center', upperHalf, P.style.white);
                 end
             else
                 if strcmp(P.language,'de')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, ' P.presentation.armname_short_de], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, ' P.presentation.armname_short_de_c], 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
                     [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, ' P.presentation.armname_short_en], 'center', upperHalf, P.style.white);
                 end

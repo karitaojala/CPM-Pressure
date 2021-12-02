@@ -26,7 +26,7 @@ if strcmp(rating,'pre') % IBI only for first rating
     if ~O.debug.toggleVisual
         upperHalf = P.display.screenRes.height/2;
         if strcmp(P.language,'de')
-            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Dieser Teil ist nun beendet. Bitte warten Sie auf den Beginn des n√§chsten Teils.', 'center', upperHalf, P.style.white);
+            [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'Dieser Teil ist nun beendet. Bitte warten Sie auf den Beginn des n‰chsten Teils.', 'center', upperHalf, P.style.white);
         elseif strcmp(P.language,'en')
             [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, 'There will now be a break before the next part starts. Please wait.', 'center', upperHalf, P.style.white);
         end

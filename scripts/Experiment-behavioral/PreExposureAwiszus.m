@@ -18,6 +18,50 @@ while ~abort
         
         fprintf([P.pain.cuffSide{cuff} ' ' P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS\n--------------------------\n']);
         
+        if ~O.debug.toggleVisual
+            upperHalf = P.display.screenRes.height/2;
+            Screen('TextSize', P.display.w, 50);
+            if stimType == 1
+                if strcmp(P.language,'de')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, ' P.presentation.armname_long_de_c], 'center', upperHalf, P.style.white);
+                elseif strcmp(P.language,'en')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long pain stimuli, ' P.presentation.armname_long_en], 'center', upperHalf, P.style.white);
+                end
+            else
+                if strcmp(P.language,'de')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, ' P.presentation.armname_short_de_c], 'center', upperHalf, P.style.white);
+                elseif strcmp(P.language,'en')
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, ' P.presentation.armname_short_en], 'center', upperHalf, P.style.white);
+                end
+            end
+            Screen('TextSize', P.display.w, 30);
+            introTextOn = Screen('Flip',P.display.w);
+        else
+            introTextOn = GetSecs;
+        end
+        
+        while GetSecs < introTextOn + P.presentation.BlockStopDuration
+            [abort]=LoopBreaker(P);
+            if abort; break; end
+        end
+        
+        % Wait for input from experiment to continue
+        fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
+        
+        while 1
+            [keyIsDown, ~, keyCode] = KbCheck();
+            if keyIsDown
+                if find(keyCode) == P.keys.resume
+                    break;
+                elseif find(keyCode) == P.keys.esc
+                    abort = 1;
+                    break;
+                end
+            end
+        end
+        
+        WaitSecs(0.2);
+        
         for trial = 1:(numel(preExpStim)+P.awiszus.N) % pre-exposure + Awiszus trials
             
             if ~O.debug.toggleVisual
@@ -114,7 +158,8 @@ while ~abort
         elseif ~preexPainful && ~any(P.awiszus.threshRatings.ratings(cuff,:)) % not painful and no previous painful ratings
             P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial); % last rated value is the pain threshold
         else
-            P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial-1); % previous rated value from Awiszus (usually painful)
+            lastPainful = find(P.awiszus.threshRatings.ratings(cuff,:),1,'last');
+            P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,lastPainful); % previous painful rated value
         end
         save(P.out.file.param,'P','O');
         fprintf(['\nPain threshold ' P.pain.cuffSide{cuff} ' ' P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS : ' num2str(P.awiszus.painThresholdFinal(cuff)) ' kPa\n\n']);
