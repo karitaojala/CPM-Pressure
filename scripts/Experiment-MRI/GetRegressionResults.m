@@ -7,11 +7,11 @@ else
 end
 x = P.calibration.pressure(cuff,:);
 y = P.calibration.rating(cuff,:);
-x = x(x > 0);
-y = y(y > 0);
+x2 = x(x > 0 & y > 0);
+y2 = y(y > 0 & x > 0);
 % y = y(x > 0);
-x = x(y > 0);
-[predPressureLin,predPressureSig,predPressureRob,betaLin,betaSig,betaRob] = FitData(x,y,[thresholdVAS P.pain.Calibration.VASTargetsVisual],2);
+% x = x(y > 0);
+[predPressureLin,predPressureSig,predPressureRob,betaLin,betaSig,betaRob] = FitData(x2,y2,[thresholdVAS P.pain.Calibration.VASTargetsVisual],2);
 
 painThresholdLin = predPressureLin(1);
 painThresholdSig = predPressureSig(1);
@@ -28,6 +28,9 @@ calibration.fitData.interceptLinear = betaLin(1); % lin intercept
 calibration.fitData.slopeLinear = betaLin(2); % lin slope
 calibration.fitData.interceptSigmoid = betaSig(1); % sig intercept
 calibration.fitData.slopeSigmoid = betaSig(2); % sig slope
+if ~isfield('painThresholdFinal',P.awiszus)
+    P.awiszus.painThresholdFinal = P.pain.Calibration.painThresholdPreset;
+end
 calibration.fitData.painThresholdAwiszus = P.awiszus.painThresholdFinal; % as per Awiszus thresholding
 calibration.fitData.painThresholdLinear = painThresholdLin; % as per linear regression for VAS 0 (pain threshold)
 calibration.fitData.painThresholdSigmoid = painThresholdSig; % as per nonlinear regression for VAS 0 (pain threshold)

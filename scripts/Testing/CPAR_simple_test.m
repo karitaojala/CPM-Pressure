@@ -27,15 +27,31 @@ if ~cparIsReady(dev)
 end
 
 % Define stimuli
-stimulus1 = cparCreateWaveform(1, 1); % cuff 1
-stimulus2 = cparCreateWaveform(2, 1); % cuff 2
+stimulus1 = cparCreateWaveform(1, 1); % cuff 1: left
+stimulus2 = cparCreateWaveform(2, 1); % cuff 2: right
 
-pressure = 70; % kPa
-duration = 40; % seconds
+pressure = 30;
+% pressure = 40;
+% pressure = 50;
+% pressure = 60; % kPa
+% pressure = 70;
+% pressure = 80;
+% pressure = 90;
+duration = 10; % seconds
 % cparWaveform_Step(stimulus1, 1, duration);
 cparWaveform_Step(stimulus1, pressure, duration);
 % cparWaveform_Step(stimulus2, 1, duration);
 cparWaveform_Step(stimulus2, pressure, duration);
+
+% Ramps
+% rampRate = 30; % kPa/s
+% rampDuration = 2;
+% rampDuration = 3;
+% rampDuration = 4;
+% cparWaveform_Inc(stimulus1, rampRate, rampDuration);
+% cparWaveform_Step(stimulus1, rampDuration*rampRate, duration);
+% cparWaveform_Inc(stimulus2, rampRate, rampDuration);
+% cparWaveform_Step(stimulus2, rampDuration*rampRate, duration);
 
 % Set stimuli
 cparSetWaveform(dev, stimulus1, stimulus2);

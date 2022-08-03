@@ -30,6 +30,6 @@ if strcmp(hostname,'isnb05cda5ba721')
 else
     O.devices.trigger       = 1;
 end
-O.devices.arduino       = 0; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress arduino initialization
+% O.devices.arduino       = 0; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress arduino initialization
 % O.devices.trigger  = 0;
 O.devices.eyetracker    = 0; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress eyetracker initialization

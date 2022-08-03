@@ -1,6 +1,6 @@
 function P = InstantiateParameters
 
-P.protocol.sbId         = 17; % subject ID
+P.protocol.sbId         = 18; % subject ID
 P.protocol.session      = 1;
 P.language              = 'de'; % de or en
 P.project.name          = 'CPM-Pressure-01';
@@ -109,7 +109,7 @@ P.cpar.initdone                      = 0;
 
 % Pre-exposure
 P.pain.cuffSide = {'LEFT' 'RIGHT'}; % cuff 1: left limb, cuff 2: right limb
-P.pain.cuffLimb = {'LEG' 'ARM'};
+P.pain.cuffLimb = {'ARM' 'ARM'};
 P.pain.stimName = {'TONIC' 'PHASIC'};
 P.pain.cuffStim = limb_stim;%randperm(2);
 
@@ -125,8 +125,8 @@ P.pain.preExposure.repeat               = 1; % number of repeats of each stimulu
 P.pain.preExposure.pressureIntensity    = [15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95]; % preexposure pressure intensities (kPa)
 P.pain.preExposure.riseSpeed            = 30; % kPa/s
 P.pain.preExposure.pressureRange        = 5.0:1:100.0; % possible pressure range (kPa)
-P.pain.preExposure.startSimuli          = [10 15; 10 20];
-P.presentation.sStimPlateauPreexp       = [30 10]; % duration of the constant pressure plateau after rise time for pre-exposure (part 1)
+P.pain.preExposure.startSimuli          = [10 20; 10 20];
+P.presentation.sStimPlateauPreexp       = [30 5]; % duration of the constant pressure plateau after rise time for pre-exposure (part 1)
 P.presentation.sPreexpITI               = 10; % pre-exposure intertrial interval (ITI)
 P.presentation.sPreexpCue               = P.presentation.sStimPlateauPreexp/P.pain.preExposure.riseSpeed+P.presentation.sStimPlateauPreexp; % pre-exposure cue duration (stimulus duration with rise time included)
 P.presentation.sStimPlateau             = P.presentation.sStimPlateauPreexp; % duration of the constant pressure plateau after rise time for pressure test (part 2)
@@ -140,30 +140,38 @@ right_en = 'right';
 
 if limb_stim(1) == 1 % tonic/leg left - phasic/arm right
     
-    P.presentation.armname_long_de = [left_de ' Bein'];
+%     P.presentation.armname_long_de = [left_de ' Bein'];
+    P.presentation.armname_long_de = [left_de ' Arm'];
     P.presentation.armname_short_de = [right_de ' Arm'];
     
-    P.presentation.armname_long_de_s = ['das ' left_de_s ' Bein'];
+%     P.presentation.armname_long_de_s = ['das ' left_de_s ' Bein'];
+    P.presentation.armname_long_de_s = ['das ' left_de_s ' Arm'];
     P.presentation.armname_short_de_s = ['den ' right_de_s ' Arm'];
     
-    P.presentation.armname_long_de_c = [left_de_s 's Bein'];
+%     P.presentation.armname_long_de_c = [left_de_s 's Bein'];
+    P.presentation.armname_long_de_c = [left_de_s 's Arm'];
     P.presentation.armname_short_de_c = [right_de_s 'r Arm'];
     
-    P.presentation.armname_long_en = [left_en ' leg'];
+%     P.presentation.armname_long_en = [left_en ' leg'];
+    P.presentation.armname_long_en = [left_en ' arm'];
     P.presentation.armname_short_en = [right_en ' arm'];
     
 elseif limb_stim(1) == 2 % tonic right / phasic left
     
-    P.presentation.armname_long_de = [right_de ' Bein'];
+%     P.presentation.armname_long_de = [right_de ' Bein'];
+    P.presentation.armname_long_de = [right_de ' Arm'];
     P.presentation.armname_short_de = [left_de ' Arm'];
     
-    P.presentation.armname_long_de_s = ['das ' right_de_s ' Bein'];
+%     P.presentation.armname_long_de_s = ['das ' right_de_s ' Bein'];
+    P.presentation.armname_long_de_s = ['das ' right_de_s ' Arm'];
     P.presentation.armname_short_de_s = ['den ' left_de_s ' Arm'];
     
-    P.presentation.armname_long_de_c = [right_de_s 's Bein'];
+%     P.presentation.armname_long_de_c = [right_de_s 's Bein'];
+    P.presentation.armname_long_de_c = [right_de_s 's Arm'];
     P.presentation.armname_short_de_c = [left_de_s 'r Arm'];
     
-    P.presentation.armname_long_en = [right_en ' leg'];
+%     P.presentation.armname_long_en = [right_en ' leg'];
+    P.presentation.armname_long_en = [right_en ' arm'];
     P.presentation.armname_short_en = [left_en ' arm'];
     
 end
@@ -171,9 +179,9 @@ end
 % Awiszus pain threshold search
 P.awiszus.N     = 6; % number of trials
 P.awiszus.X     = P.pain.preExposure.pressureIntensity(1):1:P.pain.preExposure.pressureIntensity(end);  % kPa range to be covered
-P.awiszus.mu  = [25 35]; % assumed population mean (also become first stimulus to be tested), tonic + phasic
-P.awiszus.sd  = [7 10]; % assumed population std, kPa
-P.awiszus.sp  = [1 2]; % assumed individual spread, kPa
+P.awiszus.mu  = [35 40]; % assumed population mean (also become first stimulus to be tested), tonic + phasic
+P.awiszus.sd  = [10 10]; % assumed population std, kPa
+P.awiszus.sp  = [2 2]; % assumed individual spread, kPa
 P.awiszus.nextX = P.awiszus.mu; % first phasic stimulus
 
 % VAS training
@@ -200,7 +208,7 @@ P.pain.Calibration.VASTargetsVisual             = [20,30,40,50,60,70,80];
 P.pain.Calibration.painThresholdPreset          = [35 40];%P.awiszus.mu; % first for tonic stimuli, second for phasic stimuli
 
 P.pain.Calibration.tonicStim.stimDuration       = 30;
-P.pain.Calibration.phasicStim.stimDuration      = 10;
+P.pain.Calibration.phasicStim.stimDuration      = 5;
 
 P.presentation.Calibration.firstTrialWait       = 5;
 P.presentation.Calibration.interCuffInterval    = 15;
@@ -267,13 +275,13 @@ P.pain.CPM.tonicStim.totalDuration   = P.pain.CPM.tonicStim.fullCycleDuration*P.
 % Goal: 3 x 5 seconds pulse but not possible with current CPAR firmware
 % (exceeds the maximum of possible components = 12)
 %rampSpeed = 10; % kPa/s
-P.pain.CPM.phasicStim.pressure          = 50; % phasic stimulus pressure, e.g. at VAS 8
+P.pain.CPM.phasicStim.pressure          = 50; % phasic stimulus pressure (preset)
 P.pain.CPM.phasicStim.rampDuration      = 0; %phasicPressure/rampSpeed -> instant ramping up now
 P.pain.CPM.phasicStim.duration          = 10-P.pain.CPM.phasicStim.rampDuration; % duration of phasic stimulus in seconds
 P.pain.CPM.phasicStim.VASindex          = P.pain.Calibration.VASTargetsVisual==60;
-P.pain.CPM.phasicStim.stimPerCycle      = 2; % how many phasic stimuli per cycle of the tonic stimulus
+P.pain.CPM.phasicStim.stimPerCycle      = 3; % how many phasic stimuli per cycle of the tonic stimulus
 P.pain.CPM.phasicStim.jitter            = 0:0.5:2; % jitter for onset of phasic stimuli in seconds
-P.pain.CPM.phasicStim.stimInterval      = 20; % approximate interval between phasic stimuli onsets
+P.pain.CPM.phasicStim.stimInterval      = 15; % approximate interval between phasic stimuli onsets
 % 5 s stimulus + 2 s jitter from 0 onset -> offset at max. 7 s after ->
 % with 15 s in between possible time points, 8-10 sec ISI
 

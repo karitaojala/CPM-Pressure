@@ -1,0 +1,14 @@
+# Pad the MNI template
+sct_image -i /common/apps/data/standard/MNI152_T1_0.5mm.nii.gz -pad-asym 0,0,100,0,300,0 -o MNI152_T1_0.5mm_pad.nii.gz
+# Bring the PAM50_t1 template into the padded MNI space
+sct_register_multimodal -i /home/tinnermann/sct/data/PAM50/template/PAM50_t1.nii.gz -d MNI152_T1_0.5mm_pad.nii.gz -identity 1
+# Scale the intensity of the PAM50 template to match that of the MNI template (signal value estimated at 160 in the white matter of the ICBM152_0.5 template)
+sct_maths -i PAM50_t1_reg.nii.gz -div 6.25 -o PAM50_t1_reg_norm.nii.gz
+# Mask the PAM50 above a given slice
+sct_crop_image -i PAM50_t1_reg_norm.nii.gz -dim 2 -start 0 -end 310 -b 0 -o PAM50_t1_reg_norm_crop.nii.gz
+# Mask the MNI template below the same slice
+sct_crop_image -i MNI152_T1_0.5mm_pad.nii.gz -dim 2 -start 311 -end 644 -b 0 -o MNI152_T1_0.5mm_pad_crop.nii.gz
+# Add the PAM50 to the padded MNI template image
+sct_maths -i MNI152_T1_0.5mm_pad_crop.nii.gz -add PAM50_t1_reg_norm_crop.nii.gz -o MNI152-PAM50_T1_0.5mm.nii.gz
+# And the magic happens!
+fsleyes MNI152-PAM50_T1_0.5mm.nii.gz &

@@ -8,7 +8,7 @@ abort = 0;
 
 while ~abort
     
-    fprintf(['Tonic stimulus initiated (' num2str(trialPressure(1)) ' to ' num2str(trialPressure(2)) ' kPa)... ']);
+    fprintf(['Tonic stimulus initiated (' num2str(trialPressure(1)) ' to ' num2str(trialPressure(2)) ' kPa)... \n']);
     
     % whether phasic stimulus on or not (last trial of the block
     % only long stimulus + continuous rating of it)
@@ -65,10 +65,10 @@ while ~abort
             
             if abort; return; end
             
-            % Red fixation cross
+            % White fixation cross
             if ~O.debug.toggleVisual
-                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
-                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix1);
+                Screen('FillRect', P.display.w, P.style.white, P.style.whiteFix2);
                 Screen('Flip',P.display.w);
             end
             

@@ -60,7 +60,7 @@ if strcmpi(action,'set')
     end
     
     try
-        [created_stim1, created_stim2, cuff] = CreateCPARStimulus(varargin);
+        [created_stim1, created_stim2, ~] = CreateCPARStimulus(varargin);
     catch
         warning('Creating stimulus for CPAR failed - check stimulus parameters.');
         abort = 1; varargout{1} = abort; return;

@@ -13,7 +13,9 @@ for i = 1:length(keyTimestamps)
     P = PutLogFMRI(P, keyTimestamps(i), ['Trigger ' num2str(P.mri.nTrigger)], run);
 end
 
-KbQueueFlush;
+% KbQueueFlush;
+KbQueueStop;
+KbQueueRelease;
 
 end
 

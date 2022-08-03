@@ -23,15 +23,15 @@ while ~abort
             Screen('TextSize', P.display.w, 50);
             if stimType == 1
                 if strcmp(P.language,'de')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, dem ' P.presentation.armname_long_de], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, ' P.presentation.armname_long_de_c], 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long pain stimuli, the ' P.presentation.armname_long_en], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long stimuli, ' P.presentation.armname_long_en], 'center', upperHalf, P.style.white);
                 end
             else
                 if strcmp(P.language,'de')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, den ' P.presentation.armname_short_de], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, ' P.presentation.armname_short_de_c], 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, the ' P.presentation.armname_short_en], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short stimuli, ' P.presentation.armname_short_en], 'center', upperHalf, P.style.white);
                 end
             end
             Screen('TextSize', P.display.w, 30);
@@ -45,21 +45,20 @@ while ~abort
             if abort; break; end
         end
         
-        % Wait for input from experiment to continue
-        fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
-        
-        while 1
-            [keyIsDown, ~, keyCode] = KbCheck();
-            if keyIsDown
-                if find(keyCode) == P.keys.resume
-                    break;
-                elseif find(keyCode) == P.keys.esc
-                    abort = 1;
-                    break;
-                end
-            end
-        end
-        if abort; break; end
+%         % Wait for input from experiment to continue
+%         fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
+%         
+%         while 1
+%             [keyIsDown, ~, keyCode] = KbCheck();
+%             if keyIsDown
+%                 if find(keyCode) == P.keys.resume
+%                     break;
+%                 elseif find(keyCode) == P.keys.esc
+%                     abort = 1;
+%                     break;
+%                 end
+%             end
+%         end
         
         WaitSecs(0.2);
         
@@ -81,11 +80,11 @@ while ~abort
                 if abort; break; end
             end
             
-            if ~O.debug.toggleVisual
-                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
-                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
-                Screen('Flip',P.display.w);
-            end
+%             if ~O.debug.toggleVisual
+%                 Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
+%                 Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
+%                 Screen('Flip',P.display.w);
+%             end
             
             if trial <= numel(preExpStim) % pure pre-exposure to get used to the feeling
                 preExpInt = preExpStim(trial);
@@ -96,7 +95,7 @@ while ~abort
             else % rest of the trials pressure is adjusted according to participant's rating and the Awiszus procedure
                 preExpInt = P.awiszus.nextX(stimType);
                 preExpPhase = 'Awiszus';
-            end
+            end 
             fprintf('%1.1f kPa %s stimulus initiated.',preExpInt,preExpPhase);
             
             stimDuration = CalcStimDuration(P,preExpInt,P.presentation.sStimPlateauPreexp(stimType));
@@ -108,8 +107,10 @@ while ~abort
             if P.devices.arduino && P.cpar.init
 
                 abort = UseCPAR('Set',dev,'preExp',P,stimDuration,preExpInt,cuff); % set stimulus
+                if abort; return; end
                 [abort,data] = UseCPAR('Trigger',dev,P.cpar.stoprule,P.cpar.forcedstart); % start stimulus
-   
+                if abort; return; end
+                
             end
             
             while GetSecs < tStimStart+sum(stimDuration)
@@ -159,7 +160,8 @@ while ~abort
         elseif ~preexPainful && ~any(P.awiszus.threshRatings.ratings(cuff,:)) % not painful and no previous painful ratings
             P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial); % last rated value is the pain threshold
         else
-            P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,trial-1); % previous rated value from Awiszus (usually painful)
+            lastPainful = find(P.awiszus.threshRatings.ratings(cuff,:),1,'last');
+            P.awiszus.painThresholdFinal(cuff) = P.awiszus.threshRatings.pressure(cuff,lastPainful); % previous painful rated value
         end
         save(P.out.file.param,'P','O');
         fprintf(['\nPain threshold ' P.pain.cuffSide{cuff} ' ' P.pain.cuffLimb{stimType} ' - ' P.pain.stimName{stimType} ' STIMULUS : ' num2str(P.awiszus.painThresholdFinal(cuff)) ' kPa\n\n']);

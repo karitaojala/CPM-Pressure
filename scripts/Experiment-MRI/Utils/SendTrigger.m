@@ -12,6 +12,8 @@ if P.devices.trigger
         WaitSecs(P.com.lpt.CEDDuration);
         fprintf(P.com.trigger,0);
     else % parallel port triggering
+        outp(address,0);
+        WaitSecs(P.com.lpt.CEDDuration);
         outp(address,port);
         WaitSecs(P.com.lpt.CEDDuration);
         outp(address,0);

@@ -36,15 +36,15 @@ while ~abort
             Screen('TextSize', P.display.w, 50);
             if stimType == 1
                 if strcmp(P.language,'de')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, dem ' P.presentation.armname_long_de], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: langanhaltender Reiz, ' P.presentation.armname_long_de_c], 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long pain stimuli, the ' P.presentation.armname_long_en], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: long stimuli, ' P.presentation.armname_long_en], 'center', upperHalf, P.style.white);
                 end
             else
                 if strcmp(P.language,'de')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, den ' P.presentation.armname_short_de], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Kalibrierung: kurzer Reiz, ' P.presentation.armname_short_de_c], 'center', upperHalf, P.style.white);
                 elseif strcmp(P.language,'en')
-                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short pain stimuli, the ' P.presentation.armname_short_en], 'center', upperHalf, P.style.white);
+                    [P.display.screenRes.width, ~]=DrawFormattedText(P.display.w, ['Calibration: short stimuli, ' P.presentation.armname_short_en], 'center', upperHalf, P.style.white);
                 end
             end
             Screen('TextSize', P.display.w, 30);
@@ -58,23 +58,23 @@ while ~abort
             if abort; break; end
         end
         
-        % Wait for input from experiment to continue
-        fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
-        
-        while 1
-            [keyIsDown, ~, keyCode] = KbCheck();
-            if keyIsDown
-                if find(keyCode) == P.keys.resume
-                    break;
-                elseif find(keyCode) == P.keys.esc
-                    abort = 1;
-                    break;
-                end
-            end
-        end
-        if abort; break; end
-        
-        WaitSecs(0.2);
+%         % Wait for input from experiment to continue
+%         fprintf('\nContinue [%s], or abort [%s].\n',upper(char(P.keys.keyList(P.keys.resume))),upper(char(P.keys.keyList(P.keys.esc))));
+%         
+%         while 1
+%             [keyIsDown, ~, keyCode] = KbCheck();
+%             if keyIsDown
+%                 if find(keyCode) == P.keys.resume
+%                     break;
+%                 elseif find(keyCode) == P.keys.esc
+%                     abort = 1;
+%                     break;
+%                 end
+%             end
+%         end
+%         if abort; break; end
+%         
+%         WaitSecs(0.2);
         
         if stimType == 1
             durationITI = P.presentation.Calibration.tonicStim.ITI;
@@ -82,7 +82,7 @@ while ~abort
             durationITI = P.presentation.Calibration.phasicStim.ITI;
         end
         
-        if exist('P.awiszus.painThresholdFinal','var')
+        if isfield(P.awiszus,'painThresholdFinal') && numel(P.awiszus.painThresholdFinal) == 2 % pain thresholds for both cuffs exist
             painThreshold = P.awiszus.painThresholdFinal(cuff);
         else
             painThreshold = P.awiszus.mu(stimType);
@@ -126,12 +126,12 @@ while ~abort
             % Start trial
             fprintf('\n\n=======TRIAL %d of %d=======\n',trial,trials);
             
-            % Red fixation cross
-            if ~O.debug.toggleVisual
-                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
-                Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
-                Screen('Flip',P.display.w);
-            end
+%             % Red fixation cross
+%             if ~O.debug.toggleVisual
+%                 Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix1);
+%                 Screen('FillRect', P.display.w, P.style.red, P.style.whiteFix2);
+%                 Screen('Flip',P.display.w);
+%             end
             
             trialPressure = scalingPressures(trial);
             [abort,P] = ApplyStimulusCalibration(P,O,trialPressure,calibStep,stimType,cuff,trial); % run stimulus
@@ -177,6 +177,7 @@ while ~abort
                 tmp=num2str(SecureRound(GetSecs-tCrossOn,0));
                 [abort,countedDown] = CountDown(P,GetSecs-tCrossOn,countedDown,[tmp ' ']);
                 if abort; break; end
+                if mod((countedDown/30), 1) == 0; fprintf('\n'); end % add line every 30 seconds
             end
             fprintf('\n');
         end
@@ -191,9 +192,8 @@ end
 
 if ~abort
     fprintf('\nPsychometric perceptual scaling finished. \n');
-    abort = 1;
-else
-    return;
 end
+
+return;
 
 end

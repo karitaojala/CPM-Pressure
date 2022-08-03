@@ -1,7 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Conditioned pain modulation (CPM) experiment with cuff algometry
-% For MRI
 % - Find rough ballpark of pain threshold
 % - Tonic fluctuating pain on right/left LEG
 % - Phasic pain on left/right ARM
@@ -39,11 +38,6 @@ addpath(P.path.experiment)
 addpath(genpath(P.path.PTB))
 addpath(fullfile(P.path.PTB,'PsychBasic','MatlabWindowsFilesR2007a'))
 
-% if ~O.debug.toggleVisual
-% %     Screen('Preference', 'TextRenderer', 0);
-%     %Screen('Preference', 'SkipSyncTests', 1);
-% end
-
 P.time.stamp = datestr(now,30);
 P.time.scriptStart = GetSecs;
 
@@ -64,6 +58,7 @@ if ~P.protocol.sbId % this shouldn't ever be the case since InstantiateParameter
     ListenChar(2); % deactivate keyboard input
 else
     ListenChar(2); % deactivate keyboard input
+%     ListenChar(0);
 end
 
 if P.protocol.sbId==99
@@ -73,6 +68,10 @@ end
 if ~O.debug.toggle
     clear functions; %#ok<CLFUNC>
 end
+
+% ListenChar(0);
+ListenChar(2);
+clear functions %#ok<CLFUNC> 
 
 [P,O] = SetInput(P,O);
 [P,O] = SetPTB(P,O);
@@ -89,6 +88,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Section selection (skip sections if desired)
+fprintf('\n')
 [abort,P]=StartExperimentAt(P,'Start experiment? ');
 if abort;QuickCleanup(P);return;end
 
@@ -109,12 +109,16 @@ end
 % EXPERIMENT START %
 %%%%%%%%%%%%%%%%%%%%
 
+query = 'Continue experiment? ';
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PREEXPOSURE & AWISZUS
 if P.startSection == 1
     [abort]=ShowInstruction(P,O,1,1);
     if abort;return;end
     [abort]=PreExposureAwiszus(P,O);
+    if abort;QuickCleanup(P);return;end
+    [abort,P] = StartExperimentAt(P,query);
 end
 if abort;QuickCleanup(P);return;end
 
@@ -124,6 +128,8 @@ if P.startSection == 2
     [abort]=ShowInstruction(P,O,2,1);
     if abort;return;end
     [abort]=VASTraining(P,O);
+    if abort;QuickCleanup(P);return;end
+    [abort,P] = StartExperimentAt(P,query);
 end
 if abort;QuickCleanup(P);return;end
 
@@ -134,6 +140,8 @@ if P.startSection == 3
     if abort;return;end
     load(P.out.file.param,'P');
     [abort]=PsychometricScaling(P,O);
+    if abort;QuickCleanup(P);return;end
+    [abort,P] = StartExperimentAt(P,query);
 end
 if abort;QuickCleanup(P);return;end
 
@@ -144,32 +152,21 @@ if P.startSection == 4
     if abort;return;end
     load(P.out.file.param,'P');
     [abort]=TargetRegressionVAS(P,O);
+    if abort;QuickCleanup(P);return;end
+    [abort,P] = StartExperimentAt(P,query);
 end
 if abort;QuickCleanup(P);return;end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONDITIONED PAIN MODULATION EXPERIMENT
 if P.startSection == 5
-    
-    ListenChar(0); % activate keyboard input
-    commandwindow;
-    pressure_input=input('\nHow to define pressure levels for the experiment: ... 1 = From calibration, 2 = From input, 3 = From instantiated parameters file\n');
-    ListenChar(2); % deactivate keyboard input
-    
-    load(P.out.file.param,'P');
-    [abort]=ShowInstruction(P,O,5,1);
+    %load(P.out.file.param,'P');
     if abort;return;end
-    [abort]=CondPainMod(P,O,pressure_input);
-    
+    while P.startRun < P.mri.nRuns+1 % if runs left
+        [abort,P]=CondPainMod(P,O);
+        if abort;return;end
+    end
 end
-if abort;QuickCleanup(P);return;end
-
-if P.startSection == 6
-    fprintf('\nExperiment ending.');
-    [abort]=ShowInstruction(P,O,7); % intentional 7 (not 6), as instructions section 6 corresponds to CPM tonic ratings instruction
-    if abort;return;end
-end
-
 if abort;QuickCleanup(P);return;end
 
 sca;
@@ -201,7 +198,7 @@ if strcmp(P.env.hostname,'stimpc1') % curdes button box single diamond (HID NAR 
     P.keys.left               = KbName('2@'); % yellow button
     P.keys.right              = KbName('4$'); % red button
     P.keys.confirm            = KbName('3#'); % green button
-    P.keys.trigger            = KbName('5%');
+    P.keys.trigger            = KbName('5%');  
     try
         P.keys.abort              = KbName('esc'); % alias of P.keys.esc
         P.keys.esc                = KbName('esc'); % alias of P.keys.abort
@@ -215,11 +212,10 @@ else
     P.keys.notPainful         = KbName('LeftArrow');
     P.keys.pause              = KbName('Space');
     P.keys.resume             = KbName('Return');
+    P.keys.confirm            = KbName('Return');
     P.keys.right              = KbName('RightArrow');
     P.keys.left               = KbName('LeftArrow');
-    P.keys.confirm            = KbName('Return');                                                                                                                    -
-    P.keys.trigger            = KbName('5%');
-    
+    P.keys.trigger            = KbName('5%');  
     try
         P.keys.abort              = KbName('Escape'); % alias of P.keys.esc
         P.keys.esc                = KbName('Escape'); % alias of P.keys.abort
@@ -227,7 +223,6 @@ else
         P.keys.abort              = KbName('esc');
         P.keys.esc                = KbName('esc');
     end
-
 end
 
 P.keys.triggerKeyList                   = zeros(1,256);
@@ -249,7 +244,7 @@ end
 
 fprintf('\n\nSaving parameters to %s.\n',P.out.file.param);
 fprintf('Saving CPAR data to %s.\n',[P.out.dir '\' P.out.file.CPAR]);
-fprintf('Saving VAS data to %s.\n\n',[P.out.dir '\' P.out.file.VAS]);
+fprintf('Saving VAS data to %s.\n',[P.out.dir '\' P.out.file.VAS]);
 
 end
 
@@ -279,9 +274,10 @@ P.style.sizeCross               = 20;
 Screen('Preference', 'SkipSyncTests', 1);
 Screen('Preference', 'DefaultFontSize', P.style.fontsize);
 Screen('Preference', 'DefaultFontName', P.style.fontname);
+% Screen('Preference','TextRenderer',1)
 %Screen('Preference', 'TextAntiAliasing',2);                       % Enable textantialiasing high quality
 Screen('Preference', 'VisualDebuglevel', 0);                       % 0 disable all visual alerts
-Screen('Preference', 'SuppressAllWarnings', 0);
+Screen('Preference', 'SuppressAllWarnings', 1);
 beep off;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Open a graphics window using PTB
@@ -321,12 +317,11 @@ end
 P.com.lpt.CEDDuration           = 0.005; % wait time between triggers
 
 if strcmp(P.env.hostname,'stimpc1')
-    P.com.lpt.pressureOnset      = 32;
+    P.com.lpt.pressureOnset     = 32; % SCR/Spike (32)
     P.com.lpt.VASOnset          = 64; % we'll figure this out later
+    P.com.lpt.buttonPress       = 128; % button press
     P.com.lpt.ITIOnset          = 0; % we'll figure this out later
-    P.com.lpt.cueOnset          = 128; % we'll figure this out later
 else
-    %     P.com.lpt.cueOnset      = 1; % bit 1; cue onset
     P.com.lpt.pressureOnset = 1; %4; % bit 3; pressure trigger for SCR
     P.com.lpt.VASOnset      = 2; %8; % bit 5;
     P.com.lpt.ITIOnset      = 3; %16; % bit 6; white fixation cross
@@ -369,6 +364,7 @@ P.keys.n2                 = KbName('2@'); % | VAS rating training
 P.keys.n3                 = KbName('3#'); % | Calibration/Psychometric Scaling
 P.keys.n4                 = KbName('4$'); % | Calibration/VAS Target Regression
 P.keys.n5                 = KbName('5%'); % | Conditioned Pain Modulation Experiment
+P.keys.n6                 = KbName('6^'); 
 keyN1Str = upper(char(P.keys.keyList(P.keys.n1)));
 keyN2Str = upper(char(P.keys.keyList(P.keys.n2)));
 keyN3Str = upper(char(P.keys.keyList(P.keys.n3)));
@@ -405,6 +401,47 @@ while 1
     end
 end
 
+if P.startSection == 5 % CPM experiment
+    
+    WaitSecs(1); % wait in case of a second query immediately after this
+    
+    % P.startRun = input('Which run to start with (1-6)?');
+    fprintf('Which run to start (1-6)');
+    
+    P.startRun = 0;
+    while 1
+        [keyIsDown, ~, keyCode] = KbCheck();
+        if keyIsDown
+            if find(keyCode) == P.keys.n1
+                P.startRun=1;
+                break;
+            elseif find(keyCode) == P.keys.n2
+                P.startRun=2;
+                break;
+            elseif find(keyCode) == P.keys.n3
+                P.startRun=3;
+                break;
+            elseif find(keyCode) == P.keys.n4
+                P.startRun=4;
+                break;
+            elseif find(keyCode) == P.keys.n5
+                P.startRun=5;
+                break;
+            elseif find(keyCode) == P.keys.n6
+                P.startRun=6;
+                break;
+            elseif find(keyCode) == P.keys.esc
+                P.startRun=0;
+                abort=1;
+                break;
+            end
+        end
+    end
+    
+    if abort;QuickCleanup(P);return;end
+    
+end
+
 WaitSecs(0.2); % wait in case of a second query immediately after this
 
 end
@@ -431,7 +468,7 @@ if ~isempty(dev)
     clear dev
     fprintf('CPAR device was stopped.\n');
 else
-    fprintf('CPAR already stopped or dev does not exist.\n');
+%     fprintf('CPAR already stopped or dev does not exist.\n');
 end
 
 sca; % close window; also closes io64

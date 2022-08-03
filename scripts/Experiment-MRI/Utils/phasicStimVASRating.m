@@ -7,6 +7,7 @@ abort = 0;
 while ~abort
     
     [abort,finalRating,reactionTime,keyId,keyTime,response] = singleratingScale(P);
+    fprintf([' Final rating was ' num2str(finalRating) '\n']);
     
     VASFile = fullfile(P.out.dir, [P.out.file.VAS '_rating_block' num2str(block) '_phasicstim.mat']);
     if exist(VASFile,'file')

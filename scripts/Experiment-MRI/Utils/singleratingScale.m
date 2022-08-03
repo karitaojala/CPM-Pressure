@@ -7,7 +7,7 @@ KbName('UnifyKeyNames');
 keys        = P.keys;
 lessKey     = keys.left; % yellow button
 moreKey     = keys.right; % red button
-confirmKey  = keys.confirm;
+% confirmKey  = keys.confirm;
 escapeKey   = keys.esc;
 
 window      = P.display.w;
@@ -25,7 +25,7 @@ textSize = 20;
 lineWidth = 6;
 scaleColor = [255 255 255];
 activeColor = [255 0 0];
-defaultRating = 1;
+defaultRating = randi([10 90],1);%1;
 backgroundColor = P.style.backgr;
 startY = P.style.startY;
 
@@ -67,7 +67,8 @@ startTime = GetSecs;
 while numberOfSecondsRemaining  > 0
     
     Screen('FillRect',window,backgroundColor);
-    Screen('FillRect',window,activeColor,[activeTicRects(1,1)+3 activeTicRects(2,1)+ 5 activeTicRects(3,currentRating)-3 activeTicRects(4,1)-5]);
+%     Screen('FillRect',window,activeColor,[activeTicRects(1,1)+3 activeTicRects(2,1)+ 5 activeTicRects(3,currentRating)-3 activeTicRects(4,1)-5]);
+    Screen('FillRect',window,activeColor,[activeTicRects(1,1)+3 activeTicRects(2,1)+3 activeTicRects(3,currentRating)-3 activeTicRects(4,1)-3]);
     Screen('FillRect',window,scaleColor,lowLabelRect);
     Screen('FillRect',window,scaleColor,highLabelRect);
     Screen('FillRect',window,scaleColor,midLabelRect);
@@ -129,6 +130,8 @@ while numberOfSecondsRemaining  > 0
     
     numberOfSecondsElapsed   = (GetSecs - startTime);
     numberOfSecondsRemaining = durRating - numberOfSecondsElapsed;
+    
+    WaitSecs(0.02); % wait a bit between recording key presses to not overshoot
     
 end
 

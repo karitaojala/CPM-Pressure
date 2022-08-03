@@ -65,8 +65,8 @@ end
 
 if ~abort
     fprintf('\nVAS training finished. \n');
-else
-    return;
 end
+
+return;
 
 end

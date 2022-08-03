@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+
+# Abort on error
+set -e
+
+#add path of toolbox
+PATH=~/sct/bin:$PATH
+
+#project dir
+basedir=/projects/crunchie/remi3/
+
+#tmp dir
+export TMPDIR=${basedir}tmp
+
+#template dir
+tpldir=${basedir}PAM50
+
+#log dir
+logdir=${basedir}logs/
+
+#save copy of .sh file in log dir
+filepath=$(readlink -f $0)
+filename=$( basename "$( readlink -f "$0" )"  .sh)
+savefile=${filename}$(date '+_%Y_%m_%d_%H%M%S.sh')
+
+cp ${filepath} ${logdir}${savefile}
+
+#array that lists all subs and runs in which registration problems occured
+pbl=("problems")
+
+listofSubs=(4 5 7 8 9 10 12 13 14 15 16 17 18 19 20 22 23 24 28 29 30 31 32 33 35 36 37 38 39 40 41 42 43 45 46 47 48 51 52 54 55 56 57 58 59 60 61 62 65 66 67 68 70 71 72 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 90 91 93 94 95 96 97 98 99)
+
+#subjects to exclude from analysis
+exclude=( )
+
+for i in "${exclude[@]}"; do
+	listofSubs=(${listofSubs[@]//*$i*})
+done
+
+for subject in ${listofSubs[@]}; do
+
+subdir=${basedir}Sub`printf %02d ${subject}`
+
+echo "Sub${subject}"
+
+t1dir=${subdir}/T1/
+
+# fmri
+# ===========================================================================================
+cd ${t1dir} || exit
+
+#norm mean epi to template
+sct_register_multimodal -i ${tpldir}/PAM50_t2.nii -d mean_of_mean_reg.nii -param step=1,type=im,algo=syn,metric=MeanSquares -initwarp warp_template2anat.nii.gz -initwarpinv warp_anat2template.nii.gz -x spline || pbl=( "${pbl[@]}" "Sub${subject}" )
+
+sct_crop_image -i mean_of_mean_reg_reg.nii -dim 2 -start 780 -end 860 -o mean_of_mean_reg_reg.nii 
+
+done
+
+echo ${pbl[@]}

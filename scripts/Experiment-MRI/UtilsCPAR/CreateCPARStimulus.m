@@ -44,7 +44,6 @@ if strcmp(type,'preExp')
         cuff_off = 1;
     end
     
-
     stim_pressure = pressure(1);
     ramp_up_duration = duration(1); % duration of ramp-up (target pressure/ramping up speed)
     ramp_up_rate = stim_pressure/ramp_up_duration;

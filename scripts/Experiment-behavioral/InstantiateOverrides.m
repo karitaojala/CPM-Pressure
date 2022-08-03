@@ -17,7 +17,7 @@ if O.debug.toggleVisual
     O.display.screen    = []; % to avoid PTB error when debugging without visuals on one screen setup
 else
     if strcmp(hostname,'isnb05cda5ba721') % own laptop
-        O.display.screen    = 1;
+        O.display.screen    = 2;
     else % other computers
         O.display.screen    = 2; % 2 is default; use [] for one screen setup...
     end
@@ -30,6 +30,6 @@ if strcmp(hostname,'isnb05cda5ba721')
 else
     O.devices.trigger       = 1;
 end
-O.devices.arduino       = 0; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress arduino initialization
+% O.devices.arduino       = 0; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress arduino initialization
 % O.devices.trigger  = 0;
 O.devices.eyetracker    = 0; % if no override is desired, comment out or rmfield in project-specific scripts (isfield query); ANY entry in this variable will suppress eyetracker initialization
