@@ -108,7 +108,7 @@ end
 % ratings_allsubs_b3 = squeeze(ratings_allsubs(:,3,:));
 % ratings_allsubs_b4 = squeeze(ratings_allsubs(:,4,:));
 
-save('Experiment-01_ratings.mat','ratings_allsubs','conditions_allsubs','conditions_allsubs_perblock','phasicStimPressures');
+save('Experiment-01_ratings.mat','ratings_allsubs','conditions_allsubs','conditions_allsubs_perblock','phasicStimPressures','bgvariables');
 
 no_stimuli = 72;
 stimuli_per_trial = 9;

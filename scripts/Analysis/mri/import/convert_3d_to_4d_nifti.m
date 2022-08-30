@@ -16,7 +16,7 @@ epi_folders = {'epi-run1' 'epi-run2' 'epi-run3' 'epi-run4' 'epi-run5' 'epi-run6'
 series2take = size(epi_folders,2);
 
 
-for sub = [16:34 38:44 46:47]
+for sub = 48:50
     
     subID = ['sub' sprintf('%03d',sub);];
     sub_ind = find(contains(cellstr(sub_folders),subID)==1);

@@ -16,7 +16,7 @@ series_names = {'field_map_mag' 'field_map_phase' 't1_corrected' 't1_uncorrected
     'epi-run1' 'epi-run2' 'epi-run3' 'epi-run4' 'epi-run5' 'epi-run6'};
 series2take = size(series_names,2);
 
-for sub = 42:47%1:size(sub_folders,1)
+for sub = 48:50%1:size(sub_folders,1)
     
     subID = sprintf('%03d',sub);
     sub_ind = find(contains(cellstr(sub_folders),subID)==1);

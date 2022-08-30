@@ -63,7 +63,7 @@ cpm_diff_data = ratings_allsubs_mean_control-ratings_allsubs_mean_exp;
 % datafile = fullfile(path.main,'data',project.name,project.phase,'cpm_data.csv');
 % writetable(cpm_table,datafile)
 
-% Calculate within-subject error bars
+%% Calculate within-subject error bars
 subavg = nanmean(cpm_data,2); % mean over conditions for each sub
 grandavg = nanmean(subavg); % mean over subjects and conditions
 
@@ -80,7 +80,7 @@ tvalue = tinv(1-0.025, no_subjects-1);
 newvar = (cond/(cond-1))*nanvar(newvalues);
 errorbars = squeeze(tvalue*(sqrt(newvar)./sqrt(no_subjects))); % calculate error bars according to Cousineau (2005) with Morey (2008) fix
 
-% Averaged plot over subjects
+%% Averaged bar plot over subjects
 figure('Position',[10 10 400 420]);
 
 bardata = [mean(ratings_allsubs_mean_control); mean(ratings_allsubs_mean_exp)];
@@ -129,5 +129,49 @@ title({'Average CPM effect';['N = ' num2str(no_subjects)]},'FontSize',14)
 [~,ttest_p,~,ttest_stats] = ttest(cpm_data(:,1),cpm_data(:,2))
 % addpath(cd,'..','Utils')
 d = computeCohen_d(cpm_data(:,1),cpm_data(:,2),'paired')
+
+
+%% Scatterplot of CPM magnitude across participants
+
+subjects = 1:no_subjects;
+
+cpm_hypo = cpm_diff_data(cpm_diff_data > 5);
+cpm_hypo_ind = subjects(cpm_diff_data > 5);
+
+cpm_zero = cpm_diff_data(cpm_diff_data > -5 & cpm_diff_data < 5);
+cpm_zero_ind = subjects(cpm_diff_data > -5 & cpm_diff_data < 5);
+
+cpm_hyper = cpm_diff_data(cpm_diff_data < -5);
+cpm_hyper_ind = subjects(cpm_diff_data < -5);
+
+% xdata = repmat([1 2 3],size(cpm_data,1),1);
+% jitter_amount = 0.2;
+% jittered_xdata = xdata;
+
+figure('Position',[10 10 400 420]);
+
+line([0 43],[5 5],'LineStyle','--','Color',[133, 146, 158]./255,'LineWidth',1)
+hold on
+line([0 43],[0 0],'LineStyle','-','Color',[133, 146, 158]./255,'LineWidth',1.5)
+hold on
+line([0 43],[-5 -5],'LineStyle','--','Color',[133, 146, 158]./255,'LineWidth',1)
+
+% Hypoalgesia
+scatter(cpm_hypo_ind,cpm_hypo,'filled','MarkerEdgeColor','k','MarkerFaceColor',[0, 102, 204]./255);
+hold on
+
+% Close to zero
+scatter(cpm_zero_ind,cpm_zero,'filled','MarkerEdgeColor','k','MarkerFaceColor',[128, 128, 128]./255);
+hold on
+
+% Hyperalgesia
+scatter(cpm_hyper_ind,cpm_hyper,'filled','MarkerEdgeColor','k','MarkerFaceColor',[255, 77, 77]./255);
+
+ylim([-25 25])
+set(gca,'yTick',-25:5:25,'FontSize',14)
+set(gca,'xTick',0:5:43)
+xlabel('Subject index')
+ylabel('CPM magnitude CON-EXP (VAS)','FontSize',14)
+% title({'CPM magnitude across participants';['N = ' num2str(no_subjects)]},'FontSize',14)
 
 end

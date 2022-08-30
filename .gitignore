@@ -4,3 +4,17 @@ data/
 CPAR-11.licx
 
 scripts/LabBench_error.txt
+
+*.mat
+
+scripts/Analysis/behav/Experiment-01_individualTestRatings_overStimuli.png
+
+*.fig
+
+*.nii
+
+*.log
+
+*.cache
+
+*.asv

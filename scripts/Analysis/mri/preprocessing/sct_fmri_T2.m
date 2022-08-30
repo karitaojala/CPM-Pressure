@@ -26,7 +26,7 @@ cmd_moco           = '"sct_fmri_moco -i %s -m %s -qc-seg %s -ofolder %s -qc %s"'
 cmd_label          = '"sct_label_vertebrae -i %s -s %s -c %s -ofolder %s -qc %s"';
 cmd_register       = '"sct_register_to_template -i %s -s %s -ldisc %s -c %s -ofolder %s -qc %s"';
 
-cmd_moco           = '"sct_fmri_moco -i %s -m %s -qc-seg %s -ofolder %s -qc %s"';
+cmd_moco2           = '"sct_fmri_moco -i %s -m %s -x spline -qc-seg %s -ofolder %s -qc %s"'; % added -x spline
 
 cmd_coregister_t2_epi  = ['"sct_register_multimodal -i %s -iseg %s -d %s -dseg %s ' cparam_1 ' -o %s -ofolder %s -qc %s"']; % coarse just to create a mask
 cmd_coregister         = ['"sct_register_multimodal -i %s -iseg %s -d %s -dseg %s ' cparam_2 ' -o %s -owarp %s -owarpinv %s -ofolder %s -qc %s"'];

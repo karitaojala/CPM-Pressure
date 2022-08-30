@@ -1,572 +1,0 @@
- 
-To get started, type doc.
-For product information, visit www.mathworks.com.
- 
-
-PsychStartup: Adding path of installed GStreamer runtime to library path. [C:\gstreamer\1.0\msvc_x86_64\bin]
-
-
-------------------------------------------------------------------------
-03-Aug-2022 11:39:18 - Running job #1
-------------------------------------------------------------------------
-03-Aug-2022 11:39:18 - Running 'Slice Timing'
-
-SPM12: spm_slice_timing (v6130)                    11:39:18 - 03/08/2022
-========================================================================
-Number of slices is...                  :                             12
-Time to Repeat (TR) is...               :                          1.991
-Parameters are specified as...          :               slice times (ms)
-Completed                               :          11:41:17 - 03/08/2022
-03-Aug-2022 11:41:17 - Done    'Slice Timing'
-03-Aug-2022 11:41:17 - Running 'Call MATLAB function'
-03-Aug-2022 11:41:18 - Done    'Call MATLAB function'
-03-Aug-2022 11:41:18 - Running 'Call MATLAB function'
-03-Aug-2022 11:41:21 - Done    'Call MATLAB function'
-03-Aug-2022 11:41:21 - Running 'Call MATLAB function'
-03-Aug-2022 11:41:25 - Done    'Call MATLAB function'
-03-Aug-2022 11:41:25 - Running 'Call MATLAB function'
-03-Aug-2022 11:41:28 - Done    'Call MATLAB function'
-03-Aug-2022 11:41:28 - Running 'Call MATLAB function'
-03-Aug-2022 11:41:32 - Done    'Call MATLAB function'
-03-Aug-2022 11:41:32 - Running 'Call MATLAB function'
-03-Aug-2022 11:41:32 - Done    'Call MATLAB function'
-03-Aug-2022 11:41:32 - Running 'Call MATLAB function'
-Running: sct_image -i C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\sub011-t2_spinalcord.nii.gz -set-qform-to-sform 
- 
--- 
-Spinal Cord Toolbox (git-HEAD-45b1c1759f991332697b4120160303e963f7a3c7) 
- 
-sct_image -i C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\sub011-t2_spinalcord.nii.gz -set-qform-to-sform 
--- 
- 
-Generate output files... 
-[33mFile C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\sub011-t2_spinalcord.nii.gz already exists. Will overwrite it.[0m 
-Running: sct_deepseg_sc -i C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\sub011-t2_spinalcord.nii.gz -o C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\t2_seg.nii.gz -c t2 -kernel 3d -qc C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc 
- 
--- 
-Spinal Cord Toolbox (git-HEAD-45b1c1759f991332697b4120160303e963f7a3c7) 
- 
-sct_deepseg_sc -i C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\sub011-t2_spinalcord.nii.gz -o C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\t2_seg.nii.gz -c t2 -kernel 3d -qc C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc 
--- 
- 
-Config deepseg_sc: 
-  Centerline algorithm: svm 
-  Brain in image: True 
-  Kernel dimension: 3d 
-  Contrast: t2 
-  Threshold: 0.7 
-Creating temporary folder (C:\Users\ojala\AppData\Local\Temp\sct-20220803114153.138713-pkdjqnuh) 
-Reorient the image to RPI, if necessary... 
-Finding the spinal cord centerline... 
-Creating temporary folder (C:\Users\ojala\AppData\Local\Temp\sct-20220803114206.230739-yels_nv6) 
-Remove temporary files... 
-rm -rf C:\Users\ojala\AppData\Local\Temp\sct-20220803114206.230739-yels_nv6 
-Cropping the image around the spinal cord... 
-Normalizing the intensity... 
-Segmenting the spinal cord using deep learning on 3D patches... 
-[33mFrom c:\users\ojala\spinalcordtoolbox\venv_sct\lib\site-packages\tensorflow_core\python\ops\resource_variable_ops.py:1630: calling BaseResourceVariable.__init__ (from tensorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version. 
-Instructions for updating: 
-If using Keras pass *_constraint arguments to layers.[0m 
-[33mFrom c:\users\ojala\spinalcordtoolbox\venv_sct\lib\site-packages\keras\backend\tensorflow_backend.py:422: The name tf.global_variables is deprecated. Please use tf.compat.v1.global_variables instead. 
-[0m 
-Reassembling the image... 
-Resampling the segmentation to the native image resolution using linear interpolation... 
-Binarizing the resampled segmentation... 
-c:\users\ojala\spinalcordtoolbox\venv_sct\lib\site-packages\keras\engine\saving.py:384: UserWarning: Error in loading the saved optimizer state. As a result, your model is starting with a freshly initialized optimizer. 
-  warnings.warn('Error in loading the saved optimizer ' 
-Compute shape analysis:   0%|                         | 0/269 [00:00<?, ?iter/s][33m 
-No properties for slice: 2[0m 
-[33m 
-No properties for slice: 3[0m 
-[33m 
-No properties for slice: 4[0m 
-[33m 
-No properties for slice: 5[0m 
-[33m 
-No properties for slice: 6[0m 
-[33m 
-No properties for slice: 7[0m 
-[33m 
-No properties for slice: 8[0m 
-[33m 
-No properties for slice: 9[0m 
-[33m 
-No properties for slice: 10[0m 
-[33m 
-No properties for slice: 11[0m 
-[33m 
-No properties for slice: 12[0m 
-[33m 
-No properties for slice: 13[0m 
-[33m 
-No properties for slice: 14[0m 
-[33m 
-No properties for slice: 15[0m 
-Compute shape analysis:   7%|#              | 19/269 [00:00<00:01, 178.22iter/s]Compute shape analysis:  14%|##             | 37/269 [00:00<00:01, 168.89iter/s]Compute shape analysis:  20%|###            | 55/269 [00:00<00:01, 170.03iter/s]Compute shape analysis:  27%|####           | 73/269 [00:00<00:01, 165.65iter/s]Compute shape analysis:  33%|#####          | 90/269 [00:00<00:01, 164.89iter/s]Compute shape analysis:  40%|#####5        | 107/269 [00:00<00:01, 160.81iter/s]Compute shape analysis:  46%|######4       | 124/269 [00:00<00:00, 158.27iter/s]Compute shape analysis:  52%|#######2      | 140/269 [00:00<00:00, 157.38iter/s]Compute shape analysis:  58%|########1     | 156/269 [00:00<00:00, 155.84iter/s]Compute shape analysis:  64%|########9     | 172/269 [00:01<00:00, 153.66iter/s]Compute shape analysis:  70%|#########7    | 188/269 [00:01<00:00, 153.25iter/s]Compute shape analysis:  76%|##########6   | 204/269 [00:01<00:00, 153.01iter/s]Compute shape analysis:  82%|###########4  | 220/269 [00:01<00:00, 153.69iter/s]Compute shape analysis:  88%|############2 | 236/269 [00:01<00:00, 151.65iter/s]Compute shape analysis:  94%|#############1| 252/269 [00:01<00:00, 153.72iter/s]Compute shape analysis: 100%|##############| 269/269 [00:01<00:00, 158.76iter/s]Remove temporary files... 
-rm -rf C:\Users\ojala\AppData\Local\Temp\sct-20220803114153.138713-pkdjqnuh 
- 
-*** Generate Quality Control (QC) html report *** 
-Resample images to 0.6x0.6 mm 
-QcImage: layout with Axial slice 
-Compute center of mass at each slice 
-C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\data\sub011\t2_spinalcord\sct_deepseg_sc\2022_08_03_114232.782232\bkg_img.png 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\css\bootstrap-table.min.css C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\css 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\css\bootstrap-theme.min.css C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\css 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\css\bootstrap.min.css C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\css 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\css\bootstrap.min.css.map C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\css 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\css\select2.min.css C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\css 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\css\style.css C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\css 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\js\animation.js C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\js 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\js\bootstrap-table.min.js C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\js 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\js\bootstrap.min.js C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\js 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\js\filesaver.min.js C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\js 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\js\jquery-3.1.0.min.js C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\js 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\js\main.js C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\js 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\js\select2.min.js C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\js 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\js\yaml.min.js C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\js 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\imgs\axial.png C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\imgs 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\imgs\f-icon.png C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\imgs 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\imgs\keydown.png C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\imgs 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\imgs\keyright.png C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\imgs 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\imgs\keyup.png C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\imgs 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\imgs\sagittal.png C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\imgs 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\imgs\sct_logo.png C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\imgs 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\fonts\glyphicons-halflings-regular.eot C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\fonts 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\fonts\glyphicons-halflings-regular.svg C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\fonts 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\fonts\glyphicons-halflings-regular.ttf C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\fonts 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\fonts\glyphicons-halflings-regular.woff C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\fonts 
-cp c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\reports\assets\_assets\fonts\glyphicons-halflings-regular.woff2 C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_assets\fonts 
-Successfully generated the QC results in C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_json\qc_2022_08_03_114232.782232.json 
- 
-c:\users\ojala\spinalcordtoolbox\venv_sct\lib\site-packages\scipy\ndimage\measurements.py:1407: RuntimeWarning: invalid value encountered in double_scalars 
-  for dir in range(input.ndim)] 
- 
-To see the results in a browser, type: 
-start C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\index.html 
- 
-Running: sct_get_centerline -i C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\t2_seg.nii.gz -c t2 -method fitseg -o C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\t2_seg_center.nii.gz -qc C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc 
- 
--- 
-Spinal Cord Toolbox (git-HEAD-45b1c1759f991332697b4120160303e963f7a3c7) 
- 
-sct_get_centerline -i C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\t2_seg.nii.gz -c t2 -method fitseg -o C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\t2_seg_center.nii.gz -qc C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc 
--- 
- 
- 
-*** Generate Quality Control (QC) html report *** 
-Resample images to NonexNone mm 
-QcImage: layout with Axial slice 
-Compute center of mass at each slice 
-C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\data\sub011\t2_spinalcord\sct_get_centerline\2022_08_03_114238.580564\bkg_img.png 
-Successfully generated the QC results in C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\_json\qc_2022_08_03_114238.580564.json 
-c:\users\ojala\spinalcordtoolbox\venv_sct\lib\site-packages\scipy\ndimage\measurements.py:1407: RuntimeWarning: invalid value encountered in double_scalars 
-  for dir in range(input.ndim)] 
- 
-To see the results in a browser, type: 
-start C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc\index.html 
- 
-Running: sct_label_vertebrae -i C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\sub011-t2_spinalcord.nii.gz -s C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\t2_seg.nii.gz -c t2 -ofolder C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\ -qc C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc 
- 
--- 
-Spinal Cord Toolbox (git-HEAD-45b1c1759f991332697b4120160303e963f7a3c7) 
- 
-sct_label_vertebrae -i C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\sub011-t2_spinalcord.nii.gz -s C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\t2_seg.nii.gz -c t2 -ofolder C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\ -qc C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc 
--- 
- 
-Creating temporary folder (C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown) 
- 
-Copying input data to tmp folder... 
- 
-Straighten spinal cord... 
-Creating temporary folder (C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.996900-straighten_spinalcord-p2alsvp2) 
-Copy files to tmp folder... 
-Fitting centerline using B-spline approximation 
-Error on approximation = 63.38 mm 
-Error on approximation = 3.42 mm 
-Error on approximation = 9.36 mm 
-Error on approximation = 5.85 mm 
-Error on approximation = 1.13 mm 
-Error on approximation = 0.65 mm 
-Error on approximation = 0.55 mm 
-Error on approximation = 0.49 mm 
-Error on approximation = 0.42 mm 
-Error on approximation = 0.43 mm 
-Error on approximation = 0.47 mm 
-Error on approximation = 0.49 mm 
-Error on approximation = 0.52 mm 
-Error on approximation = 0.54 mm 
-Error on approximation = 0.5 mm 
-Error on approximation = 0.44 mm 
-Error on approximation = 0.4 mm 
-Error on approximation = 0.39 mm 
-Error on approximation = 0.41 mm 
-Error on approximation = 0.43 mm 
-Error on approximation = 0.41 mm 
-Error on approximation = 0.37 mm 
-Error on approximation = 0.35 mm 
-Error on approximation = 0.35 mm 
-Error on approximation = 0.36 mm 
-Error on approximation = 0.35 mm 
-Error on approximation = 0.32 mm 
-Error on approximation = 0.28 mm 
-Error on approximation = 0.33 mm 
-Error on approximation = 0.33 mm 
-Error on approximation = 0.32 mm 
-Create the straight space and the safe zone 
-Length of spinal cord: 233.8400222963657 
-Size of spinal cord in z direction: 214.18539527939805 
-Ratio length/size: 1.0917645528133644 
-Safe zone boundaries (curved space): [-152.7031316473066, 61.482263632091446] 
-Safe zone boundaries (straight space): [-162.53044515579043, 71.30957714057527] 
-Pad input volume to account for spinal cord length... 
-Time to generate centerline: 45.0 ms 
-  0%|          | 0/293 [00:00<?, ?it/s]  2%|1         | 5/293 [00:00<00:06, 45.85it/s]  3%|3         | 10/293 [00:00<00:06, 46.63it/s]  5%|5         | 15/293 [00:00<00:05, 47.28it/s]  7%|6         | 20/293 [00:00<00:05, 47.24it/s]  9%|8         | 25/293 [00:00<00:05, 47.37it/s] 10%|#         | 30/293 [00:00<00:05, 47.00it/s] 12%|#1        | 35/293 [00:00<00:05, 47.06it/s] 14%|#3        | 40/293 [00:00<00:05, 46.53it/s] 15%|#5        | 45/293 [00:00<00:05, 46.73it/s] 17%|#7        | 50/293 [00:01<00:05, 47.00it/s] 19%|#8        | 55/293 [00:01<00:05, 47.05it/s] 20%|##        | 60/293 [00:01<00:04, 47.09it/s] 22%|##2       | 65/293 [00:01<00:04, 46.98it/s] 24%|##3       | 70/293 [00:01<00:04, 47.44it/s] 26%|##5       | 75/293 [00:01<00:04, 47.49it/s] 27%|##7       | 80/293 [00:01<00:04, 47.40it/s] 29%|##9       | 85/293 [00:01<00:04, 47.19it/s] 31%|###       | 90/293 [00:01<00:04, 46.92it/s] 32%|###2      | 95/293 [00:02<00:04, 46.73it/s] 34%|###4      | 100/293 [00:02<00:04, 46.47it/s] 36%|###5      | 105/293 [00:02<00:04, 46.41it/s] 38%|###7      | 110/293 [00:02<00:03, 46.38it/s] 39%|###9      | 115/293 [00:02<00:03, 46.61it/s] 41%|####      | 120/293 [00:02<00:03, 46.78it/s] 43%|####2     | 125/293 [00:02<00:03, 46.77it/s] 44%|####4     | 130/293 [00:02<00:03, 46.76it/s] 46%|####6     | 135/293 [00:02<00:03, 46.62it/s] 48%|####7     | 140/293 [00:02<00:03, 46.65it/s] 49%|####9     | 145/293 [00:03<00:03, 46.67it/s] 51%|#####1    | 150/293 [00:03<00:03, 46.82it/s] 53%|#####2    | 155/293 [00:03<00:02, 46.67it/s] 55%|#####4    | 160/293 [00:03<00:02, 46.68it/s] 56%|#####6    | 165/293 [00:03<00:02, 46.44it/s] 58%|#####8    | 170/293 [00:03<00:02, 46.79it/s] 60%|#####9    | 175/293 [00:03<00:02, 47.17it/s] 61%|######1   | 180/293 [00:03<00:02, 46.90it/s] 63%|######3   | 185/293 [00:03<00:02, 47.11it/s] 65%|######4   | 190/293 [00:04<00:02, 47.40it/s] 67%|######6   | 195/293 [00:04<00:02, 47.33it/s] 68%|######8   | 200/293 [00:04<00:01, 47.42it/s] 70%|######9   | 205/293 [00:04<00:01, 47.21it/s] 72%|#######1  | 210/293 [00:04<00:01, 47.19it/s] 73%|#######3  | 215/293 [00:04<00:01, 47.19it/s] 75%|#######5  | 220/293 [00:04<00:01, 47.05it/s] 77%|#######6  | 225/293 [00:04<00:01, 47.09it/s] 78%|#######8  | 230/293 [00:04<00:01, 47.11it/s] 80%|########  | 235/293 [00:05<00:01, 47.13it/s] 82%|########1 | 240/293 [00:05<00:01, 47.14it/s] 84%|########3 | 245/293 [00:05<00:01, 47.55it/s] 85%|########5 | 250/293 [00:05<00:00, 47.71it/s] 87%|########7 | 255/293 [00:05<00:00, 47.55it/s] 89%|########8 | 260/293 [00:05<00:00, 47.70it/s] 90%|######### | 265/293 [00:05<00:00, 47.67it/s] 92%|#########2| 270/293 [00:05<00:00, 47.66it/s] 94%|#########3| 275/293 [00:05<00:00, 47.92it/s] 96%|#########5| 280/293 [00:05<00:00, 47.97it/s] 97%|#########7| 285/293 [00:06<00:00, 47.72it/s] 99%|#########8| 290/293 [00:06<00:00, 47.83it/s]100%|##########| 293/293 [00:06<00:00, 47.12it/s] 
-  0%|          | 0/358 [00:00<?, ?it/s]  0%|          | 1/358 [00:00<00:38,  9.26it/s]  1%|          | 3/358 [00:00<00:32, 10.77it/s]  1%|1         | 5/358 [00:00<00:31, 11.10it/s]  2%|1         | 7/358 [00:00<00:33, 10.47it/s]  3%|2         | 9/358 [00:00<00:32, 10.81it/s]  3%|3         | 11/358 [00:01<00:31, 11.04it/s]  4%|3         | 13/358 [00:01<00:31, 10.98it/s]  4%|4         | 15/358 [00:01<00:31, 11.02it/s]  5%|4         | 17/358 [00:01<00:30, 11.17it/s]  5%|5         | 19/358 [00:01<00:30, 11.19it/s]  6%|5         | 21/358 [00:01<00:30, 11.09it/s]  6%|6         | 23/358 [00:02<00:30, 10.98it/s]  7%|6         | 25/358 [00:02<00:30, 10.75it/s]  8%|7         | 27/358 [00:02<00:31, 10.67it/s]  8%|8         | 29/358 [00:02<00:30, 10.64it/s]  9%|8         | 31/358 [00:02<00:30, 10.64it/s]  9%|9         | 33/358 [00:03<00:30, 10.66it/s] 10%|9         | 35/358 [00:03<00:30, 10.72it/s] 10%|#         | 37/358 [00:03<00:29, 10.80it/s] 11%|#         | 39/358 [00:03<00:29, 10.87it/s] 11%|#1        | 41/358 [00:03<00:29, 10.93it/s] 12%|#2        | 43/358 [00:03<00:28, 10.93it/s] 13%|#2        | 45/358 [00:04<00:28, 10.87it/s] 13%|#3        | 47/358 [00:04<00:28, 10.82it/s] 14%|#3        | 49/358 [00:04<00:28, 10.83it/s] 14%|#4        | 51/358 [00:04<00:28, 10.81it/s] 15%|#4        | 53/358 [00:04<00:28, 10.81it/s] 15%|#5        | 55/358 [00:05<00:28, 10.57it/s] 16%|#5        | 57/358 [00:05<00:28, 10.68it/s] 16%|#6        | 59/358 [00:05<00:27, 10.70it/s] 17%|#7        | 61/358 [00:05<00:27, 10.73it/s] 18%|#7        | 63/358 [00:05<00:27, 10.76it/s] 18%|#8        | 65/358 [00:06<00:27, 10.74it/s] 19%|#8        | 67/358 [00:06<00:27, 10.78it/s] 19%|#9        | 69/358 [00:06<00:27, 10.68it/s] 20%|#9        | 71/358 [00:06<00:26, 10.65it/s] 20%|##        | 73/358 [00:06<00:26, 10.70it/s] 21%|##        | 75/358 [00:06<00:26, 10.68it/s] 22%|##1       | 77/358 [00:07<00:26, 10.75it/s] 22%|##2       | 79/358 [00:07<00:25, 10.77it/s] 23%|##2       | 81/358 [00:07<00:25, 10.84it/s] 23%|##3       | 83/358 [00:07<00:25, 10.88it/s] 24%|##3       | 85/358 [00:07<00:25, 10.86it/s] 24%|##4       | 87/358 [00:08<00:25, 10.81it/s] 25%|##4       | 89/358 [00:08<00:24, 10.85it/s] 25%|##5       | 91/358 [00:08<00:24, 10.84it/s] 26%|##5       | 93/358 [00:08<00:24, 10.79it/s] 27%|##6       | 95/358 [00:08<00:24, 10.75it/s] 27%|##7       | 97/358 [00:08<00:24, 10.71it/s] 28%|##7       | 99/358 [00:09<00:24, 10.76it/s] 28%|##8       | 101/358 [00:09<00:23, 10.79it/s] 29%|##8       | 103/358 [00:09<00:23, 10.85it/s] 29%|##9       | 105/358 [00:09<00:23, 10.89it/s] 30%|##9       | 107/358 [00:09<00:22, 10.96it/s] 30%|###       | 109/358 [00:10<00:22, 10.91it/s] 31%|###1      | 111/358 [00:10<00:22, 10.95it/s] 32%|###1      | 113/358 [00:10<00:22, 10.93it/s] 32%|###2      | 115/358 [00:10<00:22, 10.93it/s] 33%|###2      | 117/358 [00:10<00:22, 10.95it/s] 33%|###3      | 119/358 [00:10<00:21, 11.00it/s] 34%|###3      | 121/358 [00:11<00:21, 10.99it/s] 34%|###4      | 123/358 [00:11<00:21, 11.07it/s] 35%|###4      | 125/358 [00:11<00:21, 11.08it/s] 35%|###5      | 127/358 [00:11<00:20, 11.11it/s] 36%|###6      | 129/358 [00:11<00:20, 11.16it/s] 37%|###6      | 131/358 [00:12<00:20, 11.17it/s] 37%|###7      | 133/358 [00:12<00:20, 11.08it/s] 38%|###7      | 135/358 [00:12<00:20, 11.00it/s] 38%|###8      | 137/358 [00:12<00:20, 11.01it/s] 39%|###8      | 139/358 [00:12<00:19, 11.04it/s] 39%|###9      | 141/358 [00:12<00:19, 11.04it/s] 40%|###9      | 143/358 [00:13<00:19, 11.06it/s] 41%|####      | 145/358 [00:13<00:19, 11.08it/s] 41%|####1     | 147/358 [00:13<00:19, 11.09it/s] 42%|####1     | 149/358 [00:13<00:18, 11.13it/s] 42%|####2     | 151/358 [00:13<00:18, 11.24it/s] 43%|####2     | 153/358 [00:14<00:18, 11.28it/s] 43%|####3     | 155/358 [00:14<00:17, 11.28it/s] 44%|####3     | 157/358 [00:14<00:17, 11.25it/s] 44%|####4     | 159/358 [00:14<00:17, 11.21it/s] 45%|####4     | 161/358 [00:14<00:17, 11.25it/s] 46%|####5     | 163/358 [00:14<00:17, 11.25it/s] 46%|####6     | 165/358 [00:15<00:17, 11.26it/s] 47%|####6     | 167/358 [00:15<00:16, 11.31it/s] 47%|####7     | 169/358 [00:15<00:17, 10.64it/s] 48%|####7     | 171/358 [00:15<00:18,  9.90it/s] 48%|####8     | 173/358 [00:15<00:19,  9.38it/s] 49%|####8     | 174/358 [00:16<00:19,  9.30it/s] 49%|####8     | 175/358 [00:16<00:19,  9.36it/s] 49%|####9     | 177/358 [00:16<00:19,  9.12it/s] 50%|####9     | 178/358 [00:16<00:20,  8.71it/s] 50%|#####     | 179/358 [00:16<00:20,  8.55it/s] 50%|#####     | 180/358 [00:16<00:22,  7.86it/s] 51%|#####     | 181/358 [00:16<00:22,  7.84it/s] 51%|#####     | 182/358 [00:17<00:22,  7.75it/s] 51%|#####1    | 183/358 [00:17<00:22,  7.89it/s] 51%|#####1    | 184/358 [00:17<00:21,  7.92it/s] 52%|#####1    | 185/358 [00:17<00:21,  7.96it/s] 52%|#####1    | 186/358 [00:17<00:21,  8.07it/s] 52%|#####2    | 187/358 [00:17<00:21,  8.10it/s] 53%|#####2    | 188/358 [00:17<00:21,  8.09it/s] 53%|#####2    | 189/358 [00:17<00:20,  8.26it/s] 53%|#####3    | 190/358 [00:18<00:20,  8.33it/s] 53%|#####3    | 191/358 [00:18<00:19,  8.43it/s] 54%|#####3    | 192/358 [00:18<00:19,  8.60it/s] 54%|#####3    | 193/358 [00:18<00:19,  8.67it/s] 54%|#####4    | 194/358 [00:18<00:21,  7.72it/s] 54%|#####4    | 195/358 [00:18<00:22,  7.40it/s] 55%|#####4    | 196/358 [00:18<00:21,  7.59it/s] 55%|#####5    | 197/358 [00:18<00:21,  7.64it/s] 55%|#####5    | 198/358 [00:19<00:20,  7.78it/s] 56%|#####5    | 199/358 [00:19<00:20,  7.79it/s] 56%|#####5    | 200/358 [00:19<00:19,  8.00it/s] 56%|#####6    | 201/358 [00:19<00:19,  8.26it/s] 56%|#####6    | 202/358 [00:19<00:18,  8.43it/s] 57%|#####6    | 203/358 [00:19<00:18,  8.51it/s] 57%|#####6    | 204/358 [00:19<00:18,  8.52it/s] 57%|#####7    | 205/358 [00:19<00:17,  8.59it/s] 58%|#####7    | 206/358 [00:20<00:17,  8.76it/s] 58%|#####7    | 207/358 [00:20<00:17,  8.83it/s] 58%|#####8    | 208/358 [00:20<00:17,  8.79it/s] 58%|#####8    | 209/358 [00:20<00:16,  8.79it/s] 59%|#####8    | 210/358 [00:20<00:16,  8.85it/s] 59%|#####8    | 211/358 [00:20<00:18,  8.08it/s] 59%|#####9    | 212/358 [00:20<00:18,  8.09it/s] 59%|#####9    | 213/358 [00:20<00:17,  8.25it/s] 60%|#####9    | 214/358 [00:20<00:17,  8.44it/s] 60%|######    | 215/358 [00:21<00:16,  8.58it/s] 60%|######    | 216/358 [00:21<00:16,  8.75it/s] 61%|######    | 217/358 [00:21<00:15,  8.87it/s] 61%|######    | 218/358 [00:21<00:15,  9.03it/s] 61%|######1   | 219/358 [00:21<00:15,  9.00it/s] 61%|######1   | 220/358 [00:21<00:15,  8.88it/s] 62%|######1   | 221/358 [00:21<00:15,  9.02it/s] 62%|######2   | 222/358 [00:21<00:14,  9.11it/s] 62%|######2   | 223/358 [00:21<00:14,  9.21it/s] 63%|######2   | 224/358 [00:22<00:14,  9.15it/s] 63%|######2   | 225/358 [00:22<00:14,  9.06it/s] 63%|######3   | 226/358 [00:22<00:14,  9.04it/s] 63%|######3   | 227/358 [00:22<00:14,  9.01it/s] 64%|######3   | 228/358 [00:22<00:14,  9.01it/s] 64%|######3   | 229/358 [00:22<00:14,  8.94it/s] 64%|######4   | 230/358 [00:22<00:14,  8.93it/s] 65%|######4   | 231/358 [00:22<00:14,  8.96it/s] 65%|######4   | 232/358 [00:22<00:14,  8.97it/s] 65%|######5   | 233/358 [00:23<00:13,  9.08it/s] 65%|######5   | 234/358 [00:23<00:13,  8.99it/s] 66%|######5   | 235/358 [00:23<00:13,  9.02it/s] 66%|######5   | 236/358 [00:23<00:13,  9.19it/s] 66%|######6   | 237/358 [00:23<00:13,  9.23it/s] 66%|######6   | 238/358 [00:23<00:13,  9.04it/s] 67%|######6   | 239/358 [00:23<00:13,  9.13it/s] 67%|######7   | 240/358 [00:23<00:12,  9.14it/s] 67%|######7   | 241/358 [00:23<00:12,  9.13it/s] 68%|######7   | 242/358 [00:24<00:12,  9.04it/s] 68%|######7   | 243/358 [00:24<00:12,  9.16it/s] 68%|######8   | 244/358 [00:24<00:12,  9.09it/s] 68%|######8   | 245/358 [00:24<00:12,  9.09it/s] 69%|######8   | 246/358 [00:24<00:12,  9.04it/s] 69%|######8   | 247/358 [00:24<00:12,  9.08it/s] 69%|######9   | 248/358 [00:24<00:12,  9.06it/s] 70%|######9   | 249/358 [00:24<00:12,  9.02it/s] 70%|######9   | 250/358 [00:24<00:11,  9.02it/s] 70%|#######   | 251/358 [00:25<00:11,  9.09it/s] 70%|#######   | 252/358 [00:25<00:11,  9.09it/s] 71%|#######   | 253/358 [00:25<00:11,  9.14it/s] 71%|#######   | 254/358 [00:25<00:11,  9.17it/s] 71%|#######1  | 255/358 [00:25<00:11,  9.15it/s] 72%|#######1  | 256/358 [00:25<00:11,  9.03it/s] 72%|#######1  | 257/358 [00:25<00:11,  9.15it/s] 72%|#######2  | 258/358 [00:25<00:10,  9.23it/s] 72%|#######2  | 259/358 [00:25<00:10,  9.16it/s] 73%|#######2  | 260/358 [00:26<00:10,  9.02it/s] 73%|#######2  | 261/358 [00:26<00:10,  9.22it/s] 73%|#######3  | 262/358 [00:26<00:10,  9.31it/s] 73%|#######3  | 263/358 [00:26<00:10,  9.16it/s] 74%|#######3  | 264/358 [00:26<00:10,  9.19it/s] 74%|#######4  | 265/358 [00:26<00:10,  9.26it/s] 74%|#######4  | 266/358 [00:26<00:09,  9.29it/s] 75%|#######4  | 267/358 [00:26<00:10,  9.05it/s] 75%|#######4  | 268/358 [00:26<00:09,  9.24it/s] 75%|#######5  | 269/358 [00:27<00:09,  9.27it/s] 75%|#######5  | 270/358 [00:27<00:09,  9.27it/s] 76%|#######5  | 271/358 [00:27<00:09,  9.24it/s] 76%|#######5  | 272/358 [00:27<00:09,  9.19it/s] 76%|#######6  | 273/358 [00:27<00:09,  8.80it/s] 77%|#######6  | 274/358 [00:27<00:09,  8.77it/s] 77%|#######6  | 275/358 [00:27<00:09,  8.79it/s] 77%|#######7  | 276/358 [00:27<00:09,  8.90it/s] 77%|#######7  | 277/358 [00:27<00:08,  9.08it/s] 78%|#######7  | 278/358 [00:28<00:08,  9.16it/s] 78%|#######7  | 279/358 [00:28<00:08,  9.32it/s] 78%|#######8  | 280/358 [00:28<00:08,  9.38it/s] 78%|#######8  | 281/358 [00:28<00:08,  9.50it/s] 79%|#######8  | 282/358 [00:28<00:08,  9.38it/s] 79%|#######9  | 283/358 [00:28<00:08,  9.11it/s] 79%|#######9  | 284/358 [00:28<00:07,  9.26it/s] 80%|#######9  | 285/358 [00:28<00:07,  9.31it/s] 80%|#######9  | 286/358 [00:28<00:07,  9.45it/s] 80%|########  | 288/358 [00:29<00:07,  9.74it/s] 81%|########  | 289/358 [00:29<00:07,  9.69it/s] 81%|########1 | 290/358 [00:29<00:07,  9.69it/s] 81%|########1 | 291/358 [00:29<00:06,  9.75it/s] 82%|########1 | 293/358 [00:29<00:06,  9.92it/s] 82%|########2 | 295/358 [00:29<00:06, 10.11it/s] 83%|########2 | 297/358 [00:29<00:06, 10.07it/s] 84%|########3 | 299/358 [00:30<00:06,  9.75it/s] 84%|########3 | 300/358 [00:30<00:05,  9.74it/s] 84%|########4 | 301/358 [00:30<00:05,  9.67it/s] 84%|########4 | 302/358 [00:30<00:05,  9.62it/s] 85%|########4 | 303/358 [00:30<00:05,  9.64it/s] 85%|########4 | 304/358 [00:30<00:05,  9.58it/s] 85%|########5 | 306/358 [00:30<00:05,  9.82it/s] 86%|########5 | 307/358 [00:30<00:05,  9.75it/s] 86%|########6 | 309/358 [00:31<00:04,  9.85it/s] 87%|########6 | 310/358 [00:31<00:04,  9.84it/s] 87%|########7 | 312/358 [00:31<00:04, 10.00it/s] 87%|########7 | 313/358 [00:31<00:04,  9.95it/s] 88%|########7 | 314/358 [00:31<00:04,  9.94it/s] 88%|########8 | 316/358 [00:31<00:04,  9.97it/s] 89%|########8 | 317/358 [00:32<00:04,  9.78it/s] 89%|########9 | 319/358 [00:32<00:03, 10.02it/s] 89%|########9 | 320/358 [00:32<00:03,  9.88it/s] 90%|########9 | 321/358 [00:32<00:03,  9.71it/s] 90%|######### | 323/358 [00:32<00:03,  9.86it/s] 91%|######### | 325/358 [00:32<00:03, 10.08it/s] 91%|#########1| 327/358 [00:32<00:03, 10.08it/s] 92%|#########1| 329/358 [00:33<00:02,  9.70it/s] 92%|#########2| 330/358 [00:33<00:02,  9.53it/s] 92%|#########2| 331/358 [00:33<00:02,  9.07it/s] 93%|#########2| 332/358 [00:33<00:02,  8.90it/s] 93%|#########3| 333/358 [00:33<00:02,  8.87it/s] 93%|#########3| 334/358 [00:33<00:02,  8.68it/s] 94%|#########3| 335/358 [00:33<00:02,  8.87it/s] 94%|#########3| 336/358 [00:34<00:02,  8.51it/s] 94%|#########4| 337/358 [00:34<00:02,  8.67it/s] 94%|#########4| 338/358 [00:34<00:02,  8.76it/s] 95%|#########4| 339/358 [00:34<00:02,  8.88it/s] 95%|#########4| 340/358 [00:34<00:02,  8.85it/s] 95%|#########5| 341/358 [00:34<00:01,  8.62it/s] 96%|#########5| 342/358 [00:34<00:01,  8.76it/s] 96%|#########6| 344/358 [00:34<00:01,  9.21it/s] 96%|#########6| 345/358 [00:35<00:01,  9.28it/s] 97%|#########6| 346/358 [00:35<00:01,  9.39it/s] 97%|#########6| 347/358 [00:35<00:01,  9.50it/s] 97%|#########7| 349/358 [00:35<00:00,  9.84it/s] 98%|#########8| 351/358 [00:35<00:00,  9.92it/s] 99%|#########8| 353/358 [00:35<00:00, 10.07it/s] 99%|#########9| 355/358 [00:36<00:00, 10.20it/s]100%|#########9| 357/358 [00:36<00:00, 10.29it/s]100%|##########| 358/358 [00:36<00:00,  9.86it/s]Warping field generated: tmp.curve2straight.nii.gz 
-Warping field generated: tmp.straight2curve.nii.gz 
-Apply transformation to input image... 
-'c:\users\ojala\spinalcordtoolbox\bin\isct_antsApplyTransforms' -d 3 -i data.nii -o tmp.anat_rigid_warp.nii.gz -t tmp.curve2straight.nii.gz -r tmp.centerline_pad_crop.nii.gz -n 'BSpline[3]' # in C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.996900-straighten_spinalcord-p2alsvp2 
-Generate output files... 
-File created: .\warp_curve2straight.nii.gz 
-File created: .\warp_straight2curve.nii.gz 
-cp C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.996900-straighten_spinalcord-p2alsvp2\tmp.anat_rigid_warp.nii.gz .\straight_ref.nii.gz 
-File created: .\data_straight.nii 
-Remove temporary files... 
-rm -rf C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.996900-straighten_spinalcord-p2alsvp2 
- 
-Resample to 0.5mm isotropic... 
-sct_resample -i data_straight.nii -mm 0.5x0.5x0.5 -x linear -o data_straightr.nii # in C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown 
- 
-Apply straightening to segmentation... 
-'c:\users\ojala\spinalcordtoolbox\bin\isct_antsApplyTransforms' -d 3 -i segmentation.nii -o segmentation_straight.nii -t warp_curve2straight.nii.gz -r data_straightr.nii -n Linear # in C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown 
-[33mFile C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown\segmentation_straight.nii already exists. Will overwrite it.[0m 
- 
-Create label to identify disc... 
-Creating temporary folder... 
-Creating temporary folder (C:\Users\ojala\AppData\Local\Temp\sct-20220803114403.130657-hwykc3ga) 
-Run C2-C3 detector... 
-C2-C3 detected... 
-Remove temporary files... 
-rm -rf C:\Users\ojala\AppData\Local\Temp\sct-20220803114403.130657-hwykc3ga 
-[33mFile C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown\labelz.nii.gz already exists. Will overwrite it.[0m 
- 
-And apply straightening to label... 
-'c:\users\ojala\spinalcordtoolbox\bin\isct_antsApplyTransforms' -d 3 -i labelz.nii.gz -o labelz_straight.nii.gz -t warp_curve2straight.nii.gz -r data_straightr.nii -n NearestNeighbor # in C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown 
- 
-Get z and disc values from straight label... 
-.. [331, 3] 
-Look for template... 
-Path template: c:\users\ojala\spinalcordtoolbox\data\PAM50 
-Open template and vertebral levels... 
-Disc values from template: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] 
-Z-values for each disc: [963, 938, 907, 870, 833, 800, 769, 735, 692, 646, 600, 551, 500, 449, 396, 342, 289, 231, 168, 104, 79] 
-Distances between discs (in voxel): [25.0, 31.0, 37.0, 37.0, 33.0, 31.0, 34.0, 43.0, 46.0, 46.0, 49.0, 51.0, 51.0, 53.0, 54.0, 53.0, 58.0, 63.0, 64.0, 25.0] 
-Detect intervertebral discs... 
-Current disc: 2 (z=331). Direction: superior 
-.. Peak found: z=-3 (correlation = 0.6626715725015475) 
-Current disc: 1 (z=359). Direction: superior 
-.. correcting factor: 1.0 
-.. Switching to inferior direction. 
-Current disc: 3 (z=294). Direction: inferior 
-.. Peak found: z=-3 (correlation = 0.6776828752197703) 
-.. correcting factor: 1.0 
-Current disc: 4 (z=254). Direction: inferior 
-.. Peak found: z=1 (correlation = 0.5798307160324296) 
-.. correcting factor: 0.990990990990991 
-Current disc: 5 (z=222). Direction: inferior 
-.. Peak found: z=1 (correlation = 0.5649321858532907) 
-.. correcting factor: 0.9856674856674856 
-Current disc: 6 (z=192). Direction: inferior 
-.. Peak found: z=4 (correlation = 0.5280904835376841) 
-.. correcting factor: 0.9627275369210853 
-Current disc: 7 (z=163). Direction: inferior 
-.. Peak found: z=5 (correlation = 0.5328204526545017) 
-.. correcting factor: 0.939527849395022 
-Current disc: 8 (z=128). Direction: inferior 
-.. Peak found: z=3 (correlation = 0.6351293379299708) 
-.. correcting factor: 0.9282331732356003 
-Current disc: 9 (z=88). Direction: inferior 
-.. Peak found: z=3 (correlation = 0.46542990639276305) 
-.. correcting factor: 0.9208996787550633 
-Current disc: 10 (z=49). Direction: inferior 
-.. Peak found: z=0 (correlation = 0.46811124211216515) 
-.. correcting factor: 0.9200267675890418 
-Current disc: 11 (z=4). Direction: inferior 
-.. Peak found: z=7 (correlation = 0.4120816853272963) 
-.. correcting factor: 0.9055751112383008 
-Adding top disc based on adjusted template distance: #0 
-.. approximate distance: 23 
-[33mDuring disc labeling, center of mass calculation failed due to discontinuities in segmented spinal cord; please check the quality of your segmentation. Using interpolated centerline as a fallback.[0m 
- 
-c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\math.py:115: FutureWarning: `selem` is a deprecated argument name for `dilation`. It will be removed in version 1.0. Please use `footprint` instead. 
-  return dilation(data, selem=_get_selem(shape, size, dim), out=None) 
-Vertebral detection failed: Center of mass can't be calculated on empty arrays. 
-03-Aug-2022 11:44:14 - Failed  'Call MATLAB function'
-Error using sct_fmri_T2>run (line 173)
-
---
-Spinal Cord Toolbox (git-HEAD-45b1c1759f991332697b4120160303e963f7a3c7)
-
-sct_label_vertebrae -i C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\sub011-t2_spinalcord.nii.gz -s C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\t2_seg.nii.gz -c t2 -ofolder C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\ -qc C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t2_spinalcord\qc
---
-
-Creating temporary folder (C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown)
-
-Copying input data to tmp folder...
-
-Straighten spinal cord...
-Creating temporary folder (C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.996900-straighten_spinalcord-p2alsvp2)
-Copy files to tmp folder...
-Fitting centerline using B-spline approximation
-Error on approximation = 63.38 mm
-Error on approximation = 3.42 mm
-Error on approximation = 9.36 mm
-Error on approximation = 5.85 mm
-Error on approximation = 1.13 mm
-Error on approximation = 0.65 mm
-Error on approximation = 0.55 mm
-Error on approximation = 0.49 mm
-Error on approximation = 0.42 mm
-Error on approximation = 0.43 mm
-Error on approximation = 0.47 mm
-Error on approximation = 0.49 mm
-Error on approximation = 0.52 mm
-Error on approximation = 0.54 mm
-Error on approximation = 0.5 mm
-Error on approximation = 0.44 mm
-Error on approximation = 0.4 mm
-Error on approximation = 0.39 mm
-Error on approximation = 0.41 mm
-Error on approximation = 0.43 mm
-Error on approximation = 0.41 mm
-Error on approximation = 0.37 mm
-Error on approximation = 0.35 mm
-Error on approximation = 0.35 mm
-Error on approximation = 0.36 mm
-Error on approximation = 0.35 mm
-Error on approximation = 0.32 mm
-Error on approximation = 0.28 mm
-Error on approximation = 0.33 mm
-Error on approximation = 0.33 mm
-Error on approximation = 0.32 mm
-Create the straight space and the safe zone
-Length of spinal cord: 233.8400222963657
-Size of spinal cord in z direction: 214.18539527939805
-Ratio length/size: 1.0917645528133644
-Safe zone boundaries (curved space): [-152.7031316473066, 61.482263632091446]
-Safe zone boundaries (straight space): [-162.53044515579043, 71.30957714057527]
-Pad input volume to account for spinal cord length...
-Time to generate centerline: 45.0 ms
-  0%|          | 0/293 [00:00<?, ?it/s]  2%|1         | 5/293 [00:00<00:06, 45.85it/s]  3%|3         | 10/293 [00:00<00:06, 46.63it/s]  5%|5         | 15/293 [00:00<00:05, 47.28it/s]  7%|6         | 20/293 [00:00<00:05, 47.24it/s]  9%|8         | 25/293 [00:00<00:05, 47.37it/s] 10%|#         | 30/293 [00:00<00:05, 47.00it/s] 12%|#1        | 35/293 [00:00<00:05, 47.06it/s] 14%|#3        | 40/293 [00:00<00:05, 46.53it/s] 15%|#5        | 45/293 [00:00<00:05, 46.73it/s] 17%|#7        | 50/293 [00:01<00:05, 47.00it/s] 19%|#8        | 55/293 [00:01<00:05, 47.05it/s] 20%|##        | 60/293 [00:01<00:04, 47.09it/s] 22%|##2       | 65/293 [00:01<00:04, 46.98it/s] 24%|##3       | 70/293 [00:01<00:04, 47.44it/s] 26%|##5       | 75/293 [00:01<00:04, 47.49it/s] 27%|##7       | 80/293 [00:01<00:04, 47.40it/s] 29%|##9       | 85/293 [00:01<00:04, 47.19it/s] 31%|###       | 90/293 [00:01<00:04, 46.92it/s] 32%|###2      | 95/293 [00:02<00:04, 46.73it/s] 34%|###4      | 100/293 [00:02<00:04, 46.47it/s] 36%|###5      | 105/293 [00:02<00:04, 46.41it/s] 38%|###7      | 110/293 [00:02<00:03, 46.38it/s] 39%|###9      | 115/293 [00:02<00:03, 46.61it/s] 41%|####      | 120/293 [00:02<00:03, 46.78it/s] 43%|####2     | 125/293 [00:02<00:03, 46.77it/s] 44%|####4     | 130/293 [00:02<00:03, 46.76it/s] 46%|####6     | 135/293 [00:02<00:03, 46.62it/s] 48%|####7     | 140/293 [00:02<00:03, 46.65it/s] 49%|####9     | 145/293 [00:03<00:03, 46.67it/s] 51%|#####1    | 150/293 [00:03<00:03, 46.82it/s] 53%|#####2    | 155/293 [00:03<00:02, 46.67it/s] 55%|#####4    | 160/293 [00:03<00:02, 46.68it/s] 56%|#####6    | 165/293 [00:03<00:02, 46.44it/s] 58%|#####8    | 170/293 [00:03<00:02, 46.79it/s] 60%|#####9    | 175/293 [00:03<00:02, 47.17it/s] 61%|######1   | 180/293 [00:03<00:02, 46.90it/s] 63%|######3   | 185/293 [00:03<00:02, 47.11it/s] 65%|######4   | 190/293 [00:04<00:02, 47.40it/s] 67%|######6   | 195/293 [00:04<00:02, 47.33it/s] 68%|######8   | 200/293 [00:04<00:01, 47.42it/s] 70%|######9   | 205/293 [00:04<00:01, 47.21it/s] 72%|#######1  | 210/293 [00:04<00:01, 47.19it/s] 73%|#######3  | 215/293 [00:04<00:01, 47.19it/s] 75%|#######5  | 220/293 [00:04<00:01, 47.05it/s] 77%|#######6  | 225/293 [00:04<00:01, 47.09it/s] 78%|#######8  | 230/293 [00:04<00:01, 47.11it/s] 80%|########  | 235/293 [00:05<00:01, 47.13it/s] 82%|########1 | 240/293 [00:05<00:01, 47.14it/s] 84%|########3 | 245/293 [00:05<00:01, 47.55it/s] 85%|########5 | 250/293 [00:05<00:00, 47.71it/s] 87%|########7 | 255/293 [00:05<00:00, 47.55it/s] 89%|########8 | 260/293 [00:05<00:00, 47.70it/s] 90%|######### | 265/293 [00:05<00:00, 47.67it/s] 92%|#########2| 270/293 [00:05<00:00, 47.66it/s] 94%|#########3| 275/293 [00:05<00:00, 47.92it/s] 96%|#########5| 280/293 [00:05<00:00, 47.97it/s] 97%|#########7| 285/293 [00:06<00:00, 47.72it/s] 99%|#########8| 290/293 [00:06<00:00, 47.83it/s]100%|##########| 293/293 [00:06<00:00, 47.12it/s]
-  0%|          | 0/358 [00:00<?, ?it/s]  0%|          | 1/358 [00:00<00:38,  9.26it/s]  1%|          | 3/358 [00:00<00:32, 10.77it/s]  1%|1         | 5/358 [00:00<00:31, 11.10it/s]  2%|1         | 7/358 [00:00<00:33, 10.47it/s]  3%|2         | 9/358 [00:00<00:32, 10.81it/s]  3%|3         | 11/358 [00:01<00:31, 11.04it/s]  4%|3         | 13/358 [00:01<00:31, 10.98it/s]  4%|4         | 15/358 [00:01<00:31, 11.02it/s]  5%|4         | 17/358 [00:01<00:30, 11.17it/s]  5%|5         | 19/358 [00:01<00:30, 11.19it/s]  6%|5         | 21/358 [00:01<00:30, 11.09it/s]  6%|6         | 23/358 [00:02<00:30, 10.98it/s]  7%|6         | 25/358 [00:02<00:30, 10.75it/s]  8%|7         | 27/358 [00:02<00:31, 10.67it/s]  8%|8         | 29/358 [00:02<00:30, 10.64it/s]  9%|8         | 31/358 [00:02<00:30, 10.64it/s]  9%|9         | 33/358 [00:03<00:30, 10.66it/s] 10%|9         | 35/358 [00:03<00:30, 10.72it/s] 10%|#         | 37/358 [00:03<00:29, 10.80it/s] 11%|#         | 39/358 [00:03<00:29, 10.87it/s] 11%|#1        | 41/358 [00:03<00:29, 10.93it/s] 12%|#2        | 43/358 [00:03<00:28, 10.93it/s] 13%|#2        | 45/358 [00:04<00:28, 10.87it/s] 13%|#3        | 47/358 [00:04<00:28, 10.82it/s] 14%|#3        | 49/358 [00:04<00:28, 10.83it/s] 14%|#4        | 51/358 [00:04<00:28, 10.81it/s] 15%|#4        | 53/358 [00:04<00:28, 10.81it/s] 15%|#5        | 55/358 [00:05<00:28, 10.57it/s] 16%|#5        | 57/358 [00:05<00:28, 10.68it/s] 16%|#6        | 59/358 [00:05<00:27, 10.70it/s] 17%|#7        | 61/358 [00:05<00:27, 10.73it/s] 18%|#7        | 63/358 [00:05<00:27, 10.76it/s] 18%|#8        | 65/358 [00:06<00:27, 10.74it/s] 19%|#8        | 67/358 [00:06<00:27, 10.78it/s] 19%|#9        | 69/358 [00:06<00:27, 10.68it/s] 20%|#9        | 71/358 [00:06<00:26, 10.65it/s] 20%|##        | 73/358 [00:06<00:26, 10.70it/s] 21%|##        | 75/358 [00:06<00:26, 10.68it/s] 22%|##1       | 77/358 [00:07<00:26, 10.75it/s] 22%|##2       | 79/358 [00:07<00:25, 10.77it/s] 23%|##2       | 81/358 [00:07<00:25, 10.84it/s] 23%|##3       | 83/358 [00:07<00:25, 10.88it/s] 24%|##3       | 85/358 [00:07<00:25, 10.86it/s] 24%|##4       | 87/358 [00:08<00:25, 10.81it/s] 25%|##4       | 89/358 [00:08<00:24, 10.85it/s] 25%|##5       | 91/358 [00:08<00:24, 10.84it/s] 26%|##5       | 93/358 [00:08<00:24, 10.79it/s] 27%|##6       | 95/358 [00:08<00:24, 10.75it/s] 27%|##7       | 97/358 [00:08<00:24, 10.71it/s] 28%|##7       | 99/358 [00:09<00:24, 10.76it/s] 28%|##8       | 101/358 [00:09<00:23, 10.79it/s] 29%|##8       | 103/358 [00:09<00:23, 10.85it/s] 29%|##9       | 105/358 [00:09<00:23, 10.89it/s] 30%|##9       | 107/358 [00:09<00:22, 10.96it/s] 30%|###       | 109/358 [00:10<00:22, 10.91it/s] 31%|###1      | 111/358 [00:10<00:22, 10.95it/s] 32%|###1      | 113/358 [00:10<00:22, 10.93it/s] 32%|###2      | 115/358 [00:10<00:22, 10.93it/s] 33%|###2      | 117/358 [00:10<00:22, 10.95it/s] 33%|###3      | 119/358 [00:10<00:21, 11.00it/s] 34%|###3      | 121/358 [00:11<00:21, 10.99it/s] 34%|###4      | 123/358 [00:11<00:21, 11.07it/s] 35%|###4      | 125/358 [00:11<00:21, 11.08it/s] 35%|###5      | 127/358 [00:11<00:20, 11.11it/s] 36%|###6      | 129/358 [00:11<00:20, 11.16it/s] 37%|###6      | 131/358 [00:12<00:20, 11.17it/s] 37%|###7      | 133/358 [00:12<00:20, 11.08it/s] 38%|###7      | 135/358 [00:12<00:20, 11.00it/s] 38%|###8      | 137/358 [00:12<00:20, 11.01it/s] 39%|###8      | 139/358 [00:12<00:19, 11.04it/s] 39%|###9      | 141/358 [00:12<00:19, 11.04it/s] 40%|###9      | 143/358 [00:13<00:19, 11.06it/s] 41%|####      | 145/358 [00:13<00:19, 11.08it/s] 41%|####1     | 147/358 [00:13<00:19, 11.09it/s] 42%|####1     | 149/358 [00:13<00:18, 11.13it/s] 42%|####2     | 151/358 [00:13<00:18, 11.24it/s] 43%|####2     | 153/358 [00:14<00:18, 11.28it/s] 43%|####3     | 155/358 [00:14<00:17, 11.28it/s] 44%|####3     | 157/358 [00:14<00:17, 11.25it/s] 44%|####4     | 159/358 [00:14<00:17, 11.21it/s] 45%|####4     | 161/358 [00:14<00:17, 11.25it/s] 46%|####5     | 163/358 [00:14<00:17, 11.25it/s] 46%|####6     | 165/358 [00:15<00:17, 11.26it/s] 47%|####6     | 167/358 [00:15<00:16, 11.31it/s] 47%|####7     | 169/358 [00:15<00:17, 10.64it/s] 48%|####7     | 171/358 [00:15<00:18,  9.90it/s] 48%|####8     | 173/358 [00:15<00:19,  9.38it/s] 49%|####8     | 174/358 [00:16<00:19,  9.30it/s] 49%|####8     | 175/358 [00:16<00:19,  9.36it/s] 49%|####9     | 177/358 [00:16<00:19,  9.12it/s] 50%|####9     | 178/358 [00:16<00:20,  8.71it/s] 50%|#####     | 179/358 [00:16<00:20,  8.55it/s] 50%|#####     | 180/358 [00:16<00:22,  7.86it/s] 51%|#####     | 181/358 [00:16<00:22,  7.84it/s] 51%|#####     | 182/358 [00:17<00:22,  7.75it/s] 51%|#####1    | 183/358 [00:17<00:22,  7.89it/s] 51%|#####1    | 184/358 [00:17<00:21,  7.92it/s] 52%|#####1    | 185/358 [00:17<00:21,  7.96it/s] 52%|#####1    | 186/358 [00:17<00:21,  8.07it/s] 52%|#####2    | 187/358 [00:17<00:21,  8.10it/s] 53%|#####2    | 188/358 [00:17<00:21,  8.09it/s] 53%|#####2    | 189/358 [00:17<00:20,  8.26it/s] 53%|#####3    | 190/358 [00:18<00:20,  8.33it/s] 53%|#####3    | 191/358 [00:18<00:19,  8.43it/s] 54%|#####3    | 192/358 [00:18<00:19,  8.60it/s] 54%|#####3    | 193/358 [00:18<00:19,  8.67it/s] 54%|#####4    | 194/358 [00:18<00:21,  7.72it/s] 54%|#####4    | 195/358 [00:18<00:22,  7.40it/s] 55%|#####4    | 196/358 [00:18<00:21,  7.59it/s] 55%|#####5    | 197/358 [00:18<00:21,  7.64it/s] 55%|#####5    | 198/358 [00:19<00:20,  7.78it/s] 56%|#####5    | 199/358 [00:19<00:20,  7.79it/s] 56%|#####5    | 200/358 [00:19<00:19,  8.00it/s] 56%|#####6    | 201/358 [00:19<00:19,  8.26it/s] 56%|#####6    | 202/358 [00:19<00:18,  8.43it/s] 57%|#####6    | 203/358 [00:19<00:18,  8.51it/s] 57%|#####6    | 204/358 [00:19<00:18,  8.52it/s] 57%|#####7    | 205/358 [00:19<00:17,  8.59it/s] 58%|#####7    | 206/358 [00:20<00:17,  8.76it/s] 58%|#####7    | 207/358 [00:20<00:17,  8.83it/s] 58%|#####8    | 208/358 [00:20<00:17,  8.79it/s] 58%|#####8    | 209/358 [00:20<00:16,  8.79it/s] 59%|#####8    | 210/358 [00:20<00:16,  8.85it/s] 59%|#####8    | 211/358 [00:20<00:18,  8.08it/s] 59%|#####9    | 212/358 [00:20<00:18,  8.09it/s] 59%|#####9    | 213/358 [00:20<00:17,  8.25it/s] 60%|#####9    | 214/358 [00:20<00:17,  8.44it/s] 60%|######    | 215/358 [00:21<00:16,  8.58it/s] 60%|######    | 216/358 [00:21<00:16,  8.75it/s] 61%|######    | 217/358 [00:21<00:15,  8.87it/s] 61%|######    | 218/358 [00:21<00:15,  9.03it/s] 61%|######1   | 219/358 [00:21<00:15,  9.00it/s] 61%|######1   | 220/358 [00:21<00:15,  8.88it/s] 62%|######1   | 221/358 [00:21<00:15,  9.02it/s] 62%|######2   | 222/358 [00:21<00:14,  9.11it/s] 62%|######2   | 223/358 [00:21<00:14,  9.21it/s] 63%|######2   | 224/358 [00:22<00:14,  9.15it/s] 63%|######2   | 225/358 [00:22<00:14,  9.06it/s] 63%|######3   | 226/358 [00:22<00:14,  9.04it/s] 63%|######3   | 227/358 [00:22<00:14,  9.01it/s] 64%|######3   | 228/358 [00:22<00:14,  9.01it/s] 64%|######3   | 229/358 [00:22<00:14,  8.94it/s] 64%|######4   | 230/358 [00:22<00:14,  8.93it/s] 65%|######4   | 231/358 [00:22<00:14,  8.96it/s] 65%|######4   | 232/358 [00:22<00:14,  8.97it/s] 65%|######5   | 233/358 [00:23<00:13,  9.08it/s] 65%|######5   | 234/358 [00:23<00:13,  8.99it/s] 66%|######5   | 235/358 [00:23<00:13,  9.02it/s] 66%|######5   | 236/358 [00:23<00:13,  9.19it/s] 66%|######6   | 237/358 [00:23<00:13,  9.23it/s] 66%|######6   | 238/358 [00:23<00:13,  9.04it/s] 67%|######6   | 239/358 [00:23<00:13,  9.13it/s] 67%|######7   | 240/358 [00:23<00:12,  9.14it/s] 67%|######7   | 241/358 [00:23<00:12,  9.13it/s] 68%|######7   | 242/358 [00:24<00:12,  9.04it/s] 68%|######7   | 243/358 [00:24<00:12,  9.16it/s] 68%|######8   | 244/358 [00:24<00:12,  9.09it/s] 68%|######8   | 245/358 [00:24<00:12,  9.09it/s] 69%|######8   | 246/358 [00:24<00:12,  9.04it/s] 69%|######8   | 247/358 [00:24<00:12,  9.08it/s] 69%|######9   | 248/358 [00:24<00:12,  9.06it/s] 70%|######9   | 249/358 [00:24<00:12,  9.02it/s] 70%|######9   | 250/358 [00:24<00:11,  9.02it/s] 70%|#######   | 251/358 [00:25<00:11,  9.09it/s] 70%|#######   | 252/358 [00:25<00:11,  9.09it/s] 71%|#######   | 253/358 [00:25<00:11,  9.14it/s] 71%|#######   | 254/358 [00:25<00:11,  9.17it/s] 71%|#######1  | 255/358 [00:25<00:11,  9.15it/s] 72%|#######1  | 256/358 [00:25<00:11,  9.03it/s] 72%|#######1  | 257/358 [00:25<00:11,  9.15it/s] 72%|#######2  | 258/358 [00:25<00:10,  9.23it/s] 72%|#######2  | 259/358 [00:25<00:10,  9.16it/s] 73%|#######2  | 260/358 [00:26<00:10,  9.02it/s] 73%|#######2  | 261/358 [00:26<00:10,  9.22it/s] 73%|#######3  | 262/358 [00:26<00:10,  9.31it/s] 73%|#######3  | 263/358 [00:26<00:10,  9.16it/s] 74%|#######3  | 264/358 [00:26<00:10,  9.19it/s] 74%|#######4  | 265/358 [00:26<00:10,  9.26it/s] 74%|#######4  | 266/358 [00:26<00:09,  9.29it/s] 75%|#######4  | 267/358 [00:26<00:10,  9.05it/s] 75%|#######4  | 268/358 [00:26<00:09,  9.24it/s] 75%|#######5  | 269/358 [00:27<00:09,  9.27it/s] 75%|#######5  | 270/358 [00:27<00:09,  9.27it/s] 76%|#######5  | 271/358 [00:27<00:09,  9.24it/s] 76%|#######5  | 272/358 [00:27<00:09,  9.19it/s] 76%|#######6  | 273/358 [00:27<00:09,  8.80it/s] 77%|#######6  | 274/358 [00:27<00:09,  8.77it/s] 77%|#######6  | 275/358 [00:27<00:09,  8.79it/s] 77%|#######7  | 276/358 [00:27<00:09,  8.90it/s] 77%|#######7  | 277/358 [00:27<00:08,  9.08it/s] 78%|#######7  | 278/358 [00:28<00:08,  9.16it/s] 78%|#######7  | 279/358 [00:28<00:08,  9.32it/s] 78%|#######8  | 280/358 [00:28<00:08,  9.38it/s] 78%|#######8  | 281/358 [00:28<00:08,  9.50it/s] 79%|#######8  | 282/358 [00:28<00:08,  9.38it/s] 79%|#######9  | 283/358 [00:28<00:08,  9.11it/s] 79%|#######9  | 284/358 [00:28<00:07,  9.26it/s] 80%|#######9  | 285/358 [00:28<00:07,  9.31it/s] 80%|#######9  | 286/358 [00:28<00:07,  9.45it/s] 80%|########  | 288/358 [00:29<00:07,  9.74it/s] 81%|########  | 289/358 [00:29<00:07,  9.69it/s] 81%|########1 | 290/358 [00:29<00:07,  9.69it/s] 81%|########1 | 291/358 [00:29<00:06,  9.75it/s] 82%|########1 | 293/358 [00:29<00:06,  9.92it/s] 82%|########2 | 295/358 [00:29<00:06, 10.11it/s] 83%|########2 | 297/358 [00:29<00:06, 10.07it/s] 84%|########3 | 299/358 [00:30<00:06,  9.75it/s] 84%|########3 | 300/358 [00:30<00:05,  9.74it/s] 84%|########4 | 301/358 [00:30<00:05,  9.67it/s] 84%|########4 | 302/358 [00:30<00:05,  9.62it/s] 85%|########4 | 303/358 [00:30<00:05,  9.64it/s] 85%|########4 | 304/358 [00:30<00:05,  9.58it/s] 85%|########5 | 306/358 [00:30<00:05,  9.82it/s] 86%|########5 | 307/358 [00:30<00:05,  9.75it/s] 86%|########6 | 309/358 [00:31<00:04,  9.85it/s] 87%|########6 | 310/358 [00:31<00:04,  9.84it/s] 87%|########7 | 312/358 [00:31<00:04, 10.00it/s] 87%|########7 | 313/358 [00:31<00:04,  9.95it/s] 88%|########7 | 314/358 [00:31<00:04,  9.94it/s] 88%|########8 | 316/358 [00:31<00:04,  9.97it/s] 89%|########8 | 317/358 [00:32<00:04,  9.78it/s] 89%|########9 | 319/358 [00:32<00:03, 10.02it/s] 89%|########9 | 320/358 [00:32<00:03,  9.88it/s] 90%|########9 | 321/358 [00:32<00:03,  9.71it/s] 90%|######### | 323/358 [00:32<00:03,  9.86it/s] 91%|######### | 325/358 [00:32<00:03, 10.08it/s] 91%|#########1| 327/358 [00:32<00:03, 10.08it/s] 92%|#########1| 329/358 [00:33<00:02,  9.70it/s] 92%|#########2| 330/358 [00:33<00:02,  9.53it/s] 92%|#########2| 331/358 [00:33<00:02,  9.07it/s] 93%|#########2| 332/358 [00:33<00:02,  8.90it/s] 93%|#########3| 333/358 [00:33<00:02,  8.87it/s] 93%|#########3| 334/358 [00:33<00:02,  8.68it/s] 94%|#########3| 335/358 [00:33<00:02,  8.87it/s] 94%|#########3| 336/358 [00:34<00:02,  8.51it/s] 94%|#########4| 337/358 [00:34<00:02,  8.67it/s] 94%|#########4| 338/358 [00:34<00:02,  8.76it/s] 95%|#########4| 339/358 [00:34<00:02,  8.88it/s] 95%|#########4| 340/358 [00:34<00:02,  8.85it/s] 95%|#########5| 341/358 [00:34<00:01,  8.62it/s] 96%|#########5| 342/358 [00:34<00:01,  8.76it/s] 96%|#########6| 344/358 [00:34<00:01,  9.21it/s] 96%|#########6| 345/358 [00:35<00:01,  9.28it/s] 97%|#########6| 346/358 [00:35<00:01,  9.39it/s] 97%|#########6| 347/358 [00:35<00:01,  9.50it/s] 97%|#########7| 349/358 [00:35<00:00,  9.84it/s] 98%|#########8| 351/358 [00:35<00:00,  9.92it/s] 99%|#########8| 353/358 [00:35<00:00, 10.07it/s] 99%|#########9| 355/358 [00:36<00:00, 10.20it/s]100%|#########9| 357/358 [00:36<00:00, 10.29it/s]100%|##########| 358/358 [00:36<00:00,  9.86it/s]Warping field generated: tmp.curve2straight.nii.gz
-Warping field generated: tmp.straight2curve.nii.gz
-Apply transformation to input image...
-'c:\users\ojala\spinalcordtoolbox\bin\isct_antsApplyTransforms' -d 3 -i data.nii -o tmp.anat_rigid_warp.nii.gz -t tmp.curve2straight.nii.gz -r tmp.centerline_pad_crop.nii.gz -n 'BSpline[3]' # in C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.996900-straighten_spinalcord-p2alsvp2
-Generate output files...
-File created: .\warp_curve2straight.nii.gz
-File created: .\warp_straight2curve.nii.gz
-cp C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.996900-straighten_spinalcord-p2alsvp2\tmp.anat_rigid_warp.nii.gz .\straight_ref.nii.gz
-File created: .\data_straight.nii
-Remove temporary files...
-rm -rf C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.996900-straighten_spinalcord-p2alsvp2
-
-Resample to 0.5mm isotropic...
-sct_resample -i data_straight.nii -mm 0.5x0.5x0.5 -x linear -o data_straightr.nii # in C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown
-
-Apply straightening to segmentation...
-'c:\users\ojala\spinalcordtoolbox\bin\isct_antsApplyTransforms' -d 3 -i segmentation.nii -o segmentation_straight.nii -t warp_curve2straight.nii.gz -r data_straightr.nii -n Linear # in C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown
-[33mFile C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown\segmentation_straight.nii already exists. Will overwrite it.[0m
-
-Create label to identify disc...
-Creating temporary folder...
-Creating temporary folder (C:\Users\ojala\AppData\Local\Temp\sct-20220803114403.130657-hwykc3ga)
-Run C2-C3 detector...
-C2-C3 detected...
-Remove temporary files...
-rm -rf C:\Users\ojala\AppData\Local\Temp\sct-20220803114403.130657-hwykc3ga
-[33mFile C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown\labelz.nii.gz already exists. Will overwrite it.[0m
-
-And apply straightening to label...
-'c:\users\ojala\spinalcordtoolbox\bin\isct_antsApplyTransforms' -d 3 -i labelz.nii.gz -o labelz_straight.nii.gz -t warp_curve2straight.nii.gz -r data_straightr.nii -n NearestNeighbor # in C:\Users\ojala\AppData\Local\Temp\sct-20220803114243.549274-label_vertebrae-wpe0gown
-
-Get z and disc values from straight label...
-.. [331, 3]
-Look for template...
-Path template: c:\users\ojala\spinalcordtoolbox\data\PAM50
-Open template and vertebral levels...
-Disc values from template: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-Z-values for each disc: [963, 938, 907, 870, 833, 800, 769, 735, 692, 646, 600, 551, 500, 449, 396, 342, 289, 231, 168, 104, 79]
-Distances between discs (in voxel): [25.0, 31.0, 37.0, 37.0, 33.0, 31.0, 34.0, 43.0, 46.0, 46.0, 49.0, 51.0, 51.0, 53.0, 54.0, 53.0, 58.0, 63.0, 64.0, 25.0]
-Detect intervertebral discs...
-Current disc: 2 (z=331). Direction: superior
-.. Peak found: z=-3 (correlation = 0.6626715725015475)
-Current disc: 1 (z=359). Direction: superior
-.. correcting factor: 1.0
-.. Switching to inferior direction.
-Current disc: 3 (z=294). Direction: inferior
-.. Peak found: z=-3 (correlation = 0.6776828752197703)
-.. correcting factor: 1.0
-Current disc: 4 (z=254). Direction: inferior
-.. Peak found: z=1 (correlation = 0.5798307160324296)
-.. correcting factor: 0.990990990990991
-Current disc: 5 (z=222). Direction: inferior
-.. Peak found: z=1 (correlation = 0.5649321858532907)
-.. correcting factor: 0.9856674856674856
-Current disc: 6 (z=192). Direction: inferior
-.. Peak found: z=4 (correlation = 0.5280904835376841)
-.. correcting factor: 0.9627275369210853
-Current disc: 7 (z=163). Direction: inferior
-.. Peak found: z=5 (correlation = 0.5328204526545017)
-.. correcting factor: 0.939527849395022
-Current disc: 8 (z=128). Direction: inferior
-.. Peak found: z=3 (correlation = 0.6351293379299708)
-.. correcting factor: 0.9282331732356003
-Current disc: 9 (z=88). Direction: inferior
-.. Peak found: z=3 (correlation = 0.46542990639276305)
-.. correcting factor: 0.9208996787550633
-Current disc: 10 (z=49). Direction: inferior
-.. Peak found: z=0 (correlation = 0.46811124211216515)
-.. correcting factor: 0.9200267675890418
-Current disc: 11 (z=4). Direction: inferior
-.. Peak found: z=7 (correlation = 0.4120816853272963)
-.. correcting factor: 0.9055751112383008
-Adding top disc based on adjusted template distance: #0
-.. approximate distance: 23
-[33mDuring disc labeling, center of mass calculation failed due to discontinuities in segmented spinal cord; please check the quality of your segmentation. Using interpolated centerline as a fallback.[0m
-
-c:\users\ojala\spinalcordtoolbox\spinalcordtoolbox\math.py:115: FutureWarning: `selem` is a deprecated argument name for `dilation`. It will be removed in version 1.0. Please use `footprint` instead.
-  return dilation(data, selem=_get_selem(shape, size, dim), out=None)
-Vertebral detection failed: Center of mass can't be calculated on empty arrays.
-
-In file "C:\Data\CPM-Pressure\scripts\Analysis\mri\preprocessing\sct_fmri_T2.m" (???), function "run" at line 173.
-In file "C:\Data\CPM-Pressure\scripts\Analysis\mri\preprocessing\sct_fmri_T2.m" (???), function "sct_fmri_T2" at line 100.
-In file "C:\Data\Toolboxes\spm12\matlabbatch\cfg_basicio\cfg_run_call_matlab.m" (v3810), function "cfg_run_call_matlab" at line 60.
-In file "C:\Data\Toolboxes\spm12\matlabbatch\cfg_basicio\cfg_cfg_basicio.m" (???), function "@(job)cfg_run_call_matlab('run',job)" at line 1379.
-
-03-Aug-2022 11:44:14 - Running 'Slice Timing'
-
-SPM12: spm_slice_timing (v6130)                    11:44:14 - 03/08/2022
-========================================================================
-Number of slices is...                  :                             60
-Time to Repeat (TR) is...               :                          1.991
-Parameters are specified as...          :               slice times (ms)
-[Warning: Forcing deletion of MAT-file.] 
-[> In spm_create_vol>create_vol (line 204)
-  In spm_create_vol (line 17)
-  In spm_slice_timing (line 161)
-  In spm_run_st (line 30)
-  In cfg_run_cm (line 29)
-  In cfg_util>local_runcj (line 1717)
-  In cfg_util (line 972)
-  In spm_jobman>fill_run_job (line 469)
-  In spm_jobman (line 247)] 
-[Warning: Forcing deletion of MAT-file.] 
-[> In spm_create_vol>create_vol (line 204)
-  In spm_create_vol (line 17)
-  In spm_slice_timing (line 161)
-  In spm_run_st (line 30)
-  In cfg_run_cm (line 29)
-  In cfg_util>local_runcj (line 1717)
-  In cfg_util (line 972)
-  In spm_jobman>fill_run_job (line 469)
-  In spm_jobman (line 247)] 
-Completed                               :          11:52:14 - 03/08/2022
-03-Aug-2022 11:52:15 - Done    'Slice Timing'
-03-Aug-2022 11:52:15 - Running 'Realign: Estimate & Reslice'
-
-SPM12: spm_realign (v7141)                         11:52:15 - 03/08/2022
-========================================================================
-Completed                               :          11:53:39 - 03/08/2022
-
-SPM12: spm_reslice (v7141)                         11:53:39 - 03/08/2022
-========================================================================
-Completed                               :          11:55:32 - 03/08/2022
-03-Aug-2022 11:55:32 - Done    'Realign: Estimate & Reslice'
-03-Aug-2022 11:55:32 - Running 'Non-linear co-registration'
-
-
-------------------------------------------------------------------------
-03-Aug-2022 11:55:34 - Running job #2
-------------------------------------------------------------------------
-03-Aug-2022 11:55:34 - Running 'Segment'
-
-SPM12: spm_preproc_run (v7670)                     11:55:34 - 03/08/2022
-========================================================================
-Segment C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t1_corrected\sub011-t1_corrected.nii
-Completed                               :          11:59:32 - 03/08/2022
-03-Aug-2022 11:59:32 - Done    'Segment'
-03-Aug-2022 11:59:32 - Running 'Smooth'
-03-Aug-2022 11:59:46 - Done    'Smooth'
-03-Aug-2022 11:59:46 - Running '3D to 4D File Conversion'
-03-Aug-2022 11:59:49 - Done    '3D to 4D File Conversion'
-03-Aug-2022 11:59:50 - Running 'Normalise: Estimate & Write'
-
-SPM12: spm_preproc_run (v7670)                     11:59:50 - 03/08/2022
-========================================================================
-Segment C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\epi-run1\meanasub011-epi-run1-brain.nii
-Completed                               :          12:07:43 - 03/08/2022
-03-Aug-2022 12:07:46 - Done    'Normalise: Estimate & Write'
-03-Aug-2022 12:07:46 - Running 'Move/Delete Files'
-03-Aug-2022 12:07:47 - Done    'Move/Delete Files'
-03-Aug-2022 12:07:47 - Done
-
-03-Aug-2022 12:07:47 - Done    'Non-linear co-registration'
-03-Aug-2022 12:07:47 - Running 'Segment'
-
-SPM12: spm_preproc_run (v7670)                     12:07:47 - 03/08/2022
-========================================================================
-Segment C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t1_corrected\sub011-t1_corrected.nii
-Completed                               :          12:13:16 - 03/08/2022
-03-Aug-2022 12:13:16 - Done    'Segment'
-03-Aug-2022 12:13:16 - Running 'Image Calculator'
-
-SPM12: spm_imcalc (v6961)                          12:13:16 - 03/08/2022
-========================================================================
-ImCalc Image: C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t1_corrected\skull_strip.nii
-03-Aug-2022 12:13:18 - Done    'Image Calculator'
-03-Aug-2022 12:13:18 - Running 'Run Dartel (existing Templates)'
-*** rc1sub011-t1_corrected ***
-Continuing registration from pre-existing parameters (C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\sub011\t1_corrected\u_rc1sub011-t1_corrected.nii)
-1 	233873	524790	758663	1746.88
-2 	275054	74515.1	349569	155.306
-3 	279208	62897	342105	43.9454
-4 	280034	29521	309555	155.177
-5 	258125	43823.5	301948	55.6624
-6 	255439	45844.1	301283	32.6553
-7 	255610	23553.4	279164	124.205
-8 	235991	35621.5	271613	46.8149
-9 	233906	37019.9	270926	28.6115
-10 	234627	19122.6	253749	107.901
-11 	215395	31206.9	246602	42.8067
-12 	214024	32263.4	246287	29.4177
-13 	215698	16870.3	232568	90.1917
-14 	199010	27549.3	226560	41.1092
-15 	197855	29122.8	226978	29.782
-16 	199216	30721.5	229938	34.5348
-17 	199358	31522.6	230880	26.649
-18 	200059	32383.2	232442	25.4612
-03-Aug-2022 12:18:32 - Done    'Run Dartel (existing Templates)'
-03-Aug-2022 12:18:32 - Running 'Deformations'
-03-Aug-2022 12:18:36 - Done    'Deformations'
-03-Aug-2022 12:18:36 - Running 'Deformations'
-03-Aug-2022 12:18:41 - Done    'Deformations'
-03-Aug-2022 12:18:41 - Running 'Deformations'
-03-Aug-2022 12:19:11 - Done    'Deformations'
-03-Aug-2022 12:19:11 - Running 'Create Warped'
-u_rc1sub011-t1_corrected: skull_strip	1,1,1
-u_rc1sub011-t1_corrected: c1sub011-t1_corrected	1,1,1
-u_rc1sub011-t1_corrected: c2sub011-t1_corrected	1,1,1
-03-Aug-2022 12:19:22 - Done    'Create Warped'
-03-Aug-2022 12:19:22 - Running 'Deformations'
-03-Aug-2022 12:19:24 - Done    'Deformations'
-03-Aug-2022 12:19:25 - Running 'Smooth'
-03-Aug-2022 12:19:31 - Done    'Smooth'
-The following modules did not run:
-Failed: Call MATLAB function
-
-{Error using MATLABbatch system
-Job execution failed. The full log of this run can be found in MATLAB command window, starting with the lines (look for the line showing
-the exact #job as displayed in this error message)
-------------------
-Running job #1
-------------------
-} 

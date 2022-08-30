@@ -41,7 +41,7 @@ do_sm_skull      = 1; % can only be done after all of the above steps
 do_avg_norm      = 0; % can only be done after all subjects done
 
 
-all_subs     = 11;%[1 2 4:13 15:18 20:27 29:34 37:40 42:47];
+all_subs     = 48:50;%[1 2 4:13 15:18 20:27 29:34 37:40 42:47];
 
 %DEBUG
 % all_subs    = 1;
