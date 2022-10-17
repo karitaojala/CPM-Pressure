@@ -18,3 +18,15 @@ scripts/Analysis/behav/Experiment-01_individualTestRatings_overStimuli.png
 *.cache
 
 *.asv
+
+scripts/Analysis/mri/preprocessing/ArtRepairScripts/
+
+*.png
+
+*.svg
+
+*.csv
+
+scripts/Analysis/behav/CPM_testrating_LMEfit_blockwise_estimates
+
+scripts/Analysis/mri/oldscripts/fromjanne/
