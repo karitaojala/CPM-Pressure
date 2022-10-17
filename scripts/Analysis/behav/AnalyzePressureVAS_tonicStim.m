@@ -58,7 +58,7 @@ elseif strcmp(project.phase,'Pilot-04')
 elseif strcmp(project.phase,'Experiment-01')
    
     prepost_order = [1 1];
-    subjects = [1:2 4:13 15:18 20:27 29:34 37:40 42:50];
+    subjects = [1:2 4:13 15:18 20:27 29:34 37:40 42:49];
     subjects_without_prerating = 2:15; % some participants had their pre-experiment rating accidentally overwritten by the post-experiment rating
     
     rating_length = 5000;
@@ -169,6 +169,19 @@ for sub = 1:numel(subjects)
     
 end
 
+for tp = 1:rating_duration
+    
+    % CON
+    errorbar_con(:,tp) = nanstd(ratings_allsubs_mean_control(:,tp))/sqrt(numel(subjects));
+    
+    % EXP
+    errorbar_exp(:,tp) = nanstd(ratings_allsubs_mean_exp(:,tp))/sqrt(numel(subjects));
+    
+end
+
+%colors = [252, 192, 24; 58, 119, 242]./255; % con, exp
+colors = [3, 186, 251; 0, 85, 254]./255; % blue shades
+
 mean_control = nanmean(ratings_allsubs_mean_control);
 mean_experimental = nanmean(ratings_allsubs_mean_exp);
 
@@ -178,23 +191,35 @@ ramp_down_start = rating_duration-10;
 mean_allsubs_control = nanmean(ratings_allsubs_mean_control(:,ramp_up_end:ramp_down_start),2);
 mean_allsubs_exp = nanmean(ratings_allsubs_mean_exp(:,ramp_up_end:ramp_down_start),2);
 
-figure('Position',[10 10 600 400]);
-plot(mean_control,'Color',[253, 216, 110]./255,'LineWidth',2);
+figure('Position',[10 10 900 400]);
 hold on
-plot(mean_experimental,'Color',[239, 123, 5]./255,'LineWidth',2);
+p1 = plot(mean_control,'Color',colors(1,:),'LineWidth',2);
+x = 1:rating_duration;
+y = mean_control;
+errorsem = errorbar_con;
+hl = boundedline(x, y, errorsem, 'linewidth', 2, 'cmap', colors(1,:),'alpha');
+
+clear x y errorsem
+p2 = plot(mean_experimental,'Color',colors(2,:),'LineWidth',2);
+x = 1:rating_duration;
+y = mean_experimental;
+errorsem = errorbar_exp;
+hl = boundedline(x, y, errorsem, 'linewidth', 2, 'cmap', colors(2,:),'alpha');
+
 hold on
 ylim([0 100])
 set(gca,'yTick',0:20:100,'FontSize',14)
-ylabel('Conditioning stimulus pain rating (VAS)','FontSize',14)
-xlabel('Time (s)','FontSize',14)
+ylabel('Conditioning stimulus pain rating','FontSize',14)
+xlabel('Time (seconds)','FontSize',14)
 set(gca,'xTick',0:10:rating_duration,'FontSize',14)
 xlim([0 rating_duration])
 if prepost
-    legend({'Pre-experiment rating','Post-experiment rating'},'Location','southeast','FontSize',14)
+    legend([p1,p2],{'Pre-experiment rating','Post-experiment rating'},'Location','northeast','FontSize',14)
+    legend('boxoff')
 else
     legend({'Control','Experimental'},'Location','southeast') %#ok<UNRCH>
 end
-legend('boxoff')
-title({'Average conditioning pain';['fMRI study (N = ' num2str(numel(subjects)) ')']},'FontSize',14)
+%legend([p1,p2],{'Control, non-painful','Experimental, painful'},'boxoff','Location','northeast')
+title({'Pre/post-experiment conditioning stimulus ratings'})%;['fMRI study (N = ' num2str(numel(subjects)) ')']},'FontSize',14)
 
 end

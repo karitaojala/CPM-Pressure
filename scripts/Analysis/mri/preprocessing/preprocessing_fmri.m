@@ -19,29 +19,29 @@ end
 addpath(genpath(spm_path))
 addpath(sct_path)
 
-parallel       = 1; % run several processes (matlabs/subjects) in parallel on different cores
+parallel       = 0; % run several processes (matlabs/subjects) in parallel on different cores
 
-do_sp_slicetime  = 1;
-do_sp_sct        = 1;
+do_sp_slicetime  = 0;
+do_sp_sct        = 0;
 
-do_shift         = 1;
-do_slicetime     = 1;
-do_realign       = 1;
-do_nonlincoreg   = 1;
-do_seg           = 1;
-do_skull         = 1;
+do_shift         = 0;
+do_slicetime     = 0;
+do_realign       = 0;
+do_nonlincoreg   = 0;
+do_seg           = 0;
+do_skull         = 0;
 
-do_norm          = 1;
-do_back          = 1;
-do_comb_dar_nlin = 1;
-do_warp          = 1;
+do_norm          = 0;
+do_back          = 0;
+do_comb_dar_nlin = 0;
+do_warp          = 0;
 
-do_sm_skull      = 1; % can only be done after all of the above steps
+do_sm_skull      = 0; % can only be done after all of the above steps
 
-do_avg_norm      = 0; % can only be done after all subjects done
+do_avg_norm      = 1; % can only be done after all subjects done
 
 
-all_subs     = 48:50;%[1 2 4:13 15:18 20:27 29:34 37:40 42:47];
+all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
 
 %DEBUG
 % all_subs    = 1;
@@ -53,7 +53,12 @@ st_spinal    = [797.5 725.0 652.5 580.0 507.5 435.0 362.5 290.0 217.5 145.0 72.5
 transM       = [1 0 0 0;0 1 0 0;0 0 1 -100;0 0 0 1]; % shift T1 and all brain EPIs
 
 skullstrip_name   = 'skull_strip.nii';
+mean_func_name    = 'tmeanasub001-epi-run1-brain.nii';
 
+all_wskull_files = [];
+all_wmean_files  = [];
+all_wc1_files    = [];
+            
 if size(all_subs) < n_proc
     n_proc = size(all_subs,2);
 end
@@ -197,8 +202,7 @@ for np = 1:size(subs,2)
         %-------------------------------
         %Do Realignment
         if do_realign
-            %for l=1:numel(epi_folders)
-            for l=1:2
+            for l=1:numel(epi_folders)
                 a_epi_brain_files{l} = strrep(epi_brain_files{l},sprintf('%s-epi-run%s-brain.nii',name,num2str(l)),sprintf('a%s-epi-run%s-brain.nii',name,num2str(l)));
             end
             matlabbatch{gi}.spm.spatial.realign.estwrite.data             = a_epi_brain_files;
@@ -380,7 +384,21 @@ for np = 1:size(subs,2)
             matlabbatch{gi}.spm.spatial.smooth.prefix = ['s' num2str(skern)];
             gi = gi + 1;
         end
+        
+        if do_avg_norm
+            
+            wskull_file     = ins_letter(strip_file,'w');
+            wmean_file      = ins_letter(mean_file,'wt');
+            wc1_file        = ins_letter(struc_file,'wc1');
+            
+            all_wskull_files  = strvcat(all_wskull_files,wskull_file);
+            all_wmean_files   = strvcat(all_wmean_files,wmean_file);
+            all_wc1_files     = strvcat(all_wc1_files,wc1_file);
+            
+        end
+        
     end
+    
     if ~isempty(matlabbatch)
         if parallel
             run_matlab(np, matlabbatch, l_string);
@@ -393,50 +411,30 @@ for np = 1:size(subs,2)
 end
 
 if do_avg_norm
-    matlabbatch = [];
-    all_wskull_files = [];
-    all_wmean_files  = [];
-    all_wc1_files    = [];
-    
-    for g = 1:size(all_subs,2)
-        name = sprintf('Sub%02.2d',all_subs(g));
-        strip_file        = [base_dir name filesep 'T1' filesep skullstrip_name];
-        wskull_file       = ins_letter(strip_file,'w');
-        
-        mean_file        = [base_dir name filesep 'T1' filesep mean_func_name];
-        wmean_file       = ins_letter(mean_file,'w');
-        
-        
-        
-        st_dir       = [base_dir name filesep 'T1' filesep];
-        struc_file   = spm_select('FPList', st_dir, struc_templ);
-        wc1_file     = ins_letter(struc_file,'wc1');
-        
-        all_wskull_files  = strvcat(all_wskull_files,wskull_file);
-        all_wmean_files   = strvcat(all_wmean_files,wmean_file);
-        all_wc1_files     = strvcat(all_wc1_files,wc1_file);
-    end
+  
+    clear matlabbatch
     
     matlabbatch{1}.spm.util.imcalc.input = cellstr(all_wskull_files);
     matlabbatch{1}.spm.util.imcalc.output = 'mean_wskull';
-    matlabbatch{1}.spm.util.imcalc.outdir = cellstr(base_dir);
+    matlabbatch{1}.spm.util.imcalc.outdir = cellstr(fullfile(base_dir,'2ndlevel','meanmasks'));
     matlabbatch{1}.spm.util.imcalc.expression = 'mean(X)';
     matlabbatch{1}.spm.util.imcalc.var = struct('name', {}, 'value', {});
     matlabbatch{1}.spm.util.imcalc.options.dmtx = 1;
     matlabbatch{1}.spm.util.imcalc.options.mask = 0;
     matlabbatch{1}.spm.util.imcalc.options.interp = 1;
     matlabbatch{1}.spm.util.imcalc.options.dtype = 4;
+
+    matlabbatch{2} = matlabbatch{1};
+    matlabbatch{2}.spm.util.imcalc.input = cellstr(all_wmean_files);
+    matlabbatch{2}.spm.util.imcalc.output = 'mean_wmean';
     
-    %     matlabbatch{2} = matlabbatch{1};
-    %     matlabbatch{2}.spm.util.imcalc.input = cellstr(all_wmean_files);
-    %     matlabbatch{2}.spm.util.imcalc.output = 'mean_wmean';
-    %
-    %     matlabbatch{3} = matlabbatch{1};
-    %     matlabbatch{3}.spm.util.imcalc.input = cellstr(all_wc1_files);
-    %     matlabbatch{3}.spm.util.imcalc.output = 'mean_wc1';
-    %
+    matlabbatch{3} = matlabbatch{1};
+    matlabbatch{3}.spm.util.imcalc.input = cellstr(all_wc1_files);
+    matlabbatch{3}.spm.util.imcalc.output = 'mean_wc1';
+    
     spm_jobman('initcfg');
     spm_jobman('run',matlabbatch);
+    
 end
 
 function chuckCell = splitvect(v, n)
@@ -530,5 +528,3 @@ system(['start matlab.exe ' l_string ' -nodesktop -nosplash  -logfile ' num2str(
 %     end
 % end
 %
-
-

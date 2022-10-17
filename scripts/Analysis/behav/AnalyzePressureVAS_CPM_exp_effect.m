@@ -24,7 +24,7 @@ path.code = pwd;
 path.main = fullfile(path.code,'..','..','..');
 path.data = fullfile(path.main,'data',project.name,project.phase,'logs');
 
-subjects = [1:2 4:13 15:18 20:27 29:34 37:40 42:50]; % sub 3, 36 excluded due to behavioral reasons, rest dropouts during scanning
+subjects = [1:2 4:13 15:18 20:27 29:34 37:40 42:49]; % sub 3, 36 excluded due to behavioral reasons, rest dropouts during scanning
 blocks = 4;
 trials = 2;
 stimuli = 9;
@@ -108,24 +108,27 @@ end
 % ratings_allsubs_b3 = squeeze(ratings_allsubs(:,3,:));
 % ratings_allsubs_b4 = squeeze(ratings_allsubs(:,4,:));
 
-save('Experiment-01_ratings.mat','ratings_allsubs','conditions_allsubs','conditions_allsubs_perblock','phasicStimPressures','bgvariables');
+%save('Experiment-01_ratings.mat','ratings_allsubs','conditions_allsubs','conditions_allsubs_perblock','phasicStimPressures','bgvariables');
 
 no_stimuli = 72;
 stimuli_per_trial = 9;
 stimuli_per_block = 18;
 no_trials = 4*2;
+no_blocks = 4;
 
 Subject = repmat(subjects,[no_stimuli 1]);
 Subject = Subject(:);
 Stimulus = repmat(1:no_stimuli,[length(subjects) 1])';
 Stimulus = Stimulus(:);
-Trial = trials_all';
+StimInBlock = repmat(1:stimuli_per_block,[length(subjects)*no_blocks 1])';
+StimInBlock = StimInBlock(:);
+TrialInBlock = trials_all';
 Block = blocks_all';
 Condition = conditions_all';
 PainRating = ratings_all';
 
 summarytablefile = fullfile(path.code,'Experiment-01_ratings_table_long.csv');
-datatable1 = table(Subject,Stimulus,Trial,Block,Condition,PainRating);
+datatable1 = table(Subject,StimInBlock,TrialInBlock,Stimulus,Block,Condition,PainRating);
 writetable(datatable1,summarytablefile);
     
 end

@@ -2,10 +2,12 @@
 
 function ConvertFromSpikeSMR
 
-    baseDir = 'C:\Users\horing\Documents\projects\P7_EquiNox\physio';
-    logDir = 'C:\Users\horing\Documents\projects\P7_EquiNox\logs'; 
+    baseDir = 'C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\physio';
+    logDir = 'C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\logs'; 
     
     NChannels = 7; %could use [ iMaxChans ] = CEDS64MaxChan( fhand ); buit there's something weird in channel 31...
+    % 1: scanner, 2: pressure onset (tonic=trial), 3: VAS onset, 4: button
+    % press, 5: SCR/Spike, 6: breathing, 7: pulse
     
     DoConversion(baseDir,NChannels); % expects all smr files to be in baseDir; will distribute to subfolders later
     DistributeFiles(baseDir,logDir);
@@ -13,7 +15,7 @@ function ConvertFromSpikeSMR
     
 function DoConversion(baseDir,NChannels)
 
-    cedpath = 'C:\Program Files\CEDMATLAB\CEDS64ML';
+    cedpath = 'C:\Program Files (x86)\CEDMATLAB\CEDS64ML';
     addpath( cedpath );
     CEDS64LoadLib( cedpath );
     
@@ -108,7 +110,7 @@ function DoConversion(baseDir,NChannels)
             %eval(sprintf('sub%03d_Ch%d = tempStruct;',sbId,iChan));        
 
             %m.(sprintf('sub%03d_Ch%d',sbId,iChan)) = tempStruct;
-            m.(sprintf('%s_Ch%d',outName,iChan)) = tempStruct;
+            m.(sprintf('Ch%d',iChan)) = tempStruct;
             fprintf('done\n');
 
         end

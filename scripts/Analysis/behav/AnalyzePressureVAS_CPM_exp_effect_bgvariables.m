@@ -28,7 +28,9 @@ load(fullfile(path.code,'Experiment-01_ratings.mat'))
 load(fullfile(path.code,'Experiment-01_backgroundvar.mat'))
 load(fullfile(path.code,'Experiment-01_conditions.mat'))
 
-% ratings_allsubs = ratings_allsubs(1:40,:,:);
+backgroundvar = backgroundvar(1:end-1,:);
+
+ratings_allsubs = ratings_allsubs(1:end-1,:,:); % last subject 50 excluded
 blocks_to_take = 0; % 0 all, 1 = first con vs. exp, 2 = last con vs. exp
 
 no_subjects = size(ratings_allsubs,1);
@@ -57,43 +59,48 @@ end
 cpm_data = [ratings_allsubs_mean_control ratings_allsubs_mean_exp];
 cpm_diff_data = ratings_allsubs_mean_control-ratings_allsubs_mean_exp;
 
+Subject = [1:2 4:13 15:18 20:27 29:34 37:40 42:49]';
+RatedCPM = cpm_diff_data;
+VerbalCPM = backgroundvar.SubjectiveCPM;
+cpmtable = table(Subject,RatedCPM,VerbalCPM);
+writetable(cpmtable,'CPM_rated_reported.csv')
 % Scatterplot CPM effect magnitude vs. backgroundvar
 
 %% Subjective CPM
-% cpm_diff_pos = cpm_diff_data(backgroundvar.SubjectiveCPM == 1);
-% cpm_diff_zero = cpm_diff_data(backgroundvar.SubjectiveCPM == 0);
-% cpm_diff_neg = cpm_diff_data(backgroundvar.SubjectiveCPM == -1);
-% 
-% aligned_resp = sum(cpm_diff_pos > 0) + sum(cpm_diff_neg < 0) + sum(cpm_diff_zero < 5 | cpm_diff_zero > -5);
-% conflicting_resp = sum(cpm_diff_pos < 0) + sum(cpm_diff_neg > 0) + sum(cpm_diff_zero > 5 | cpm_diff_zero < -5);
-% 
-% % Calculate between-subject error bars (SEM)
-% sem_pos = std(cpm_diff_pos)/sqrt(numel(cpm_diff_pos));
-% sem_zero = std(cpm_diff_zero)/sqrt(numel(cpm_diff_zero));
-% sem_neg = std(cpm_diff_neg)/sqrt(numel(cpm_diff_neg));
-% errorbars = [sem_pos sem_zero sem_neg];
-% 
-% clear bardata
-% bardata = [mean(cpm_diff_pos); mean(cpm_diff_zero); mean(cpm_diff_neg)];
-% 
-% figure('Position',[10 10 400 420]);
-% 
-% b = bar(bardata,'LineWidth',1);
-% b.FaceColor = 'flat';
-% b.CData(1,:) = [0, 102, 204]./255;%[253, 216, 110]./255;
-% b.CData(2,:) = [128, 128, 128]./255;
-% b.CData(3,:) = [255, 77, 77]./255;%[239, 123, 5]./255;
-% hold on
-% 
-% errorbar(1:3,bardata',errorbars,'k','LineStyle','none','LineWidth',2,'CapSize',0)
-% 
-% ylim([-10 10])
-% set(gca,'yTick',-10:2:10,'FontSize',14)
-% ylabel('CPM magnitude CON-EXP (VAS)','FontSize',14)
-% set(gca,'xTickLabel', {sprintf('Hypo'),sprintf('No diff'),sprintf('Hyper')},'FontSize',14)
-% box off
-% title({'Average CPM vs. Subjective CPM';['N = ' num2str(numel(cpm_diff_pos)) ' - ' ...
-%     num2str(numel(cpm_diff_zero)) ' - ' num2str(numel(cpm_diff_neg))]},'FontSize',14)
+cpm_diff_pos = cpm_diff_data(backgroundvar.SubjectiveCPM == 1);
+cpm_diff_zero = cpm_diff_data(backgroundvar.SubjectiveCPM == 0);
+cpm_diff_neg = cpm_diff_data(backgroundvar.SubjectiveCPM == -1);
+
+aligned_resp = sum(cpm_diff_pos > 5) + sum(cpm_diff_neg < -5) + sum(abs(cpm_diff_zero) < 5);
+conflicting_resp = sum(cpm_diff_pos < 5) + sum(cpm_diff_neg > -5) + sum(abs(cpm_diff_zero) > 5);
+
+% Calculate between-subject error bars (SEM)
+sem_pos = std(cpm_diff_pos)/sqrt(numel(cpm_diff_pos));
+sem_zero = std(cpm_diff_zero)/sqrt(numel(cpm_diff_zero));
+sem_neg = std(cpm_diff_neg)/sqrt(numel(cpm_diff_neg));
+errorbars = [sem_pos sem_zero sem_neg];
+
+clear bardata
+bardata = [mean(cpm_diff_pos); mean(cpm_diff_zero); mean(cpm_diff_neg)];
+
+figure('Position',[10 10 450 400]);
+
+b = bar(bardata,'LineWidth',1);
+b.FaceColor = 'flat';
+b.CData(1,:) = [0, 102, 204]./255;%[253, 216, 110]./255;
+b.CData(2,:) = [128, 128, 128]./255;
+b.CData(3,:) = [255, 77, 77]./255;%[239, 123, 5]./255;
+hold on
+
+errorbar(1:3,bardata',errorbars,'k','LineStyle','none','LineWidth',2,'CapSize',0)
+
+ylim([-10 10])
+set(gca,'yTick',-10:2:10,'FontSize',14)
+ylabel('CPM magnitude (CON-EXP test ratings)','FontSize',14)
+set(gca,'xTickLabel', {sprintf('Hypo'),sprintf('No diff'),sprintf('Hyper')},'FontSize',14)
+box off
+title({'Pain ratings vs. Verbal report';['N = ' num2str(numel(cpm_diff_pos)) ' - ' ...
+    num2str(numel(cpm_diff_zero)) ' - ' num2str(numel(cpm_diff_neg))]},'FontSize',14)
 
 % [~,ttest_p,~,ttest_stats] = ttest2(cpm_diff_tonic,cpm_diff_phasic)
 % % addpath(cd,'..','Utils')

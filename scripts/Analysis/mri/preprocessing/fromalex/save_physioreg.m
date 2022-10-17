@@ -6,7 +6,7 @@ nsess             = 8;
 n_scans           = 157;
 dummy             = 4;
 TR                = 2.65;
-basedir           = '/projects/crunchie/remi3/';
+basedir           = '..\..\..\..\data\CPM-Pressure-01\Experiment-01';
 physiodir         = fullfile(basedir,'physio');
 
 logdir = fullfile(basedir,'logs');
@@ -29,6 +29,6 @@ for g = 1:size(subs,2)
             physio = get_physio(physiodir,name,se,n_scans,TR);
             physio = physio(dummy+1:n_scans,:);
         end       
-        save(fullfile(rundir,sprintf('Sub%02.0f_physio_run%d.mat',subs(g),se)),'physio');
+        save(fullfile(rundir,sprintf('sub%02.0f_physio_run%d.mat',subs(g),se)),'physio');
     end
 end

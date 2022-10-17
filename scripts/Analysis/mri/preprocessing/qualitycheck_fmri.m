@@ -7,8 +7,6 @@ switch hostname
     case 'isnb05cda5ba721' % work laptop
         base_dir          = 'C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\';
         base_dir2          = 'C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\sc_proc\';
-        l_string          = '';
-        n_proc            = 2; % maximum processes on 2 cores
         sct_path          = 'C:\Users\ojala\spinalcordtoolbox';
         spm_path          = 'C:\Data\Toolboxes\spm12';
     otherwise
@@ -20,12 +18,12 @@ addpath(sct_path)
 
 % all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
 all_subs     = [1 2 4:10 12:13 15:18 20:24 26:27 29:34 37:40 42:49]; % subs 11 and 25 not run
-all_subs2     = [1 2 4:7 12:13 15:18 24:27 29:30 37:39 42:44]; % if sc_proc data
-all_subs = setdiff(all_subs,all_subs2);
+% all_subs2     = [1 2 4:7 12:13 15:18 24:27 29:30 37:39 42:44]; % if sc_proc data
+%all_subs = setdiff(all_subs,all_subs2);
 data1 = true;
 data2 = false;
 
-for sub = numel(all_subs)
+for sub = 1:numel(all_subs)
     
     clear images
     
@@ -38,7 +36,10 @@ for sub = numel(all_subs)
 
     fprintf(['Doing volunteer ' name '\n']);
     
-    for epi = [2:5]
+    epi_files = {};
+    epi_ind = 1;
+    
+    for epi = [1 6]
         
         % Find EPIs in both data folders
 %         func_name = sprintf('%s-epi-run%d-spinal_moco.nii.gz',name,epi);
@@ -76,14 +77,16 @@ for sub = numel(all_subs)
             images = char(t2_file, epi_file, epi_file2);
         end
         
-        % Compare T2, and the two EPIs
-         spm_check_registration(images)
+        epi_files{epi_ind} = epi_file;
+        epi_ind = epi_ind + 1;
+        % Compare T2, and the two EPIs from the two datasets
+         %spm_check_registration(images)
         
     end
     
-%     images = {t2_file epi_files};
-%     
-%     spm_check_registration(images)
+    % Compare T2 and EPIs of different runs
+    images = char(t2_file, epi_files{:});
+    spm_check_registration(images)
     
 end
 
