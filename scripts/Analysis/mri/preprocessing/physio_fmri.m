@@ -23,9 +23,9 @@ multiband_factor  = 3; % brain only
 
 % Options
 spinal              = false;
-extract_physio_runs = false;
+extract_physio_runs = true;
 convert_physio2bids = false;
-run_physio_batch    = true;
+run_physio_batch    = false;
 calc_manual_physio  = false;
 
 if spinal % Spinal
@@ -53,9 +53,9 @@ physregopts.h_size   = 300; %for breathing histogram
 
 if extract_physio_runs
     
-    for sub = 1:numel(all_subs)
+    for sub = 6%all_subs
         
-        name = sprintf('sub%03d',all_subs(sub));
+        name = sprintf('sub%03d',sub);
         disp(name);
         
         outdir = fullfile(physiodir,name);
@@ -77,8 +77,8 @@ if extract_physio_runs
             start_scans_all(run) = start_scan;
             all_scans = [all_scans physio.scansPhysioStart'];
             
-            save(fullfile(outdir,sprintf('sub%03d-run%d-physio.mat',all_subs(sub),run)),'physio');
-            save(fullfile(outdir,sprintf('sub%03d-run%d-behav.mat',all_subs(sub),run)),'behav');
+            save(fullfile(outdir,sprintf('sub%03d-run%d-physio.mat',sub,run)),'physio');
+            save(fullfile(outdir,sprintf('sub%03d-run%d-behav.mat',sub,run)),'behav');
             
             if run < n_runs
                 start_scan = start_scan + n_scans(run) + n_dummy;
@@ -135,7 +135,7 @@ end
 
 if run_physio_batch
     
-    for sub = 5%1:numel(all_subs)
+    for sub = 1:numel(all_subs)
         
         fprintf('Running PhysIO batch...\n')
         name = sprintf('sub%03d',all_subs(sub));
@@ -143,7 +143,7 @@ if run_physio_batch
         
         output_dir = fullfile(physiodir,name);
         
-        for run = 6%1:n_runs
+        for run = 1:n_runs
         
             close all
             run_id = sprintf('run%d',run);

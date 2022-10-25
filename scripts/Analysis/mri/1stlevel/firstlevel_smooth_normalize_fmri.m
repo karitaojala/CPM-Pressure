@@ -40,7 +40,7 @@ for sub = subj
 %     norm_con_files = char(spm_select('FPList', firstlvlpath, ['^' norm_prefix 'con.*nii$']));
 %     norm_con_files = cellstr(char(norm_con_files));
     
-    for con = contrasts
+    for con = 1:numel(contrasts)
         [fp,fn,ext] = fileparts(input_files{con});
         norm_con_files{con} = fullfile(firstlvlpath, [options.preproc.norm_prefix fn ext]);
     end

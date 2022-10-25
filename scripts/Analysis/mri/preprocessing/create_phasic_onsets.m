@@ -1,12 +1,4 @@
-function create_phasic_onsets
-
-base_dir    = 'C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\';
-physiodir   = fullfile(base_dir,'physio');
-
-all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
-
-n_runs            = 6;
-exp_runs          = 2:5;
+function create_phasic_onsets(options,subj)
 
 cparSR = 20;
 physioSR = 100;
@@ -17,51 +9,83 @@ step = 0.1;
 discrepancyCPARVASperStim = (0:8)*step;
 discrepancyCPARVASperStim = [discrepancyCPARVASperStim discrepancyCPARVASperStim]';
 
-for sub = 1:numel(all_subs)
+for sub = subj
     
-    name = sprintf('sub%03d',all_subs(sub));
+    clear P O cparData
+    
+    name = sprintf('sub%03d',sub);
     fprintf([name '\n']);
     
-    logdir = fullfile(base_dir,'logs',name,'pain');
+    logdir = fullfile(options.path.logdir,name,'pain');
     load(fullfile(logdir,['parameters_' name '.mat']));
     load(fullfile(logdir,[name '_CPAR_CPM.mat']));
         
-    for run = 1:numel(exp_runs)
+    for run = 1:numel(options.acq.exp_runs)
         
-        run_id = num2str(exp_runs(run));
+        clear phasicStim phasicPressure physio behav
+        
+        run_id = num2str(options.acq.exp_runs(run));
         
         % file to save onsets to
-        behavfile = fullfile(logdir,[name '-run' run_id '-phasic-onsets.mat']);
+        behavfile = fullfile(logdir,[name '-run' run_id '-onsets.mat']);
 
-        load(fullfile(physiodir,name,[name '-run' run_id '-behav.mat']))
-        load(fullfile(physiodir,name,[name '-run' run_id '-physio.mat']))
+        load(fullfile(options.path.physiodir,name,[name '-run' run_id '-behav.mat']))
+        load(fullfile(options.path.physiodir,name,[name '-run' run_id '-physio.mat']))
 
         % tonic trial numbers for this run
         trialNo = [(run-1)+run run+run]+1;
         
-        % scanner pulse timings from physio file in seconds
+        % scanner pulse timings from physio file in seconds (starting from
+        % 6th pulse after 5 dummies)
         scannerPulsesvsPhysioStart = physio.scansPhysioStart/physioSR;
 
         % time from physio file start to first scanner pulse
         timeFromPhysioStarttoFirstPulse = scannerPulsesvsPhysioStart(1);
-        % time from first scanner pulse to the first trial onset based on
-        % physio file saved triggers sent from Matlab to Spike
+        
+        % time from first scanner pulse in Matlab to run's first trial start in Matlab
+        timeFromLastDummytoFirstTrial = P.time.trialStart(run,1)-(P.mri.mriRunStartTime(options.acq.exp_runs(run))-P.time.scriptStart);
+        % in fact ~5 seconds = 1x 1.991 s TR + ~3s because time counting
+        % starts right after last dummy pulse was measured -> last dummy TR
+        % is not excluded yet
+        
+        % time from first scanner pulse to the first trial onset in Spike
+        % (sent as marker from Matlab)
         timeFromFirstPulsetoTrial = behav.trialOnsets(trialNo(1))-timeFromPhysioStarttoFirstPulse;
+        
+        % difference in Matlab and Spike recordings due to the Matlab
+        % recording starting from 5th dummy pulse arrival and physio
+        % signals set to start from 6th pulse (first experimental pulse)
+        diffMatlabSpikeTimings = timeFromLastDummytoFirstTrial-timeFromFirstPulsetoTrial;
+        % but why is this less than 1 TR? (1.991 s) -> maybe delay in
+        % sending pulse info to Matlab, should not matter much for this
+        % paradigm that < 0.2 s difference in timings
         
         % trial and tonic stimulus onsets as saved in Matlab during
         % experiment
-        firstTrialStart = P.time.trialStart(run,1);
+        firstTrialStart = P.time.trialStart(run,1); 
         firstTonicStart = P.time.tonicStimStart(run,1);
         timeFromTrialStarttoFirstTonic = firstTonicStart-firstTrialStart;
+        % but this difference likely not relevant as trigger is likely more
+        % reliable, right before CPAR onset - log-based VAS timings etc.
+        % may be up to 0.2 s off (or not) then but no matter in this paradigm
         
         % VAS onsets as recorded in Spike with triggers sent from Matlab
         phasicVASOnsetsvsPhysioStart = behav.VASOnsets';
+        phasicVASOnsetsvsFirstPulse = behav.VASOnsets'-timeFromPhysioStarttoFirstPulse;
+        phasicVASOnsetsvsFirstTrial = behav.VASOnsets'-behav.trialOnsets(trialNo(1));
+        
+        % VAS onsets as recorded in Matlab vs script start
         phasicVASOnsetLog = squeeze(P.time.phasicStimVASStart(run,:,:)); 
+        phasicVASOnsetLog(phasicVASOnsetLog==0) = NaN; % remove zeros = no stimuli (case only for sub 5 run 4 trial 2)
         phasicVASOnsetLog = sort(phasicVASOnsetLog(:))';
-        phasicVASOnsetLogtoTrialStart = phasicVASOnsetLog-firstTrialStart+timeFromFirstPulsetoTrial;
+        % adjust to set timings to start from first experimental pulse
+        % onset
+        phasicVASOnsetLogtoTrialStart = phasicVASOnsetLog-firstTrialStart; % relative timing, not absolute
         
         % phasic stimulus onsets from CPAR device pressure recordings
         % detect changes in pressure indicating phasic stimulus start
+        phasicStim = {NaN(1,9) NaN(1,9)};
+        
         for trial = 1:2
             
             try
@@ -71,7 +95,7 @@ for sub = 1:numel(all_subs)
                 continue;
             end
             maxPressure = max(phasicPressure);
-
+            
             realPhasicOnsets = 0;
             threshold = 0.5;
             stepSize = 0.01;
@@ -98,37 +122,50 @@ for sub = 1:numel(all_subs)
         
         % tonic stimulus trial 2 onset from Matlab (to get CPAR pressure
         % recordings into physio/Matlab recording time)
-        tonicStartTrial2 = P.time.tonicStimStart(run,2); % start time of tonic trial 2
+        if sub == 5 && run == 3
+            tonicStartTrial2 = P.time.trialStart(run,2)+timeFromTrialStarttoFirstTonic; % tonic time not recorded, take trial start time and add difference estimated from first tonic trial
+        else
+            tonicStartTrial2 = P.time.tonicStimStart(run,2); % start time of tonic trial 2
+        end
         tonicStartInd = ceil((tonicStartTrial2-firstTonicStart)*cparSR+1); % find tonic trial 2 start time relative to tonic trial 1 start time
         
         % collect tonic trial 1 and 2 phasic stimulus onsets together
-        realPhasicStimOnsetsFromTrialStart = [phasicStim{1} phasicStim{2}+tonicStartInd]; % concatenate the phasic onsets of the two tonic trials
-        realPhasicStimOnsetsFromTrialStart = realPhasicStimOnsetsFromTrialStart/cparSR; % back to seconds
-        %realPhasicStimOnsetsFromTrialStart = realPhasicStimOnsetsFromTrialStart+timeFromFirstPulsetoTrial; % add difference between first scanner pulse and trial start trigger
+        realPhasicStimOnsetsFromTonicStart = [phasicStim{1} phasicStim{2}+tonicStartInd]; % concatenate the phasic onsets of the two tonic trials
+        realPhasicStimOnsetsFromTonicStart = realPhasicStimOnsetsFromTonicStart/cparSR; % back to seconds
         
         % time between phasic stimulus and VAS onsets as a check (should be around
         % 6 seconds but now known that actually decreases over time by 0.1
         % s per phasic stimulus due to some CPAR lag -> in the end of each tonic trial the difference is only ~5 s)
-        timeBetweenStimandVAS = phasicVASOnsetLogtoTrialStart-realPhasicStimOnsetsFromTrialStart;
+        timeBetweenStimandVAS = phasicVASOnsetLogtoTrialStart-realPhasicStimOnsetsFromTonicStart;
         
         % time of phasic stimulus VAS onset from trial start
-        phasicVASOnsetsFromTrialStart = phasicVASOnsetsvsPhysioStart-timeFromPhysioStarttoFirstPulse-timeFromFirstPulsetoTrial;
-        physioPhasicOnsetsFromTrialStart = phasicVASOnsetsFromTrialStart-6;
+        if sub == 5 && run == 3 % actually used
+            physioPhasicOnsetsFromTrialStart = phasicVASOnsetsvsFirstTrial-6; % 6 seconds is the programmed value
+        else % just for checking purposes
+            physioPhasicOnsetsFromTrialStart = phasicVASOnsetsvsFirstTrial-timeBetweenStimandVAS;
+        end
         % deduct time from physio start to first scanner pulse
         % deduct 5 s pressure stimulus + 1 s VAS wait duration = 6 s total from VAS onset to arrive at phasic stimulus onset / NOT PRECISE
          
+        % save onsets for tonic stimuli
+        firstTonic = timeFromFirstPulsetoTrial; % no need to correct as based on Spike triggers already
+        secondTonic = firstTonic+(tonicStartTrial2-firstTonicStart); % no need to correct as first time based on Spike and then only relative difference between first and second tonic onset
+        onsetsTonic = [firstTonic secondTonic]';
+        
         % save onsets for phasic stimuli
-        if strcmp(name,'sub005') && exp_runs(run) == 3 % subject 5 run 3 tonic trial has 2 missing phasic stimuli at the end
-            onsetsStim = physioPhasicOnsetsFromTrialStart'+discrepancyCPARVASperStim;
-            % take into account the observed discrepancy between real CPAR phasic stimulus onset and recorded VAS onsets
+        if sub == 5 && run == 3 % subject 5 run 3 tonic trial has 2 missing phasic stimuli at the end
+            onsetsStim = physioPhasicOnsetsFromTrialStart'+timeFromFirstPulsetoTrial;%+discrepancyCPARVASperStim(1:numel(physioPhasicOnsetsFromTrialStart));
         else
-            onsetsStim = realPhasicStimOnsetsFromTrialStart';
+            onsetsStimMatlab = realPhasicStimOnsetsFromTonicStart';
+            onsetsStim = onsetsStimMatlab+timeFromFirstPulsetoTrial-diffMatlabSpikeTimings; % corrected for Matlab-Spike difference due to last dummy pulse
         end
         % add time from run start as defined as first scanner pulse to
         % tonic trial start which defines phasic onsets
-        onsetsStim = onsetsStim+timeFromFirstPulsetoTrial;
+        
         % save onsets for phasic VAS ratings
-        onsetsVAS = phasicVASOnsetLog'-firstTrialStart+timeFromFirstPulsetoTrial;
+        %onsetsVAS = (onsetsVASMatlab-diffMatlabSpikeTimings)+timeFromFirstPulsetoTrial; % corrected for Matlab-Spike difference due to last dummy pulse
+        onsetsVAS = phasicVASOnsetsvsFirstPulse'-diffMatlabSpikeTimings;
+        disp(diffMatlabSpikeTimings)
         
         % also save condition information
         cond = P.pain.CPM.tonicStim.condition(run);
@@ -138,7 +175,7 @@ for sub = 1:numel(all_subs)
             conditions = ones(numel(onsetsStim),1);
         end
         
-        save(behavfile,'onsetsStim','onsetsVAS','conditions')
+        save(behavfile,'onsetsTonic','onsetsStim','onsetsVAS','conditions')
         
     end
     

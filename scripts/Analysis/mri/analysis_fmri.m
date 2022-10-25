@@ -4,41 +4,53 @@ options = get_options();
 addpath(options.path.spmdir)
 addpath(genpath(options.path.scriptdir))
 
-subj = options.subj.all_subs;
+subj = options.subj.all_subs(10:end);%(end-4:end);
 
-analysis_version = '13Oct22';
-basisF = 'HRF'; % or 'HRF' for usual models
-modelname = ['Boxcar_painOnly_' basisF];
-VASincluded = false;
+%analysis_version = '13Oct22';
+analysis_version = '24Oct22';
+basisF = 'FIR'; % 'HRF' for canonical haemodynamic response function, or 'FIR' for Finite Impulse Response model
+%modelname = ['Boxcar_painOnly_' basisF '_noMotion'];
+% modelname = ['Boxcar_' basisF '_TempDeriv'];
+% modelname = ['Boxcar_' basisF '_TonicIncl_Derivs'];
+modelname = ['Boxcar_' basisF];
+VASincluded     = false;
+tonicIncluded   = false; 
+physioOn        = true;
+    %options.preproc.no_noisereg = 0; % only motion
 
 congroup    = 'SanityCheck';
-contrasts   = 1;%:3;%1:11;%
+contrasts   = 1:10;%
 
 % create a pipeline for physio regressors and onsets
 
+run_create_onsets               = false;
 run_firstlevel_mask             = false;
 run_firstlevel_model            = false;
 run_firstlevel_contrasts        = false;
-run_firstlevel_smoothnorm       = true;
-    run_norm                    = true;
-    run_smooth                  = true;
+run_firstlevel_smoothnorm       = false;
+    run_norm                    = false;
+    run_smooth                  = false;
 run_secondlevel_mask            = false;
-run_secondlevel_model_contrasts = true;
-    copycons                    = true;
+run_secondlevel_model_contrasts = false;
+    copycons                    = false;
 
-run_delete_folders              = false;
+run_delete_folders              = true;
     folders_level2delete = 1; % 1: first level folders, 2: second level folders
 
+if run_create_onsets
+    create_phasic_onsets(options,subj)    
+end
+    
 if run_firstlevel_mask
    firstlevel_brainmask(options,subj)
 end
 
 if run_firstlevel_model
-    firstlevel_fmri(options,analysis_version,modelname,basisF,VASincluded,subj) %#ok<*UNRCH>
+    firstlevel_fmri(options,analysis_version,modelname,basisF,tonicIncluded,VASincluded,physioOn,subj) %#ok<*UNRCH>
 end
 
 if run_firstlevel_contrasts
-    firstlevel_contrasts_fmri(options,analysis_version,modelname,basisF,VASincluded,subj,contrasts)
+    firstlevel_contrasts_fmri(options,analysis_version,modelname,basisF,tonicIncluded,VASincluded,subj)
 end
 
 if run_firstlevel_smoothnorm

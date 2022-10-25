@@ -45,21 +45,29 @@ options.preproc.smooth_kernel = [6 6 6];
 options.basisF.fir.nBase      = 5+5; % depending on duration of longest stimulus, for FIR model
 options.basisF.fir.baseRes    = options.basisF.fir.nBase*options.acq.TR; % for FIR model
 
-options.basisF.hrf.stim_duration     = 5; % phasic stimulus pressure duration in seconds
-options.basisF.hrf.vas_duration      = 5; % VAS duration in seconds
-
 options.basisF.fir.stim_duration     = 0; % phasic stimulus pressure duration in seconds
 options.basisF.fir.vas_duration      = 0; % phasic stimulus pressure duration in seconds
+
+options.basisF.hrf.derivatives       = [1 1]; % temporal derivative%[0 0];
+
+options.basisF.hrf.stim_duration     = 5; % phasic stimulus pressure duration in seconds
+options.basisF.hrf.vas_duration      = 5; % VAS duration in seconds
+options.basisF.hrf.tonic_duration    = 200; % tonic stimulus duration
+
+options.basisF.onset_shift           = 0;%-5; % a quick tool to shift all onsets by x seconds
 
 % Orthogonalization
 options.model.firstlvl.orthogonalization = 0;
 
 % Statistical models
+options.stats.firstlvl.contrasts.names = {'Tonic-baseline' 'TonicTempDeriv' 'TonicDispDeriv' ...
+    'TonicCond EXP-CON' 'TonicCondTempDeriv' 'TonicCondDispDeriv' ...
+    'Pain-baseline' 'PainTempDeriv' 'PainDispDeriv' 'VAS-baseline' 'VASTempDeriv' 'VASDispDeriv'};
 options.stats.firstlvl.contrasts.conrepl.hrf = 'none';
 options.stats.firstlvl.contrasts.conrepl.fir = 'replsc'; % contrasts not replicated across sessions because sessions different conditions
 
 options.stats.secondlvl.mask_name = 'brainmask_secondlevel.nii';
-options.stats.secondlvl.contrasts.contrastnames = {'Pain' 'VAS' 'CON-EXP'};
+options.stats.secondlvl.contrasts.contrastnames = options.stats.firstlvl.contrasts.names;
 % options.stats.secondlvl.contrasts.contrastnames = {'Pain01' 'Pain02' 'Pain03' 'Pain04' 'Pain05' 'Pain06' 'Pain07' ... 
 %     'Pain08' 'Pain09' 'Pain10' 'PainF'};
 options.stats.secondlvl.contrasts.direction = 1;
@@ -67,10 +75,10 @@ options.stats.secondlvl.contrasts.conrepl.hrf = 'none';
 options.stats.secondlvl.contrasts.conrepl.fir = 'replsc';
 
 if options.stats.secondlvl.contrasts.direction
-    options.stats.secondlvl.contrasts.actualnames = {'Pain > baseline' 'VAS > baseline' 'CON > EXP'};
+    options.stats.secondlvl.contrasts.actualnames = replace(options.stats.firstlvl.contrasts.names,'-','>');
 %     options.stats.secondlvl.contrasts.actualnames = options.stats.secondlvl.contrasts.contrastnames;
 else
-    options.stats.secondlvl.contrasts.actualnames = {'Pain < baseline' 'VAS < baseline' 'CON < EXP'};
+    options.stats.secondlvl.contrasts.actualnames = replace(options.stats.firstlvl.contrasts.names,'-','<');
 end
 
 end
