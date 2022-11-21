@@ -87,15 +87,16 @@ end
 % find scans only for the current run
 trial_start = trialOnsets(runFirstTrial);
 run_start = scansAll(startScan);
-if abs(trial_start-run_start) > 7 % if too large gap between trial start and scanner run start
+if contains(subid,'24'); max_gap = 5; else; max_gap = 7; end % sub 24 has 1 extra scanner pulse, which throws off timings, need shorter gap
+if abs(trial_start-run_start) > max_gap % if too large gap between trial start and scanner run start
     % find true run start (can only be later as the only possible reason for extra scans is
     % a restart of a run)
     fprintf('-----Run restarted, need to find true run start!\n');
     %run_ends = scansAll(diff(scansAll) > 2*TR);
     %run_start = run_ends > trial_start-20;
     for scan = startScan+1:numel(scansAll)
-        if trial_start-scansAll(scan) < 15
-            startScan_true = scan+nDummyScans;
+        if trial_start-scansAll(scan) < 15 % if the distance between the next pulse after the initial start pulse and trial start is less than 15 s
+            if contains(subid,'24'); startScan_true = scan; else; startScan_true = scan+nDummyScans; end % in all cases except sub 24 skipping a big portion, for sub 24 only 1 scan
             run_start = scansAll(startScan_true);
             fprintf('-----Real run start found at %1.1f s\n',run_start);
             break

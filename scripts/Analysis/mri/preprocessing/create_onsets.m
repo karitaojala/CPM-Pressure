@@ -1,13 +1,14 @@
-function create_phasic_onsets(options,subj)
+function create_onsets(options,subj,onsets_as_scans,debug_plot)
 
 cparSR = 20;
 physioSR = 100;
 
 % there is a systematic discrepancy between CPAR recorded phasic pressure
 % onsets and Matlab recorded VAS onsets
-step = 0.1;
-discrepancyCPARVASperStim = (0:8)*step;
-discrepancyCPARVASperStim = [discrepancyCPARVASperStim discrepancyCPARVASperStim]';
+% step = 0.1;
+% discrepancyCPARVASperStim = (0:8)*step;
+% discrepancyCPARVASperStim = [discrepancyCPARVASperStim discrepancyCPARVASperStim]';
+% -> already taken into account now
 
 for sub = subj
     
@@ -20,14 +21,18 @@ for sub = subj
     load(fullfile(logdir,['parameters_' name '.mat']));
     load(fullfile(logdir,[name '_CPAR_CPM.mat']));
         
+    if debug_plot; figure; subplot_ind = 1; end
+    
     for run = 1:numel(options.acq.exp_runs)
         
-        clear phasicStim phasicPressure physio behav
+        clear phasicStim phasicPressure physio behav pmodTonic bpPerVAS pmodVAS
         
         run_id = num2str(options.acq.exp_runs(run));
         
         % file to save onsets to
         behavfile = fullfile(logdir,[name '-run' run_id '-onsets.mat']);
+        pmodfile  = fullfile(logdir,[name '-run' run_id '-tonic-pmod.mat']);
+        pmodfile2  = fullfile(logdir,[name '-run' run_id '-vas-pmod.mat']);
 
         load(fullfile(options.path.physiodir,name,[name '-run' run_id '-behav.mat']))
         load(fullfile(options.path.physiodir,name,[name '-run' run_id '-physio.mat']))
@@ -74,6 +79,20 @@ for sub = subj
         phasicVASOnsetsvsFirstPulse = behav.VASOnsets'-timeFromPhysioStarttoFirstPulse;
         phasicVASOnsetsvsFirstTrial = behav.VASOnsets'-behav.trialOnsets(trialNo(1));
         
+        % Button presses per VAS rating as parametric modulator
+        buttonPressOnsetsvsFirstPulse = behav.buttonPresses'-timeFromPhysioStarttoFirstPulse;
+        for vas = 1:numel(phasicVASOnsetsvsFirstPulse)
+            vasStart = phasicVASOnsetsvsFirstPulse; 
+            vasEnd = phasicVASOnsetsvsFirstPulse+5; % 5 s interval
+           bpPerVAS(vas) = sum(buttonPressOnsetsvsFirstPulse >= vasStart(vas) & buttonPressOnsetsvsFirstPulse <= vasEnd(vas));
+           if bpPerVAS(vas) == 0
+               warning([name ' run ' run_id ' trial ' num2str(vas) ' no button presses! Excluded trial.']);
+           end
+        end
+        excludeTrial = bpPerVAS == 0;
+        bpPerVAS(excludeTrial) = [];
+        pmodVAS = bpPerVAS';
+        
         % VAS onsets as recorded in Matlab vs script start
         phasicVASOnsetLog = squeeze(P.time.phasicStimVASStart(run,:,:)); 
         phasicVASOnsetLog(phasicVASOnsetLog==0) = NaN; % remove zeros = no stimuli (case only for sub 5 run 4 trial 2)
@@ -84,14 +103,39 @@ for sub = subj
         
         % phasic stimulus onsets from CPAR device pressure recordings
         % detect changes in pressure indicating phasic stimulus start
-        phasicStim = {NaN(1,9) NaN(1,9)};
+        phasicStim = {NaN(1,9) NaN(1,9)}; % for the two tonic trials, 9 stimuli each
+        pmodTonic = NaN(4000/cparSR,2); % runs, trials, max CPAR timepoints
         
         for trial = 1:2
-            
+            %clear tonicPressure phasicPressure tonicPressure_filt tonicPresure_filt_extrap
             try
+                tonicPressure = cparData(run).data(trial).Pressure01;
+                tonicPressure_filt = medfilt1(tonicPressure,100); % filter out spikes
+                if sub == 29 && (run == 3 || run == 4); tonicPressure_filt = medfilt1(tonicPressure_filt,200); end % additional filtering
+                if sub == 30 && (run == 1 || run == 4); tonicPressure_filt = medfilt1(tonicPressure_filt,200); end % additional filtering
+                tonicPressure_filt_extrap = interp1(1:numel(tonicPressure_filt), tonicPressure_filt, 0.5:1:4000,'pchip',0); % extrapolate to zero
+                tonicPressure_downsampl = downsample(tonicPressure_filt_extrap,cparSR); % to 1 Hz / seconds
+                if debug_plot
+                    subplot(2,4,subplot_ind)
+                    plot(tonicPressure_filt_extrap); hold on
+                    subplot_ind = subplot_ind + 1;
+                    title(['Run ' num2str(run+1) ' - Trial ' num2str(trial)])
+                end
+                pmodTonic(1:numel(tonicPressure_downsampl),trial) = tonicPressure_downsampl;
+                
                 phasicPressure = cparData(run).data(trial).Pressure02; 
+            
             catch
-                warning([name ' run ' run_id ' trial ' num2str(trial) ' no CPAR data! Use onsets reconstructed from VAS onsets.']);
+                warning([name ' run ' run_id ' trial ' num2str(trial) ' no CPAR data! Use onsets reconstructed from VAS onsets or previous trial data.']);
+                if sub == 5 && run == 3 && trial == 2
+                    pmodTonic(:,trial) = pmodTonic(:,trial-1); % take previous trial data (same type, same form)
+                    if debug_plot
+                    subplot(2,4,subplot_ind)
+                    plot(pmodTonic(:,trial)); hold on
+                    subplot_ind = subplot_ind + 1;
+                    title(['Run ' num2str(run+1) ' - Trial ' num2str(trial)])
+                    end
+                end
                 continue;
             end
             maxPressure = max(phasicPressure);
@@ -165,19 +209,32 @@ for sub = subj
         % save onsets for phasic VAS ratings
         %onsetsVAS = (onsetsVASMatlab-diffMatlabSpikeTimings)+timeFromFirstPulsetoTrial; % corrected for Matlab-Spike difference due to last dummy pulse
         onsetsVAS = phasicVASOnsetsvsFirstPulse'-diffMatlabSpikeTimings;
-        disp(diffMatlabSpikeTimings)
+        %disp(diffMatlabSpikeTimings)
+        onsetsVAS(excludeTrial) = []; % exclude VAS onset if zero button presses (invalid trial)
         
         % also save condition information
         cond = P.pain.CPM.tonicStim.condition(run);
         if cond == 0 % control
             conditions = zeros(numel(onsetsStim),1);
+            conditionsTonic = zeros(numel(onsetsTonic),1);
         else % experimental
             conditions = ones(numel(onsetsStim),1);
+            conditionsTonic = ones(numel(onsetsTonic),1);
+        end
+        
+        if onsets_as_scans
+            onsetsTonic = onsetsTonic/options.acq.TR;
+            onsetsStim = onsetsStim/options.acq.TR;
+            onsetsVAS = onsetsVAS/options.acq.TR;
         end
         
         save(behavfile,'onsetsTonic','onsetsStim','onsetsVAS','conditions')
+        save(pmodfile,'onsetsTonic','pmodTonic','conditionsTonic')
+        save(pmodfile2,'onsetsVAS','pmodVAS')
         
     end
+    
+    if debug_plot; sgtitle(name); end
     
 end
 

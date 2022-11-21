@@ -8,7 +8,7 @@ if folders_level2delete == 1
         disp(name);
         
         firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
-        %         firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version]);
+%         firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version]);
         try
             rmdir(firstlvlpath,'s')
         catch
@@ -19,7 +19,7 @@ if folders_level2delete == 1
 else % 2nd level folders
     
     secondlvlpath = fullfile(options.path.mridir,'2ndlevel',['Version_' analysis_version],modelname);
-    %     secondlvlpath = fullfile(options.path.mridir,'2ndlevel',['Version_' analysis_version]);
+%     secondlvlpath = fullfile(options.path.mridir,'2ndlevel',['Version_' analysis_version]);
     try
         rmdir(secondlvlpath,'s')
     catch
