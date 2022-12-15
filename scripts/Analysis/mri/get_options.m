@@ -51,7 +51,7 @@ options.basisF.fir.baseRes    = options.basisF.fir.nBase*options.acq.TR; % for F
 
 options.basisF.fourier.windowLength  = 200; % window lenght for Fourier set (Hanning)
 options.basisF.fourier.order         = 5; % order for Fourier set (Hanning)
-
+options.basisF.fourier.regressors    = 1+2*options.basisF.fourier.order; % Fourier set no. of regressors: Hanning window + order * sine + cosine
 options.basisF.fir.stim_duration     = 0; % phasic pain stimulus duration in seconds
 options.basisF.fir.vas_duration      = 0; % vas rating duration in seconds
 options.basisF.fir.tonic_duration    = 0; % tonic stimulus duration seconds
@@ -70,7 +70,7 @@ options.basisF.onset_shift           = 0; % a quick tool to shift all onsets by 
 options.model.firstlvl.timing_units = 'scans'; % scans or secs
 
 % Orthogonalization
-options.model.firstlvl.orthogonalization = 1;
+options.model.firstlvl.orthogonalization = 0;
 
 % High-pass filter
 options.model.firstlvl.hpf.phasic = 128; % 128 for phasic only models
@@ -79,25 +79,33 @@ options.model.firstlvl.hpf.tonic = 200; % 200 for tonic models
 options.model.firstlvl.stimuli.phasic_total = 18*numel(options.acq.exp_runs);
 
 % Statistical models
-options.model.firstlvl.tonic_name = {'TonicCON' 'TonicEXP'};
 options.stats.firstlvl.contrasts.names.sanitycheck = {'Tonic-baseline' 'TonicTempDeriv' 'TonicDispDeriv' ...
     'TonicPmod-baseline' 'TonicPmodTempDeriv' 'TonicPmodDispDeriv' ...
-    'Pain-baseline' 'PainTempDeriv' 'PainDispDeriv' 'VAS-baseline' 'VASTempDeriv' 'VASDispDeriv'};
-options.stats.firstlvl.contrasts.names.cpm = {'Pain CON-EXP'};
-options.stats.firstlvl.contrasts.names.cpmtime = {'PainCond CON-EXP' 'StimIndex' 'PainCond X StimIndex'};
+    'Phasic-baseline' 'PhasicTempDeriv' 'PhasicDispDeriv' ...
+    'VAS-baseline' 'VASTempDeriv' 'VASDispDeriv' ...
+    'VASPmod-baseline' 'VASPmodTempDeriv' 'VASPmodDispDeriv'};
+options.stats.firstlvl.contrasts.names.sanitycheck_tonic = {'Tonic-baseline' 'TonicPressure-baseline' 'TonicxPhasic-baseline' ...
+    'Phasic-baseline' 'VAS-baseline'};
+options.stats.firstlvl.contrasts.names.sanitycheck_tonic_phasic = {'Tonic-baseline' 'TonicPressure-baseline' 'TonicxPhasic-baseline' ...
+    'Phasic-baseline' 'TonicCond-baseline' 'StimIndex-baseline' 'TonicCondxStimInd-baseline' 'VAS-baseline'};
+options.stats.firstlvl.contrasts.names.tonic = {'TonicOnset-EXP' 'TonicOnset-CON' 'TonicOnset-EXP-CON' ...
+    'TonicPressure-EXP' 'TonicPressure-CON' 'TonicPressure-EXP-CON' ...
+    'TonicxPhasic-EXP' 'TonicxPhasic-CON' 'TonicxPhasic-EXP-CON'};
+options.stats.firstlvl.contrasts.names.cpm = {'Phasic pain CON-EXP'};
+options.stats.firstlvl.contrasts.names.cpmtime = {'TonicCond EXP-CON' 'StimIndex' 'TonicCond X StimIndex'};
 options.stats.firstlvl.contrasts.names.physioreg = {'PhysioReg' 'MotionReg'};
-options.stats.firstlvl.contrasts.names.fourier = {'Pain-baseline' 'VAS-baseline' 'TonicFourier'};
+options.stats.firstlvl.contrasts.names.fourier = {'Phasic-baseline' 'VAS-baseline' 'TonicFourier'};
 options.stats.firstlvl.contrasts.conrepl.hrf = 'replsc';
 options.stats.firstlvl.contrasts.conrepl.fir = 'replsc'; % contrasts not replicated across sessions because sessions different conditions
 options.stats.firstlvl.contrasts.conrepl.fourier = 'replsc';
-options.stats.firstlvl.contrasts.delete = 1;
+options.stats.firstlvl.contrasts.delete = 0;
 
 options.stats.secondlvl.mask_name = 'brainmask_secondlevel.nii';
 options.stats.secondlvl.contrasts.names = options.stats.firstlvl.contrasts.names;
 options.stats.secondlvl.contrasts.direction = 1;
-options.stats.secondlvl.contrasts.conrepl.hrf = 'replsc';
-options.stats.secondlvl.contrasts.conrepl.fir = 'replsc';
-options.stats.secondlvl.contrasts.conrepl.fourier = 'replsc';
-options.stats.secondlvl.contrasts.delete = 1;
+options.stats.secondlvl.contrasts.conrepl.hrf = 'none';
+options.stats.secondlvl.contrasts.conrepl.fir = 'none';
+options.stats.secondlvl.contrasts.conrepl.fourier = 'none';
+options.stats.secondlvl.contrasts.delete = 0;
 
 end

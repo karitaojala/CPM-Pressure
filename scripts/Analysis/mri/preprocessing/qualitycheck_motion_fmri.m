@@ -25,7 +25,7 @@ all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49]; % all 42 included subje
 % data2 = false; % Christian's preproc data with SCT WSL
 
 % Whether spinal or brain motion is retrieved
-spinal = true; % otherwise brain
+spinal = false; % otherwise brain
 motion_dir_spinal = fullfile(base_dir,'..','motion','spinal');
 motion_dir_brain = fullfile(base_dir,'..','motion','brain');
 

@@ -86,12 +86,14 @@ for sub = subj
             vasEnd = phasicVASOnsetsvsFirstPulse+5; % 5 s interval
            bpPerVAS(vas) = sum(buttonPressOnsetsvsFirstPulse >= vasStart(vas) & buttonPressOnsetsvsFirstPulse <= vasEnd(vas));
            if bpPerVAS(vas) == 0
-               warning([name ' run ' run_id ' trial ' num2str(vas) ' no button presses! Excluded trial.']);
+               warning([name ' run ' run_id ' trial ' num2str(vas) ' no button presses! Excluded stimulus.']);
            end
         end
         excludeTrial = bpPerVAS == 0;
         bpPerVAS(excludeTrial) = [];
         pmodVAS = bpPerVAS';
+        %pmodVAS = pmodVAS-mean(pmodVAS); % mean-centering
+        pmodVAS = zscore(pmodVAS); % z-scoring
         
         % VAS onsets as recorded in Matlab vs script start
         phasicVASOnsetLog = squeeze(P.time.phasicStimVASStart(run,:,:)); 
@@ -104,7 +106,8 @@ for sub = subj
         % phasic stimulus onsets from CPAR device pressure recordings
         % detect changes in pressure indicating phasic stimulus start
         phasicStim = {NaN(1,9) NaN(1,9)}; % for the two tonic trials, 9 stimuli each
-        pmodTonic = NaN(4000/cparSR,2); % runs, trials, max CPAR timepoints
+        tonicRegressor = NaN(4000/cparSR,2); % runs, trials, max CPAR timepoints
+        phasicRegressor = NaN(4000/cparSR,2);
         
         for trial = 1:2
             %clear tonicPressure phasicPressure tonicPressure_filt tonicPresure_filt_extrap
@@ -115,23 +118,29 @@ for sub = subj
                 if sub == 30 && (run == 1 || run == 4); tonicPressure_filt = medfilt1(tonicPressure_filt,200); end % additional filtering
                 tonicPressure_filt_extrap = interp1(1:numel(tonicPressure_filt), tonicPressure_filt, 0.5:1:4000,'pchip',0); % extrapolate to zero
                 tonicPressure_downsampl = downsample(tonicPressure_filt_extrap,cparSR); % to 1 Hz / seconds
+                %tonicPressure_downsampl_filt = smoothdata(tonicPressure_downsampl,'gaussian',20); % filter again to smooth
                 if debug_plot
                     subplot(2,4,subplot_ind)
                     plot(tonicPressure_filt_extrap); hold on
                     subplot_ind = subplot_ind + 1;
                     title(['Run ' num2str(run+1) ' - Trial ' num2str(trial)])
                 end
-                pmodTonic(1:numel(tonicPressure_downsampl),trial) = tonicPressure_downsampl;
+                tonicRegressor(1:numel(tonicPressure_downsampl),trial) = tonicPressure_downsampl;
                 
                 phasicPressure = cparData(run).data(trial).Pressure02; 
-            
+                phasicPressure_filt = medfilt1(phasicPressure,20);
+                phasicPressure_filt_extrap = interp1(1:numel(phasicPressure_filt), phasicPressure_filt, 0.5:1:4000,'pchip',0); % extrapolate to zero
+                phasicPressure_downsampl = downsample(phasicPressure_filt_extrap,cparSR); % to 1 Hz / seconds
+                phasicRegressor(1:numel(phasicPressure_downsampl),trial) = phasicPressure_downsampl;
+                
             catch
-                warning([name ' run ' run_id ' trial ' num2str(trial) ' no CPAR data! Use onsets reconstructed from VAS onsets or previous trial data.']);
+                warning([name ' run ' run_id ' trial ' num2str(trial) ' no CPAR data! Use onsets reconstructed from VAS onsets or previous trial data. ' ...
+                    'Exclude trial from tonic pmod models.']);
                 if sub == 5 && run == 3 && trial == 2
-                    pmodTonic(:,trial) = pmodTonic(:,trial-1); % take previous trial data (same type, same form)
+                    tonicRegressor(:,trial) = tonicRegressor(:,trial-1); % take previous trial data (same type, same form)
                     if debug_plot
                     subplot(2,4,subplot_ind)
-                    plot(pmodTonic(:,trial)); hold on
+                    plot(tonicRegressor(:,trial)); hold on
                     subplot_ind = subplot_ind + 1;
                     title(['Run ' num2str(run+1) ' - Trial ' num2str(trial)])
                     end
@@ -228,9 +237,20 @@ for sub = subj
             onsetsVAS = onsetsVAS/options.acq.TR;
         end
         
-        save(behavfile,'onsetsTonic','onsetsStim','onsetsVAS','conditions')
-        save(pmodfile,'onsetsTonic','pmodTonic','conditionsTonic')
-        save(pmodfile2,'onsetsVAS','pmodVAS')
+        if sub == 5 && run == 3 % remove tonic trial 2 for run 4
+            onsetsTonic(2) = [];
+            tonicRegressor(:,2) = [];
+            phasicRegressor(:,2) = [];
+        end
+        
+        %pmodTonic = zscore(tonicRegressor(:));
+        tonicRegressor_z = zscore(tonicRegressor(:));
+        phasicRegressor_z = zscore(phasicRegressor(:));
+        %pmodTonic2 = zscore(phasicReg_z .* pmodTonic);
+        save(pmodfile,'tonicRegressor_z','phasicRegressor_z','onsetsTonic')
+%         save(behavfile,'onsetsTonic','onsetsStim','onsetsVAS','conditions')
+%         save(pmodfile,'onsetsTonic','pmodTonic','pmodTonic2','conditionsTonic')
+%         save(pmodfile2,'onsetsVAS','pmodVAS')
         
     end
     

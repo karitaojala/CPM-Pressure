@@ -1,4 +1,4 @@
-function firstlevel_fmri_fourier(options,analysis_version,modelname,tonicIncluded,phasicIncluded,VASincluded,physioOn,subj,n_proc,phasicFourier)
+function firstlevel_fmri_fourier(options,analysis_version,modelname,tonicIncluded,phasicIncluded,VASincluded,physioOn,specifyTonicOnly,subj,n_proc)
 
 for sub = subj
     
@@ -24,7 +24,7 @@ for sub = subj
         EPI.epiFiles = spm_vol(spm_select('ExtFPList',epipath,['^ra' name '-epi-run' num2str(run) '-brain.nii$']));
         
         for epino = 1:size(EPI.epiFiles,1)
-            episcans{epino} = [EPI.epiFiles(epino).fname, ',',num2str(epino)]; %#ok<AGROW>
+            episcans{epino} = [EPI.epiFiles(epino).fname, ',',num2str(epino)]; 
         end
         
         episcans_all{block} = episcans;
@@ -43,7 +43,7 @@ for sub = subj
         onsetsTonic = onsetdata.onsetsTonic+options.basisF.onset_shift;
         % Phasic stimulus onsets
         onsetsStim = onsetdata.onsetsStim+options.basisF.onset_shift;
-        onsetsStim_all{block} = onsetsStim;
+        onsetsStim_all{block} = onsetsStim; %#ok<*AGROW>
         % VAS ratings onsets
         onsetsVAS  = onsetdata.onsetsVAS+options.basisF.onset_shift;
         onsetsVAS_all{block} = onsetsVAS;
@@ -106,83 +106,91 @@ for sub = subj
     
     %% Define phasic stimuli
     
-    block = 1;
-    run_ind_regressors = 1:options.acq.n_scans(block+1);
-    
-    % Retrieve unestimated regressors
-    SPMtonic = load(fullfile(firstlvlpath, 'SPM.mat'));
-    tonicReg = SPMtonic.SPM.xX.X; % 5 sines + 5 cosines + Hanning window = 11 regressors
-    
-    for run = options.acq.exp_runs
+    if ~specifyTonicOnly
         
-        % Define phasic regressors
-        c = 0;
-        if phasicIncluded && ~phasicFourier
-            c = c+1;
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PainStim';
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsStim_all{block};
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration;
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
-        elseif phasicIncluded && phasicFourier
+        block = 1;
+        run_ind_regressors = 1:options.acq.n_scans(block+1);
+        
+        % Retrieve unestimated regressors
+        SPMtonic = load(fullfile(firstlvlpath, 'SPM.mat'));
+        tonicReg = SPMtonic.SPM.xX.X; % 5 sines + 5 cosines + Hanning window = 11 regressors
+        
+        for run = options.acq.exp_runs
+            
+            % Define phasic regressors
+            c = 0;
+            if phasicIncluded % && ~phasicFourier
+                c = c+1;
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PainStim';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsStim_all{block};
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration;
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
+                %elseif phasicIncluded && phasicFourier
+            end
+            
+            if VASincluded% && ~phasicFourier
+                c = c+1;
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'VAS';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsVAS_all{block};
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration;
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
+            end
+            
+            clear tonigReg_run newMultiReg noiseReg
+            % Retrieve tonic regressors for this run
+            tonicReg_run = tonicReg(SPMtonic.SPM.Sess(block).row,SPMtonic.SPM.Sess(block).col(1:11));
+            % Retrieve noise data
+            if physioOn
+                noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain-zscored.txt']);
+            else % only motion regressors
+                noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-motion_regressors-brain-zscored.txt']);
+            end
+            noiseReg = importdata(noisefile);
+            
+            % Concatenate regressors, tonic stimuli first
+            newMultiReg = [tonicReg_run noiseReg];
+            
+            % Save new multiple regressors data
+            newMultiFn = [name '-run' num2str(run) '-multiple_regressors-brain_fourierTonic.txt'];
+            newMultiFile = fullfile(firstlvlpath,newMultiFn);
+            writematrix(newMultiReg,newMultiFile,'Delimiter','tab')
+            
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).scans = episcans_all{block}';
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).multi = {''};
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).regress = struct('name', {}, 'val', {});
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).multi_reg = {newMultiFile}; % File including tonic stimulus Fourier set and nuisance regressors
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).hpf = options.model.firstlvl.hpf.tonic; % High-pass filter
+            
+            run_ind_regressors = run_ind_regressors + options.acq.n_scans(block+1);
+            block = block + 1;
             
         end
         
-        if VASincluded && ~phasicFourier
-            c = c+1;
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'VAS';
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsVAS_all{block};
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration;
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
+        delete(fullfile(firstlvlpath, 'SPM.mat')) % delete old SPM
+        matlabbatch{1}.spm.stats.fmri_spec.bases.hrf.derivs = options.basisF.hrf.derivatives; % Hemodynamic response function derivatives
+        
+        %% Estimate 1st level model
+        matlabbatch{2}.spm.stats.fmri_est.spmmat = {fullfile(firstlvlpath, 'SPM.mat')};
+        matlabbatch{2}.spm.stats.fmri_est.write_residuals = 0;
+        matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
+        
+        %% Run matlabbatch
+        if n_proc > 1
+            run_matlab(process, matlabbatch, '');
+        else
+            spm_jobman('initcfg');
+            spm('defaults', 'FMRI');
+            spm_jobman('run',matlabbatch);
         end
         
-        clear tonigReg_run newMultiReg noiseReg
-        % Retrieve tonic regressors for this run
-        tonicReg_run = tonicReg(SPMtonic.SPM.Sess(block).row,SPMtonic.SPM.Sess(block).col(1:11));
-        % Retrieve noise data
-        noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain.txt']);
-        noiseReg = importdata(noisefile);
-        
-        % Concatenate regressors, tonic stimuli first
-        newMultiReg = [tonicReg_run noiseReg];
-        
-        % Save new multiple regressors data
-        newMultiFn = [name '-run' num2str(run) '-multiple_regressors-brain_fourierTonic.txt'];
-        newMultiFile = fullfile(firstlvlpath,newMultiFn);
-        writematrix(newMultiReg,newMultiFile,'Delimiter','tab')
-        
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).scans = episcans_all{block}';
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).multi = {''};
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).regress = struct('name', {}, 'val', {});
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).multi_reg = {newMultiFile}; % File including tonic stimulus Fourier set and nuisance regressors
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).hpf = options.model.firstlvl.hpf.tonic; % High-pass filter
-        
-        run_ind_regressors = run_ind_regressors + options.acq.n_scans(block+1);
-        block = block + 1;
+        save(fullfile(firstlvlpath,'batch_firstlevel'), 'matlabbatch')
         
     end
     
-    delete(fullfile(firstlvlpath, 'SPM.mat')) % delete old SPM
-    matlabbatch{1}.spm.stats.fmri_spec.bases.hrf.derivs = options.basisF.hrf.derivatives; % Hemodynamic response function derivatives
-    
-    %% Estimate 1st level model
-    matlabbatch{2}.spm.stats.fmri_est.spmmat = {fullfile(firstlvlpath, 'SPM.mat')};
-    matlabbatch{2}.spm.stats.fmri_est.write_residuals = 0;
-    matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
-    
-    %% Run matlabbatch
-    if n_proc > 1
-        run_matlab(process, matlabbatch, '');
-    else
-        spm_jobman('initcfg');
-        spm('defaults', 'FMRI');
-        spm_jobman('run',matlabbatch);
-    end
-    
-    save(fullfile(firstlvlpath,'batch_firstlevel'), 'matlabbatch')
     clear matlabbatch
     
 end

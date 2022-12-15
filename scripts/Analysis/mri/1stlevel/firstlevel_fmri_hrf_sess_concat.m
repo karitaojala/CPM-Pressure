@@ -11,20 +11,30 @@ for sub = subj
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
     brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask.nii']);
     
+    nscans_run = options.acq.n_scans(2);
+    nscans_all = 4*options.acq.n_scans(2);
+    
+    tonic_SPM_file = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],'HRF_phasic_tonic_pmod');
+    tonic_SPM = load(tonic_SPM_file);
+    reg_no = size(tonic_SPM.xX.X,2)-4; % number of design matrix columns without constants
+    if reg_no > 4*
+    
     episcansAll = [];
-    noisedataAll = [];
-    pmodTonicAll = [];
-    onsetsStimAll = [];
-    onsetsVASAll = [];
+    noisedataAll = zeros(nscans_all,25); % all volumes, 25th column for possible motion exclusion volume
     onsetsTonicAll = [];
+    pmodTonic1All = [];
+    pmodTonic2All = [];
+    onsetsPhasicAll = [];
+    onsetsVASAll = [];
     conditionsPhasicAll = [];
     
     block = 1;
     scans2add = 0;
+    run_vols = 1:nscans_run;
     
     for run = options.acq.exp_runs
         
-        clear EPI episcans onsetsTonic
+        clear EPI episcans onsetdata pmoddata onsetsTonic
         
         % Select EPI files
         epipath = fullfile(options.path.mridir,name,['epi-run' num2str(run)]);
@@ -32,7 +42,7 @@ for sub = subj
         EPI.epiFiles = spm_vol(spm_select('ExtFPList',epipath,['^ra' name '-epi-run' num2str(run) '-brain.nii$']));
         
         for epino = 1:size(EPI.epiFiles,1)
-            episcans{epino} = [EPI.epiFiles(epino).fname, ',',num2str(epino)]; %#ok<AGROW>
+            episcans{epino} = [EPI.epiFiles(epino).fname, ',',num2str(epino)]; 
         end
         
         % Concantenate EPI files
@@ -42,13 +52,18 @@ for sub = subj
         physiopathsub = fullfile(options.path.physiodir,name);
         
         if physioOn
-            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain.txt']);
+            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain-zscored.txt']);
         else % only motion regressors
-            noisefile = fullfile(epipath, ['rp_a' name '-epi-run' num2str(run) '-brain.txt']);
+            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-motion_regressors-brain-zscored.txt']);
         end
         
         noisedata = importdata(noisefile);
-        noisedataAll = [noisedataAll; noisedata]; %#ok<*AGROW>
+        if size(noisedata,2) == options.preproc.no_noisereg
+            noisedataAll(run_vols,:) = [noisedata zeros(nscans_run,1)]; 
+        elseif size(noisedata,2) == options.preproc.no_noisereg+1
+            noisedataAll(run_vols,:) = noisedata; 
+        end
+        run_vols = run_vols + nscans_run;
         
         % Define onsets and conditions
         onsetfile = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-onsets.mat']);
@@ -63,25 +78,30 @@ for sub = subj
             for ons = 1:numel(onsetsTonicStart) % create stick onsets and pmod with selected resolution to fill the true tonic stimulus duration
                 firstStick = onsetsTonicStart(ons);
                 resStick = options.basisF.hrf.tonic_resolution;
-                lastStick = (onsetsTonicStart(ons)+options.basisF.hrf.tonic_durationtrue/options.acq.TR); % as scans
-                onsetsTonic_temp = firstStick:resStick:lastStick; %#ok<AGROW>
-                onsetsTonic(:,ons) = onsetsTonic_temp(1:end-1)'; % remove last element to reach even number matching with pmod
+                if strcmp(options.model.firstlvl.timing_units,'scans')
+                    lastStick = (onsetsTonicStart(ons)+options.basisF.hrf.tonic_durationtrue/options.acq.TR); % as scans
+                else
+                    lastStick = (onsetsTonicStart(ons)+options.basisF.hrf.tonic_durationtrue); % as seconds
+                end
+                onsetsTonic_temp = firstStick:resStick:lastStick; 
+                onsetsTonic(:,ons) = onsetsTonic_temp(1:end-1)'; %#ok<*AGROW> % remove last element to reach even number matching with pmod
             end
             onsetsTonic = onsetsTonic(:);
             
-            % Concatenate pmod
-            pmodTonicAll = [pmodTonicAll; pmoddata.pmodTonic(:)];
+            % Concatenate pmods
+            pmodTonic1All = [pmodTonic1All; pmoddata.pmodTonic(:)];
+            pmodTonic2All = [pmodTonic2All; pmoddata.pmodTonic2(:)];
             
         else
             onsetsTonic = onsetdata.onsetsTonic+options.basisF.onset_shift;
         end
         
         % Phasic stimulus and VAS ratings onsets
-        onsetsStim = onsetdata.onsetsStim+options.basisF.onset_shift;
+        onsetsPhasic = onsetdata.onsetsStim+options.basisF.onset_shift;
         onsetsVAS  = onsetdata.onsetsVAS+options.basisF.onset_shift;
         
         % Concatenated onsets
-        onsetsStimAll = [onsetsStimAll; onsetsStim + scans2add];
+        onsetsPhasicAll = [onsetsPhasicAll; onsetsPhasic + scans2add];
         onsetsVASAll = [onsetsVASAll; onsetsVAS + scans2add];
         onsetsTonicAll = [onsetsTonicAll; onsetsTonic + scans2add];
         
@@ -96,15 +116,19 @@ for sub = subj
         
     end
     
-    noisefileAll = fullfile(physiopathsub, [name '-all_runs-multiple_regressors-brain.txt']);
+    noisedataAll = zscore(noisedataAll);
+    noisefileAll = fullfile(physiopathsub, [name '-all_runs-multiple_regressors-brain-zscored.txt']);
     writematrix(noisedataAll,noisefileAll,'Delimiter','tab')
     
     pmodStructTonic = struct();
-    pmodStructTonic.name = 'TonicPressure';
-    pmodStructTonic.poly = 1;
-    pmodStructTonic.param = pmodTonicAll(:);
+    pmodStructTonic(1).name = 'TonicPressure';
+    pmodStructTonic(1).poly = 1;
+    pmodStructTonic(1).param = zscore(pmodTonic1All(:));
+    pmodStructTonic(2).name = 'TonicPressurexPhasicPressure';
+    pmodStructTonic(2).poly = 1;
+    pmodStructTonic(2).param = zscore(pmodTonic2All(:));
     
-    pmodStructPhasic = struct();
+    pmodStructPhasic = struct('name', {}, 'param', {}, 'poly', {});
     pmodStructPhasic(1).name = 'TonicCond';
     pmodStructPhasic(1).poly = 1;
     conditionsPhasicAll = conditionsPhasicAll*(-1); % flip sign, CON = 1, EXP = -1
@@ -112,12 +136,12 @@ for sub = subj
     
     pmodStructPhasic(2).name = 'StimIndex';
     pmodStructPhasic(2).poly = 1;
-    no_stim = options.model.firstlvl.stimuli.phasic_total;
-    stim_ind = (1:no_stim)'; % stimulus index across experiment
-    stim_ind_meanc = stim_ind-mean(1:no_stim); % mean-centered
+    %no_stim = options.model.firstlvl.stimuli.phasic_total;
+    stim_ind = (1:numel(conditionsPhasicAll))'; % stimulus index across experiment
+    stim_ind_meanc = stim_ind-mean(stim_ind); % mean-centered
     pmodStructPhasic(2).param = stim_ind_meanc;
     
-    pmodStructPhasic(3).name = 'TonicCond X StimIndex';
+    pmodStructPhasic(3).name = 'TonicCondxStimIndex';
     pmodStructPhasic(3).poly = 1;
     cond_stimind_interaction = conditionsPhasicAll .* stim_ind;
     cond_stimind_interaction_meanc = cond_stimind_interaction-mean(cond_stimind_interaction);
@@ -126,7 +150,7 @@ for sub = subj
     disp(['...Blocks ' num2str(options.acq.exp_runs(1)), ' to ' num2str(options.acq.n_runs(end)), '. Found ', num2str(numel(episcansAll)), ' EPIs...' ])
     %if epino ~= options.acq.n_scans(run); warning('Wrong number of EPIs found!'); end
     %disp(['Found ', num2str(size(noisefile,1)), ' noise correction file(s).'])
-    disp(['Found ', num2str(numel(onsetsTonicAll)) ' tonic, ', num2str(numel(onsetsStimAll)), ' phasic, and ', num2str(numel(onsetsVASAll)), ' VAS rating events.'])
+    disp(['Found ', num2str(numel(onsetsTonicAll)) ' tonic, ', num2str(numel(onsetsPhasicAll)), ' phasic, and ', num2str(numel(onsetsVASAll)), ' VAS rating events.'])
     disp('................................')
     
     % Define conditions
@@ -137,7 +161,11 @@ for sub = subj
         %matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = options.model.firstlvl.tonic_name{conditionsTonic(1)+1};
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'TonicStim';
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsTonicAll;
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.tonic_duration;
+        if strcmp(options.model.firstlvl.timing_units,'scans')
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.tonic_duration/options.acq.TR;
+        else
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.tonic_duration;
+        end
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = pmodStructTonic; % Parametric modulation
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
@@ -145,9 +173,13 @@ for sub = subj
     
     if phasicIncluded
         c = c+1;
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PainStim';
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsStimAll;
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration;
+        matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PhasicStim';
+        matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsPhasicAll;
+        if strcmp(options.model.firstlvl.timing_units,'scans')
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration/options.acq.TR;
+        else
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration;
+        end
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = pmodStructPhasic; % No parametric modulation
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
@@ -155,9 +187,13 @@ for sub = subj
     
     if VASincluded
         c = c+1;
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'VAS';
+        matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'VASRating';
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsVASAll;
-        matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration;
+        if strcmp(options.model.firstlvl.timing_units,'scans')
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration/options.acq.TR;
+        else
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration;
+        end
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization

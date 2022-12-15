@@ -109,9 +109,9 @@ for sub = subj
     matlabbatch{1}.spm.stats.con.delete = options.stats.firstlvl.contrasts.delete; % Deleting old contrast
     
     %% Run matlabbatch
-%    spm_jobman('run', matlabbatch);
+   spm_jobman('run', matlabbatch);
     
-%     save(fullfile(firstlvlpath,'batch_firstlevel_contrasts'), 'matlabbatch')
+    save(fullfile(firstlvlpath,'batch_firstlevel_contrasts'), 'matlabbatch')
     clear matlabbatch
     
 end

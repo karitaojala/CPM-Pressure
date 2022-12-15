@@ -230,7 +230,8 @@ if zscore_physio
             physio_file = fullfile(output_dir,sprintf('sub%03d-run%d-multiple_regressors-%s.txt',all_subs(sub),run,region));
             physiodata = load(physio_file);
             physiodata_temp = physiodata(:,1:no_noise_reg); % take only real physio regressors, not motion volume exclusion regressors
-            physiodata_temp_z = reshape(zscore(physiodata_temp(:)), size(physiodata_temp));
+            %physiodata_temp_z = reshape(zscore(physiodata_temp(:)), size(physiodata_temp));
+            physiodata_temp_z = zscore(physiodata_temp);
             physiodata_z = physiodata;
             physiodata_z(:,1:no_noise_reg) = physiodata_temp_z;
             
@@ -244,7 +245,8 @@ if zscore_physio
                 motion_file = fullfile(motion_dir,name,['epi-' run_id],['rp_a' name '-epi-' run_id '-brain.txt']);
             end
             motiondata = load(motion_file);
-            motiondata_z = reshape(zscore(motiondata(:)), size(motiondata));
+            %motiondata_z = reshape(zscore(motiondata(:)), size(motiondata));
+            motiondata_z = zscore(motiondata);
             
             motionfile_new = fullfile(output_dir,sprintf('sub%03d-run%d-motion_regressors-%s-zscored.txt',all_subs(sub),run,region));
             writematrix(motiondata_z,motionfile_new,'Delimiter','tab');

@@ -1,4 +1,7 @@
-function firstlevel_fmri(options,analysis_version,modelname,tonicIncluded,phasicIncluded,VASincluded,physioOn,subj)
+function firstlevel_fmri(options,analysis_version,modelname,tonicIncluded,phasicIncluded,VASincluded,pmodNo,physioOn,subj)
+
+allcondsfile = fullfile(options.path.logdir, '..', 'conditions_list.mat');
+allconds = load(allcondsfile);
 
 for sub = subj
     
@@ -11,7 +14,15 @@ for sub = subj
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
     brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask.nii']);
     
-    block = 1;
+    if tonicIncluded
+        cond_runs = allconds.conditions_list_rand(sub,:);
+        exp_run = find(cond_runs == 1,1)+1; % find first EXP run and use its tonic pmod shape for all runs
+        pmodfile_exp = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(exp_run) '-tonic-pmod.mat']);
+        pmoddata_exp = load(pmodfile_exp);
+        tonicReg = pmoddata_exp.tonicRegressor_z;
+    end
+    
+    block = 1; 
     
     for run = options.acq.exp_runs
         
@@ -23,16 +34,16 @@ for sub = subj
         EPI.epiFiles = spm_vol(spm_select('ExtFPList',epipath,['^ra' name '-epi-run' num2str(run) '-brain.nii$']));
         
         for epino = 1:size(EPI.epiFiles,1)
-            episcans{epino} = [EPI.epiFiles(epino).fname, ',',num2str(epino)]; %#ok<AGROW>
+            episcans{epino} = [EPI.epiFiles(epino).fname, ',',num2str(epino)];
         end
         
         % Noise correction files
         physiopathsub = fullfile(options.path.physiodir,name);
         
         if physioOn
-            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain.txt']);
+            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain-zscored.txt']);
         else % only motion regressors
-            noisefile = fullfile(epipath, ['rp_a' name '-epi-run' num2str(run) '-brain.txt']);
+            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-motion_regressors-brain-zscored.txt']);
         end
         
         % Define onsets and conditions
@@ -41,10 +52,16 @@ for sub = subj
         
         % Tonic stimulus onsets
         if tonicIncluded
+
             pmodfile = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-tonic-pmod.mat']);
-            pmoddata = load(pmodfile);
-        
-            onsetsTonicStart = pmoddata.onsetsTonic+options.basisF.onset_shift;
+            pmoddata = load(pmodfile,'phasicRegressor_z');
+            phasicReg = pmoddata.phasicRegressor_z;
+            
+            onsetsTonicStart = onsetdata.onsetsTonic+options.basisF.onset_shift;
+            if sub == 5 && run == 4 % remove tonic trial 2 from sub 5 run 3
+                onsetsTonicStart = onsetsTonicStart(1);
+            end
+            
             for ons = 1:numel(onsetsTonicStart) % create stick onsets and pmod with selected resolution to fill the true tonic stimulus duration
                 firstStick = onsetsTonicStart(ons);
                 resStick = options.basisF.hrf.tonic_resolution;
@@ -53,14 +70,34 @@ for sub = subj
                 else
                     lastStick = (onsetsTonicStart(ons)+options.basisF.hrf.tonic_durationtrue); % as seconds
                 end
-                onsetsTonic_temp = firstStick:resStick:lastStick; %#ok<AGROW>
-                onsetsTonic(:,ons) = onsetsTonic_temp(1:end-1)'; % remove last element to reach even number matching with pmod
+                onsetsTonic_temp = firstStick:resStick:lastStick;
+                onsetsTonic(:,ons) = onsetsTonic_temp(1:end-1)'; %#ok<*AGROW> % remove last element to reach even number matching with pmod
             end
             onsetsTonic = onsetsTonic(:);
-            pmodStructTonic = struct();
-            pmodStructTonic.name = 'TonicPressure';
-            pmodStructTonic.param = pmoddata.pmodTonic(:);
-            pmodStructTonic.poly = 1;
+            
+            if pmodNo(1) >= 1 % 1 parametric modulator
+                pmodStructTonic = struct();
+                pmodStructTonic.name = 'TonicPressure';
+                if sub == 5 && run == 4 % remove tonic trial 2 from sub 5 run 3
+                    pmodStructTonic.param = tonicReg(1:200);
+                else
+                    pmodStructTonic.param = tonicReg;
+                end
+                pmodStructTonic.poly = 1;
+                if pmodNo(1) == 2 % 2 parametric modulators
+                    %pmodStructTonic = struct();
+                    pmodStructTonic(2).name = 'TonicPressure x PhasicStimuli';
+                    if sub == 5 && run == 4 % remove tonic trial 2 from sub 5 run 3
+                        pmodStructTonic(2).param = zscore(phasicReg(1:200) .* tonicReg(1:200));
+                    else
+                        pmodStructTonic(2).param = zscore(phasicReg .* tonicReg);
+                    end
+                    pmodStructTonic(2).poly = 1;
+                end
+            else
+                pmodStructTonic = struct('name', {}, 'param', {}, 'poly', {});
+            end
+            
         else
             onsetsTonic = onsetdata.onsetsTonic+options.basisF.onset_shift;
         end
@@ -68,6 +105,17 @@ for sub = subj
         % Phasic stimulus and VAS ratings onsets
         onsetsStim = onsetdata.onsetsStim+options.basisF.onset_shift;
         onsetsVAS  = onsetdata.onsetsVAS+options.basisF.onset_shift;
+        
+        if VASincluded && any(pmodNo(3))
+            pmodfile_vas = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-vas-pmod.mat']);
+            pmoddata_vas = load(pmodfile_vas);
+            pmodStructVAS = struct();
+            pmodStructVAS.name = 'ButtonPresses';
+            pmodStructVAS.param = pmoddata_vas.pmodVAS(:);
+            pmodStructVAS.poly = 1;
+        else
+            pmodStructVAS = struct('name', {}, 'param', {}, 'poly', {});
+        end
         
         % Conditions
         %conditionsPhasic = onsetdata.conditions;
@@ -87,7 +135,11 @@ for sub = subj
             %matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = options.model.firstlvl.tonic_name{conditionsTonic(1)+1};
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'TonicStim';
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsTonic;
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.tonic_duration;
+            if strcmp(options.model.firstlvl.timing_units,'scans')
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.tonic_duration/options.acq.TR;
+            else
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.tonic_duration;
+            end
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = pmodStructTonic; % Parametric modulation
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
@@ -95,9 +147,13 @@ for sub = subj
         
         if phasicIncluded
             c = c+1;
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PainStim';
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PhasicStim';
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsStim;
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration;
+            if strcmp(options.model.firstlvl.timing_units,'scans')
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration/options.acq.TR;
+            else
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration;
+            end
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
@@ -107,9 +163,13 @@ for sub = subj
             c = c+1;
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'VAS';
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsVAS;
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration;
+            if strcmp(options.model.firstlvl.timing_units,'scans')
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration/options.acq.TR;
+            else
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration;
+            end
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = pmodStructVAS; % No parametric modulation
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
         end
         

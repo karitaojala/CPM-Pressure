@@ -1,36 +1,10 @@
-function secondlevel_contrasts_fmri(options,analysis_version,modelname,basisF,subj,contrasts,copycons,congroup,estimate_model)
+function secondlevel_contrasts_fmri(options,analysis_version,modelname,basisF,subj,contrasts,congroup,estimate_model)
 
 secondlvlpath = fullfile(options.path.mridir,'2ndlevel',['Version_' analysis_version],modelname,congroup);
-conpath = fullfile(secondlvlpath,'conimages');
 if ~exist(secondlvlpath, 'dir'); mkdir(secondlvlpath); end
-if ~exist(conpath, 'dir'); mkdir(conpath); end
 
 secondlvl_maskpath = fullfile(options.path.mridir,'2ndlevel','meanmasks');
-
-if copycons
-    
-    for sub = subj
-        
-        name = sprintf('sub%03d',sub);
-        disp(name);
-        
-        firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
-        
-        % Transfer CON images to 2nd level folder
-        norm_con_files = char(spm_select('List', firstlvlpath, ['^' options.preproc.normsmooth_prefix '.*nii$']));
-        norm_con_files_fp = char(spm_select('FPList', firstlvlpath, ['^' options.preproc.normsmooth_prefix '.*nii$']));
-        
-        for confile = 1:size(norm_con_files)
-            newname = norm_con_files(confile,:);
-            newname = [newname(1:end-4) '_' name newname(end-3:end)];
-            newname = fullfile(conpath,newname);
-            copyfile(norm_con_files_fp(confile,:),newname)
-            %delete(norm_con_files_fp(confile,:)) % delete old file to avoid duplicates taking a lot of space
-        end
-        
-    end
-    
-end
+conprefix = [options.preproc.smooth_prefix options.preproc.norm_prefix];
 
 matlabbatch{1}.spm.stats.factorial_design.cov = struct('c', {}, 'cname', {}, 'iCFI', {}, 'iCC', {});
 matlabbatch{1}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
@@ -50,30 +24,40 @@ for con = contrasts
     
     con_ind = con_ind + 1;
     % 2nd level model specification
-    if strcmp(basisF,'HRF') || strcmp(basisF,'Fourier')
+    if strcmp(basisF,'HRF')
         
-        if strcmp(basisF,'HRF')
-            if strcmp(congroup,'SanityCheck')
-                conname = options.stats.secondlvl.contrasts.names.sanitycheck{con};
-            elseif strcmp(congroup,'CPM')
-                conname = options.stats.secondlvl.contrasts.names.cpm{con};
-            elseif strcmp(congroup,'PhysioReg')
-                conname = options.stats.secondlvl.contrasts.names.physioreg{con};
-            end
-        elseif strcmp(basisF,'Fourier')
-            conname = options.stats.secondlvl.contrasts.names.fourier{con};
+        if strcmp(congroup,'SanityCheck')
+            conname = options.stats.secondlvl.contrasts.names.sanitycheck{con};
+        elseif strcmp(congroup,'SanityCheckTonicPmod')
+            conname = options.stats.secondlvl.contrasts.names.sanitycheck_tonic{con};
+        elseif strcmp(congroup,'TonicPressure')
+            conname = options.stats.secondlvl.contrasts.names.tonic{con};
+        elseif strcmp(congroup,'CPM')
+            conname = options.stats.secondlvl.contrasts.names.cpm{con};
+        elseif strcmp(congroup,'PhysioReg')
+            conname = options.stats.secondlvl.contrasts.names.physioreg{con};
         end
         
-        if options.stats.secondlvl.contrasts.direction == 1
-            actualname = replace(conname,'-','>');
-        elseif options.stats.secondlvl.contrasts.direction == -1
-            actualname = replace(conname,'-','<');
-        end
+%         dash_ind = strfind(conname,'-');
+%         if numel(dash_ind) == 1 && ~strcmp(congroup,'TonicPressure')
+%             actualname = replace(conname,'-','>');
+%         elseif numel(dash_ind) > 1 && ~strcmp(congroup,'TonicPressure')
+%             conname_direction(dash_ind(end)) = '>';
+%             actualname = conname_direction;
+%         else
+%             
+%         end
+%         
+%         if options.stats.secondlvl.contrasts.direction == -1
+%             actualname = replace(conname,'>','<');
+%         end
 
+        actualname = conname;
+        
         contrastpath = fullfile(secondlvlpath,conname);
         matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = actualname;
         matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = options.stats.secondlvl.contrasts.direction;
-        matlabbatch{3}.spm.stats.con.consess{1}.tcon.sessrep = options.stats.secondlvl.contrasts.conrepl.fourier;
+        matlabbatch{3}.spm.stats.con.consess{1}.tcon.sessrep = options.stats.secondlvl.contrasts.conrepl.hrf;
         
     elseif strcmp(basisF,'FIR')
         contrastpath = secondlvlpath;
@@ -81,27 +65,46 @@ for con = contrasts
     
     if ~exist(contrastpath, 'dir'); mkdir(contrastpath); end
     
-    con_id = sprintf('%02d',con_ind);
+    con_id = sprintf('%04d',con_ind);
     
     matlabbatch{1}.spm.stats.factorial_design.dir = {contrastpath};
     
-    if strcmp(basisF,'HRF') || strcmp(basisF,'Fourier')
-        conlist = cellstr(spm_select('ExtFPList',conpath,['^*_00' con_id '.*.nii$'],1));
-        matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = conlist;
+    if strcmp(basisF,'HRF')
+        clear conlist
+        for sub = 1:numel(subj)
+            name = sprintf('sub%03d',subj(sub));
+            conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+            conlist(sub) = cellstr(spm_select('ExtFPList',conpathsub,['^' conprefix 'con_' con_id '.nii$'],1)); %#ok<*AGROW>
+        end
+        %conlist = cellstr(spm_select('ExtFPList',conpath,['^*_00' con_id '.*.nii$'],1));
+        matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = conlist';
+        
     elseif strcmp(basisF,'FIR')
         if numel(contrasts) <= 2 % separate contrasts for CON and EXP stimuli
             cons2take = [1:100; 101:200];
             cons2take = cons2take(con,:);
             for conf = 1:numel(cons2take)
-                conlist = cellstr(spm_select('ExtFPList',conpath,sprintf('^*_%04d.*.nii$', cons2take(conf)),1));
-                matlabbatch{1}.spm.stats.factorial_design.des.anova.icell(conf).scans = conlist;
+                clear conlist
+                for sub = 1:numel(subj)
+                    name = sprintf('sub%03d',subj(sub));
+                    conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+                    conlist(sub) = cellstr(spm_select('ExtFPList',conpathsub,sprintf('^%scon_%04d.*.nii$',conprefix,cons2take(conf)),1));
+                end
+                %conlist = cellstr(spm_select('ExtFPList',conpath,sprintf('^*_%04d.*.nii$', cons2take(conf)),1));
+                matlabbatch{1}.spm.stats.factorial_design.des.anova.icell(conf).scans = conlist';
             end
             matlabbatch{3}.spm.stats.con.consess{1}.fcon.name = 'FIR';
             matlabbatch{3}.spm.stats.con.consess{1}.fcon.weights = eye(numel(cons2take));
             matlabbatch{3}.spm.stats.con.consess{1}.fcon.sessrep = 'none';%options.stats.secondlvl.contrasts.conrepl.fir;
         else % 1 contrast per timebin
-            conlist = cellstr(spm_select('ExtFPList',conpath,['^*_00' con_id '.*.nii$'],1));
-            matlabbatch{1}.spm.stats.factorial_design.des.anova.icell(con).scans = conlist;
+            clear conlist
+            for sub = 1:numel(subj)
+                name = sprintf('sub%03d',subj(sub));
+                conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+                conlist(sub) = cellstr(spm_select('ExtFPList',conpathsub,sprintf('^%scon_%s.*.nii$',conprefix,con_id),1));
+            end
+            %conlist = cellstr(spm_select('ExtFPList',conpath,['^*_00' con_id '.*.nii$'],1));
+            matlabbatch{1}.spm.stats.factorial_design.des.anova.icell(con).scans = conlist';
         end
         
     end
@@ -114,7 +117,7 @@ for con = contrasts
     matlabbatch{3}.spm.stats.con.delete = options.stats.secondlvl.contrasts.delete;
     
     %% Run matlabbatch
-    if strcmp(basisF,'HRF') || strcmp(basisF,'Fourier') ||numel(contrasts) <= 2
+    if strcmp(basisF,'HRF') || numel(contrasts) <= 2
         if estimate_model % estimate model and contrasts
             spm_jobman('run', matlabbatch);
         else % only contrasts

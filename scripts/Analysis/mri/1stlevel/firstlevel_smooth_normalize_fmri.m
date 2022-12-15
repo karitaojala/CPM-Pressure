@@ -15,13 +15,14 @@ for sub = subj
 %     flowfield_file = fullfile(mridir,name,'t1_corrected','u_rc1sub001-t1_corrected.nii');
     
     % Retrieve 1st level con images
-    con_files = char(spm_select('FPList', firstlvlpath, '^con.*nii$'));
-    con_files = cellstr(char(con_files));
-%     ess_files = char(spm_select('FPList', firstlvlpath, '^ess.*nii$'));
-%     ess_files = cellstr(char(ess_files));
+    cn = 1;
+    for con = contrasts
+        con_files{cn} = char(fullfile(firstlvlpath, sprintf('con_00%02d.nii',con)));
+        %con_files{cn} = char(spm_select('FPList', firstlvlpath, sprintf('^con_00%02d.*nii$',con)));
+        cn = cn + 1;
+    end
     
-    input_files = con_files;
-%     input_files = [con_files; ess_files];
+    input_files = cellstr(char(con_files));
     input_files = input_files(~cellfun('isempty',input_files));
     %mask_file = char(spm_select('FPList', firstlvlpath, '^mask.*nii$'));
     %con_files{end+1} = mask_file;
@@ -42,7 +43,7 @@ for sub = subj
 %     norm_con_files = cellstr(char(norm_con_files));
     
     cn = 1;
-    for con = contrasts
+    for con = 1:numel(contrasts)
         [fp,fn,ext] = fileparts(input_files{con});
         norm_con_files{cn} = fullfile(firstlvlpath, [options.preproc.norm_prefix fn ext]);
         cn = cn + 1;

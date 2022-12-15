@@ -1,33 +1,42 @@
-function firstlevel_contrasts_fmri(options,analysis_version,modelname,basisF,tonicIncluded,VASincluded,subj,congroup)
+function firstlevel_contrasts_fmri(options,analysis_version,modelname,basisF,tonicIncluded,VASincluded,pmod,subj,congroup,sessConcatenat)
 
 for sub = subj
     
-    clear conweights
+    clear conweights cond_runs
     
     name = sprintf('sub%03d',sub);
     disp(name);
     
     firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
+
+    % Load SPM to extract 1st level regressor numbers
+    load(fullfile(firstlvlpath,'SPM.mat'))
     
-    % Define conditions
-    
+    % Define conditions & extract number of regressors
     for run = options.acq.exp_runs
+        
         condfile = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-onsets.mat']);
         load(condfile,'conditions')
-        cond_runs(run-1) = conditions(1); % whole run is same condition
+        cond_runs(run-1) = conditions(1); %#ok<*AGROW> % whole run is same condition
+        
+        if sessConcatenat
+            no_reg = numel(SPM.Sess.col);
+        else
+            no_reg(run-1) = numel(SPM.Sess(run-1).col);
+        end
+        
     end
     cond_runs(cond_runs == 0) = -1; % switch control cond to -1
-    cond_runs = -cond_runs; % flip all signs so that CON = 1, EXP = -1 (hypothesis: CON - EXP / CON > EXP)
     
     % Add conditions depending on which ones included and are there any
     % derivatives
-    if tonicIncluded; cond_Tonic = 2*(1+sum(options.basisF.hrf.derivatives)); else; cond_Tonic = 0; end
-    cond_Stim = 1;
-    if VASincluded; cond_VAS = 1; else; cond_VAS = 0; end
+    if tonicIncluded; cond_Tonic = (1+pmod(1))*(1+sum(options.basisF.hrf.derivatives)); else; cond_Tonic = 0; end %#ok<*NASGU>
+    cond_Stim = 1 + pmod(2);
+    if VASincluded; cond_VAS = 1 + pmod(3); else; cond_VAS = 0; end
     if any(options.basisF.hrf.derivatives)
         cond_Stim = cond_Stim+sum(options.basisF.hrf.derivatives);
-        cond_VAS = VASincluded*(cond_VAS+sum(options.basisF.hrf.derivatives));
+        cond_VAS = VASincluded*cond_VAS*(1+sum(options.basisF.hrf.derivatives));
     end
     
     % Contrast names
@@ -39,8 +48,8 @@ for sub = subj
     
     if strcmp(basisF,'HRF')
         
-        no_cond = cond_Tonic+cond_Stim+cond_VAS;
-        no_reg = no_cond+options.preproc.no_noisereg;     
+        %no_cond = cond_Tonic+cond_Stim+cond_VAS;
+        %no_reg = no_cond+options.preproc.no_noisereg;     
         
         if strcmp(congroup,'SanityCheck')
             
@@ -63,10 +72,52 @@ for sub = subj
             no_contr = numel(con_ind);
             
             conweights = eye(no_contr);
-            start_noise_reg = no_contr+1;
-            conweights(:,start_noise_reg:start_noise_reg+options.preproc.no_noisereg-1) = 0;
+            %start_noise_reg = no_contr+1;
+            %conweights(:,start_noise_reg:start_noise_reg+options.preproc.no_noisereg-1) = 0;
             
             conrepl = 'replsc';
+            
+        elseif strcmp(congroup,'SanityCheckTonicPmod')
+            
+            connames = options.stats.firstlvl.contrasts.names.sanitycheck_tonic;
+            con_ind = 1:numel(connames);
+            no_contr = numel(con_ind);
+            conweights = eye(no_contr);
+            
+            if sessConcatenat
+                conrepl = 'none';
+            else
+                conrepl = 'replsc';
+            end
+            
+        elseif strcmp(congroup,'TonicPressure')
+            
+            connames = options.stats.firstlvl.contrasts.names.tonic;
+            con_ind = 1:numel(connames);
+            no_contr = numel(con_ind);
+            
+            conweights = zeros(no_contr,sum(no_reg));
+            cn = 1;
+            
+            % Tonic onset contrasts
+            run_ind = [1 no_reg(1)+1 no_reg(1)+no_reg(2)+1 no_reg(1)+no_reg(2)+no_reg(3)+1]; % 1st regressor for each run
+            conweights(cn,run_ind) = (cond_runs == 1)/2; cn = cn + 1; % EXP contrast
+            conweights(cn,run_ind) = (cond_runs == -1)/2; cn = cn + 1; % CON contrast
+            conweights(cn,run_ind) = cond_runs/2; cn = cn + 1; % EXP > CON contrast
+            
+            % Tonic pressure contrasts
+            run_ind = run_ind + 1; % 2nd regressor for each run
+            conweights(cn,run_ind) = (cond_runs == 1)/2; cn = cn + 1; % EXP contrast
+            conweights(cn,run_ind) = (cond_runs == -1)/2; cn = cn + 1; % CON contrast
+            conweights(cn,run_ind) = cond_runs/2; cn = cn + 1; % EXP > CON contrast
+            
+            % Tonic x phasic interaction contrasts
+            run_ind = run_ind + 1; % 3rd regressor for each run
+            conweights(cn,run_ind) = (cond_runs == 1)/2; cn = cn + 1; % EXP contrast
+            conweights(cn,run_ind) = (cond_runs == -1)/2; cn = cn + 1; % CON contrast
+            conweights(cn,run_ind) = cond_runs/2; % EXP > CON contrast
+            
+            conrepl = 'none';
             
         elseif strcmp(congroup,'CPM')
             
@@ -76,34 +127,16 @@ for sub = subj
             no_contr = numel(con_ind);
             
             conweights = zeros(no_contr,numel(options.acq.exp_runs)*no_reg);
-            run_ind = [1 no_reg+1 2*no_reg+1 3*no_reg+1];
+            run_ind = [1 no_reg(1)+1 no_reg(1)+no_reg(2)+1 no_reg(1)+no_reg(2)+no_reg(3)+1]; 
             
             cn = 1;
             for run = 1:numel(options.acq.exp_runs)
                 %conweights(cn,run_ind(run)) = cond_runs(run)*(1/(numel(options.acq.exp_runs)/2)); % CON-EXP contrast, with equal weight for each run of each condition
-                conweights(cn,run_ind(run)) = cond_runs(run);
+                conweights(cn,run_ind(run)) = cond_runs(run)/2;
             end
+            conweights = -conweights; % flip to have CON as positive and EXP as negative (CON > EXP)
             
             conrepl = 'none';
-            
-        elseif strcmp(congroup,'PhysioReg')
-            
-            connames = options.stats.firstlvl.contrasts.names.physioreg;
-            
-            con_ind = 1:2;
-            no_contr = numel(con_ind);
-            
-            % F-contrast for physio regressors
-            conweights_physio = zeros(no_reg);
-            start_physio_reg = no_cond+1;
-            conweights_physio(:,start_physio_reg:start_physio_reg+options.preproc.no_physioreg-1) = eye(no_reg,options.preproc.no_physioreg);
-            
-            % F-contrast for motion regressors
-            conweights_motion = zeros(no_reg);
-            start_motion_reg = no_cond+options.preproc.no_physioreg+1;
-            conweights_motion(:,start_motion_reg:start_motion_reg+options.preproc.no_motionreg-1) = eye(no_reg,options.preproc.no_motionreg);
-            
-            conrepl = 'replsc';
             
         end
         
@@ -153,64 +186,16 @@ for sub = subj
             conrepl = options.stats.firstlvl.contrasts.conrepl.fir;
         end
         
-    elseif strcmp(basisF,'Fourier')
-        
-        cond_Tonic = 11; % 5 sine, 5 cosine, 1 Henning
-        no_cond = cond_Stim+cond_VAS+cond_Tonic;
-        
-        connames = options.stats.firstlvl.contrasts.names.fourier';
-        conweights = eye(no_cond);
-        
-        conrepl = options.stats.firstlvl.contrasts.conrepl.fourier;
-        
     end
     
     matlabbatch{1}.spm.stats.con.spmmat = {fullfile(firstlvlpath, 'SPM.mat')};
     
     cond = 1;
-    if strcmp(congroup,'PhysioReg') % F-contrasts already at 1st level -> not interested in single regressor effect
-        
-        matlabbatch{1}.spm.stats.con.consess{1}.fcon.name = connames{1}; % Contrast name
-        matlabbatch{1}.spm.stats.con.consess{1}.fcon.weights = conweights_physio; % Contrast weight
-        matlabbatch{1}.spm.stats.con.consess{1}.fcon.sessrep = conrepl; % Contrast replication across sessions
-        
-        matlabbatch{1}.spm.stats.con.consess{2}.fcon.name = connames{2}; % Contrast name
-        matlabbatch{1}.spm.stats.con.consess{2}.fcon.weights = conweights_motion; % Contrast weight
-        matlabbatch{1}.spm.stats.con.consess{2}.fcon.sessrep = conrepl; % Contrast replication across sessions
-        
-    elseif strcmp(basisF,'Fourier')
-        
-        for con = 1:2 % Loop over contrasts for current model
-            matlabbatch{1}.spm.stats.con.consess{con}.tcon.name = connames{con,cond}; % Contrast name
-            matlabbatch{1}.spm.stats.con.consess{con}.tcon.weights = conweights(con,:); % Contrast weight
-            matlabbatch{1}.spm.stats.con.consess{con}.tcon.sessrep = conrepl; % Contrast replication across sessions
-        end
-        
-        con = 3;
-        matlabbatch{1}.spm.stats.con.consess{3}.fcon.name = connames{con,cond}; % Contrast name
-        matlabbatch{1}.spm.stats.con.consess{3}.fcon.weights = conweights(con:end,:); % Contrast weight
-        matlabbatch{1}.spm.stats.con.consess{3}.fcon.sessrep = conrepl; % Contrast replication across sessions
-        
-    else % all other contrasts
-        
-        for con = 1:no_contr % Loop over contrasts for current model
-            matlabbatch{1}.spm.stats.con.consess{con}.tcon.name = connames{con,cond}; % Contrast name
-            matlabbatch{1}.spm.stats.con.consess{con}.tcon.weights = conweights(con,:); % Contrast weight
-            matlabbatch{1}.spm.stats.con.consess{con}.tcon.sessrep = conrepl; % Contrast replication across sessions
-        end
-        
+    for con = 1:no_contr % Loop over contrasts for current model
+        matlabbatch{1}.spm.stats.con.consess{con}.tcon.name = connames{con,cond}; % Contrast name
+        matlabbatch{1}.spm.stats.con.consess{con}.tcon.weights = conweights(con,:); % Contrast weight
+        matlabbatch{1}.spm.stats.con.consess{con}.tcon.sessrep = conrepl; % Contrast replication across sessions
     end
-    
-%     if tonicIncluded
-%         
-%         cond = cond + 1;
-%         for con = 1:no_contr
-%             matlabbatch{1}.spm.stats.con.consess{no_contr+con}.tcon.name = connames{con,cond}; % Contrast name
-%             matlabbatch{1}.spm.stats.con.consess{no_contr+con}.tcon.weights = conweights(no_contr+con,:); % Contrast weight
-%             matlabbatch{1}.spm.stats.con.consess{no_contr+con}.tcon.sessrep = conrepl; % Contrast replication across sessions
-%         end
-%         
-%     end
     
     matlabbatch{1}.spm.stats.con.delete = options.stats.firstlvl.contrasts.delete; % Deleting old contrast
     
