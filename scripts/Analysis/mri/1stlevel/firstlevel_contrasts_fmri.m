@@ -14,19 +14,35 @@ for sub = subj
     load(fullfile(firstlvlpath,'SPM.mat'))
     
     % Define conditions & extract number of regressors
-    for run = options.acq.exp_runs
+    if sub == 5
+        runs = [2 3 5];
+    else
+        runs = options.acq.exp_runs;
+    end
+    
+    block = 1; 
+    
+    for run = runs
         
         condfile = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-onsets.mat']);
         load(condfile,'conditions')
-        cond_runs(run-1) = conditions(1); %#ok<*AGROW> % whole run is same condition
+        cond_runs(block) = conditions(1); %#ok<*AGROW> % whole run is same condition
         
         if sessConcatenat
             no_reg = numel(SPM.Sess.col);
         else
-            no_reg(run-1) = numel(SPM.Sess(run-1).col);
+            no_reg(block) = numel(SPM.Sess(block).col);
         end
         
+        block = block + 1;
+        
     end
+    
+    if ~sessConcatenat
+        run_ind = [1 no_reg(1)+1 no_reg(1)+no_reg(2)+1 no_reg(1)+no_reg(2)+no_reg(3)+1]; % 1st regressor for each run
+        run_ind = run_ind(1:numel(runs));
+    end
+    
     cond_runs(cond_runs == 0) = -1; % switch control cond to -1
     
     % Add conditions depending on which ones included and are there any
@@ -55,20 +71,14 @@ for sub = subj
             
             connames = options.stats.firstlvl.contrasts.names.sanitycheck;
             
-            if tonicIncluded && VASincluded && options.basisF.hrf.derivatives(1) == 1 % Tonic, VAS, Deriv
-                con_ind = 1:numel(connames);
-            elseif tonicIncluded && VASincluded && options.basisF.hrf.derivatives(1) ~= 1 % Tonic, VAS, ~Deriv
-                con_ind = 1:3:numel(connames);
-            elseif ~tonicIncluded && VASincluded && options.basisF.hrf.derivatives(1) == 1 % ~Tonic, VAS, Deriv
-                con_ind = 7:numel(connames);
-            elseif ~tonicIncluded && VASincluded && options.basisF.hrf.derivatives(1) ~= 1 % ~Tonic, VAS, ~Deriv
-                con_ind = 7:3:numel(connames);
-            elseif ~tonicIncluded && ~VASincluded && options.basisF.hrf.derivatives(1) == 1 % ~Tonic, ~VAS, Deriv
-                con_ind = 7:9;
-            elseif ~tonicIncluded && ~VASincluded && options.basisF.hrf.derivatives(1) ~= 1 % ~Tonic, ~VAS, ~Deriv (pain only)
-                con_ind = 7;
+            if tonicIncluded && VASincluded % Tonic, VAS
+                con_ind = 1:3;
+            elseif ~tonicIncluded && VASincluded % ~Tonic, VAS
+                con_ind = 1:2;
+            elseif ~tonicIncluded && ~VASincluded % ~Tonic, ~VAS (Phasic only)
+                con_ind = 1;
             end
-            
+                
             no_contr = numel(con_ind);
             
             conweights = eye(no_contr);
@@ -77,6 +87,24 @@ for sub = subj
             
             conrepl = 'replsc';
             
+        elseif strcmp(congroup,'SanityCheckDeriv')
+            
+            connames = options.stats.firstlvl.contrasts.names.sanitycheck_deriv;
+            
+            if tonicIncluded && VASincluded && options.basisF.hrf.derivatives(1) == 1 % Phasic, Tonic, VAS
+                con_ind = 1:numel(connames);
+            elseif ~tonicIncluded && VASincluded && options.basisF.hrf.derivatives(1) == 1 % Phasic, ~Tonic, VAS
+                con_ind = 7:numel(connames);
+            elseif ~tonicIncluded && ~VASincluded && options.basisF.hrf.derivatives(1) == 1 % Phasic, ~Tonic, ~VAS
+                con_ind = 7:9;
+            end
+                
+            no_contr = numel(con_ind);
+            
+            conweights = eye(no_contr);
+            
+            conrepl = 'replsc';
+             
         elseif strcmp(congroup,'SanityCheckTonicPmod')
             
             connames = options.stats.firstlvl.contrasts.names.sanitycheck_tonic;
@@ -99,25 +127,146 @@ for sub = subj
             conweights = zeros(no_contr,sum(no_reg));
             cn = 1;
             
-            % Tonic onset contrasts
-            run_ind = [1 no_reg(1)+1 no_reg(1)+no_reg(2)+1 no_reg(1)+no_reg(2)+no_reg(3)+1]; % 1st regressor for each run
-            conweights(cn,run_ind) = (cond_runs == 1)/2; cn = cn + 1; % EXP contrast
-            conweights(cn,run_ind) = (cond_runs == -1)/2; cn = cn + 1; % CON contrast
-            conweights(cn,run_ind) = cond_runs/2; cn = cn + 1; % EXP > CON contrast
-            
-            % Tonic pressure contrasts
-            run_ind = run_ind + 1; % 2nd regressor for each run
-            conweights(cn,run_ind) = (cond_runs == 1)/2; cn = cn + 1; % EXP contrast
-            conweights(cn,run_ind) = (cond_runs == -1)/2; cn = cn + 1; % CON contrast
-            conweights(cn,run_ind) = cond_runs/2; cn = cn + 1; % EXP > CON contrast
-            
-            % Tonic x phasic interaction contrasts
-            run_ind = run_ind + 1; % 3rd regressor for each run
-            conweights(cn,run_ind) = (cond_runs == 1)/2; cn = cn + 1; % EXP contrast
-            conweights(cn,run_ind) = (cond_runs == -1)/2; cn = cn + 1; % CON contrast
-            conweights(cn,run_ind) = cond_runs/2; % EXP > CON contrast
+            if sub == 5 % only 1 experimental run but 2 control runs
+                cond_runs_scaled(cond_runs == 1) = 1;
+                cond_runs_scaled(cond_runs == -1) = -1/2;
+            else
+                cond_runs_scaled = cond_runs/2;
+            end
+    
+            if sessConcatenat
+               
+                % Tonic onset contrasts
+                conweights(cn,1) = 1; cn = cn + 1; % EXP contrast
+                conweights(cn,4) = 1; cn = cn + 1; % CON contrast
+                conweights(cn,[1 4]) = [1 -1]; cn = cn + 1; % EXP > CON contrast
+                
+                % Tonic pressure contrasts
+                conweights(cn,2) = 1; cn = cn + 1; % EXP contrast
+                conweights(cn,5) = 1; cn = cn + 1; % CON contrast
+                conweights(cn,[2 5]) = [1 -1]; cn = cn + 1; % EXP > CON contrast
+                
+                % Tonic x phasic interaction contrasts
+                conweights(cn,3) = 1; cn = cn + 1; % EXP contrast
+                conweights(cn,6) = 1; cn = cn + 1; % CON contrast
+                conweights(cn,[3 6]) = [1 -1]; cn = cn + 1; % EXP > CON contrast
+                
+                % Phasic onset contrasts
+                conweights(cn,7) = 1; cn = cn + 1; % EXP contrast
+                conweights(cn,9) = 1; cn = cn + 1; % CON contrast
+                conweights(cn,[7 9]) = [1 -1]; cn = cn + 1; % EXP > CON contrast
+                
+                % Phasic pain rating contrasts
+                conweights(cn,8) = 1; cn = cn + 1; % EXP contrast
+                conweights(cn,10) = 1; cn = cn + 1; % CON contrast
+                conweights(cn,[8 10]) = [1 -1]; cn = cn + 1; % EXP > CON contrast
+                
+                % VAS onset contrasts
+                conweights(cn,11) = 1; cn = cn + 1; % EXP+CON contrast
+                
+                % VAS button presses contrasts
+                conweights(cn,12) = 1; % EXP+CON contrast
+                
+            else
+                
+                % Tonic onset contrasts
+                conweights(cn,run_ind) = cond_runs_scaled > 0; cn = cn + 1; % EXP contrast
+                conweights(cn,run_ind) = cond_runs_scaled < 0; cn = cn + 1; % CON contrast
+                conweights(cn,run_ind) = cond_runs_scaled; cn = cn + 1; % EXP > CON contrast
+                
+                % Tonic pressure contrasts
+                run_ind = run_ind + 1; % 2nd regressor for each run
+                conweights(cn,run_ind) = cond_runs_scaled > 0; cn = cn + 1; % EXP contrast
+                conweights(cn,run_ind) = cond_runs_scaled < 0; cn = cn + 1; % CON contrast
+                conweights(cn,run_ind) = cond_runs_scaled; cn = cn + 1; % EXP > CON contrast
+                
+                % Tonic x phasic interaction contrasts
+                run_ind = run_ind + 1; % 3rd regressor for each run
+                conweights(cn,run_ind) = cond_runs_scaled > 0; cn = cn + 1; % EXP contrast
+                conweights(cn,run_ind) = cond_runs_scaled < 0; cn = cn + 1; % CON contrast
+                conweights(cn,run_ind) = cond_runs_scaled; cn = cn + 1;% EXP > CON contrast
+                
+                % Phasic onset contrasts
+                run_ind = run_ind + 1; % 4th regressor for each run
+                conweights(cn,run_ind) = cond_runs_scaled > 0; cn = cn + 1; % EXP contrast
+                conweights(cn,run_ind) = cond_runs_scaled < 0; cn = cn + 1; % CON contrast
+                conweights(cn,run_ind) = cond_runs_scaled; cn = cn + 1; % EXP > CON contrast
+                
+                % Phasic pain rating contrasts
+                run_ind = run_ind + 1; % 5th regressor for each run
+                conweights(cn,run_ind) = cond_runs_scaled > 0; cn = cn + 1; % EXP contrast
+                conweights(cn,run_ind) = cond_runs_scaled < 0; cn = cn + 1; % CON contrast
+                conweights(cn,run_ind) = cond_runs_scaled; % EXP > CON contrast
+                
+            end
             
             conrepl = 'none';
+            
+        elseif strcmp(congroup,'TonicPressureConcatTime')
+            
+            connames = options.stats.firstlvl.contrasts.names.tonic_concat;
+            con_ind = 1:numel(connames);
+            no_contr = numel(con_ind);
+            
+            conweights = zeros(no_contr,sum(no_reg));
+            cn = 1;
+            
+            % Tonic onset contrasts
+            conweights(cn,4) = 1; cn = cn + 1; % EXP contrast
+            conweights(cn,1) = 1; cn = cn + 1; % CON contrast
+            conweights(cn,[4 1]) = [1 1]; cn = cn + 1; % EXP-CON average contrast
+            conweights(cn,[4 1]) = [1 -1]; cn = cn + 1; % EXP > CON contrast
+            
+            % Tonic pressure contrasts
+            conweights(cn,5) = 1; cn = cn + 1; % EXP contrast
+            conweights(cn,2) = 1; cn = cn + 1; % CON contrast
+            conweights(cn,[5 2]) = [1 1]; cn = cn + 1; % EXP-CON average contrast
+            conweights(cn,[5 2]) = [1 -1]; cn = cn + 1; % EXP > CON contrast
+            
+            % Tonic x phasic interaction contrasts
+            conweights(cn,6) = 1; cn = cn + 1; % EXP contrast
+            conweights(cn,3) = 1; cn = cn + 1; % CON contrast
+            conweights(cn,[6 3]) = [1 1]; cn = cn + 1; % EXP-CON average contrast
+            conweights(cn,[6 3]) = [1 -1]; cn = cn + 1; % EXP > CON contrast
+            
+            % Phasic onset contrasts
+            conweights(cn,9) = 1; cn = cn + 1; % EXP contrast
+            conweights(cn,7) = 1; cn = cn + 1; % CON contrast
+            conweights(cn,[9 7]) = [1 1]; cn = cn + 1; % EXP-CON average contrast
+            conweights(cn,[9 7]) = [1 -1]; cn = cn + 1; % EXP > CON contrast
+            
+            % Phasic stimulus index contrasts
+            conweights(cn,10) = 1; cn = cn + 1; % EXP contrast
+            conweights(cn,8) = 1; cn = cn + 1; % CON contrast
+            conweights(cn,[10 8]) = [1 1]; cn = cn + 1; % EXP-CON average contrast
+            conweights(cn,[10 8]) = [1 -1]; cn = cn + 1; % EXP > CON contrast
+            
+            % VAS onset contrasts
+            conweights(cn,11) = 1; % EXP-CON average contrast / no differentiation EXP-CON
+            
+%             % VAS button presses contrasts
+%             conweights(cn,12) = 1; % EXP+CON contrast
+            
+            conrepl = 'none';
+                
+        elseif strcmp(congroup,'NoiseReg')
+            
+            no_cond = 1 + tonicIncluded + VASincluded;
+                
+            no_reg = no_cond + options.preproc.no_noisereg;
+            no_contr = options.preproc.no_noisereg;
+            
+            con_ind = 1:no_contr;
+            
+            conweights = zeros(no_contr,no_reg);
+            col_ind = (no_cond+1):(no_cond+no_contr);
+            conweights(:,col_ind) = eye(no_contr,no_contr);
+            
+            conrepl = 'replsc';
+            
+            for con = 1:no_contr % Loop over contrasts for current model
+                connames{1,con} = sprintf('NoiseReg%02d',con); % Contrast name
+            end
             
         elseif strcmp(congroup,'CPM')
             
@@ -127,12 +276,11 @@ for sub = subj
             no_contr = numel(con_ind);
             
             conweights = zeros(no_contr,numel(options.acq.exp_runs)*no_reg);
-            run_ind = [1 no_reg(1)+1 no_reg(1)+no_reg(2)+1 no_reg(1)+no_reg(2)+no_reg(3)+1]; 
             
             cn = 1;
-            for run = 1:numel(options.acq.exp_runs)
+            for run = 1:numel(runs)
                 %conweights(cn,run_ind(run)) = cond_runs(run)*(1/(numel(options.acq.exp_runs)/2)); % CON-EXP contrast, with equal weight for each run of each condition
-                conweights(cn,run_ind(run)) = cond_runs(run)/2;
+                conweights(cn,run_ind(run)) = cond_runs_scaled(run);
             end
             conweights = -conweights; % flip to have CON as positive and EXP as negative (CON > EXP)
             
@@ -159,7 +307,7 @@ for sub = subj
             conweights_CON = [];
             conweights_EXP = [];
             
-            for run = 1:numel(options.acq.exp_runs)
+            for run = 1:numel(runs)
                clear conweights_run
                condname = SPM.Sess(run).U.name{:}(end-2:end); 
                if strcmp(condname,'CON') % if CON run, ones for CON condition contrasts, zeros for EXP condition contrasts

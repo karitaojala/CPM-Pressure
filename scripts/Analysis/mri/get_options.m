@@ -34,7 +34,15 @@ else % Brain
     options.acq.n_slices = 60;
     options.preproc.onset_slice = 60;%1065+50; % onset slice timing in ms, last brain slice + 50 ms (middle of the gap); % last brain slice closest to the slice time correction reference slice (50 ms from last brain slice and first spinal)
     options.preproc.no_motionreg = 6;
-    options.preproc.no_physioreg = 18;
+%     options.preproc.no_physioreg = 18; % normal RETROICOR 8 + 6 + 4
+%     options.preproc.physio_name = 'multiple_regressors-brain-zscored';
+    options.preproc.no_physioreg = 18 + 14; % nNoiseROI (= 2) x (6 components + 1)
+%     options.preproc.no_physioreg = 18 + 14 + 2; % nNoiseROI (= 2) x (6 components + 1) + HRV + RVT
+%     options.preproc.physio_name = ['multiple_regressors-brain-HRVRVT_noiseROI_6comp_' num2str(options.preproc.no_motionreg) 'motion-zscored'];
+%     options.preproc.physio_name = ['multiple_regressors-brain-noiseROI_6comp_' num2str(options.preproc.no_motionreg) 'motion-zscored'];
+    options.preproc.physio_name = ['multiple_regressors-brain-noiseROI_6comp-zscored'];
+%     options.preproc.no_physioreg = 18 + 2; % HRV and RVT without delays
+%     options.preproc.physio_name = 'multiple_regressors-brain-HRVRVT-zscored';
     options.preproc.no_noisereg = options.preproc.no_physioreg+options.preproc.no_motionreg; % 18 physio + 6 movement = 24
     
 end
@@ -72,28 +80,42 @@ options.model.firstlvl.timing_units = 'scans'; % scans or secs
 % Orthogonalization
 options.model.firstlvl.orthogonalization = 0;
 
+% Brain mask
+options.model.firstlvl.mask_name = '-v2'; 
+
 % High-pass filter
 options.model.firstlvl.hpf.phasic = 128; % 128 for phasic only models
 options.model.firstlvl.hpf.tonic = 200; % 200 for tonic models
 
-options.model.firstlvl.stimuli.phasic_total = 18*numel(options.acq.exp_runs);
+options.model.firstlvl.stimuli.phasic_run   = 18;
+options.model.firstlvl.stimuli.phasic_total = options.model.firstlvl.stimuli.phasic_run*numel(options.acq.exp_runs);
+options.model.firstlvl.stimuli.tonic_name = {'CON' 'EXP'};
 
 % Statistical models
-options.stats.firstlvl.contrasts.names.sanitycheck = {'Tonic-baseline' 'TonicTempDeriv' 'TonicDispDeriv' ...
-    'TonicPmod-baseline' 'TonicPmodTempDeriv' 'TonicPmodDispDeriv' ...
+options.stats.firstlvl.contrasts.names.sanitycheck = {'Tonic-baseline' 'Phasic-baseline' 'VAS-baseline'};
+options.stats.firstlvl.contrasts.names.sanitycheck_deriv = {'Tonic-baseline' 'TonicTempDeriv' 'TonicDispDeriv' ...
     'Phasic-baseline' 'PhasicTempDeriv' 'PhasicDispDeriv' ...
-    'VAS-baseline' 'VASTempDeriv' 'VASDispDeriv' ...
-    'VASPmod-baseline' 'VASPmodTempDeriv' 'VASPmodDispDeriv'};
+    'VAS-baseline' 'VASTempDeriv' 'VASDispDeriv'};
 options.stats.firstlvl.contrasts.names.sanitycheck_tonic = {'Tonic-baseline' 'TonicPressure-baseline' 'TonicxPhasic-baseline' ...
-    'Phasic-baseline' 'VAS-baseline'};
+    'Phasic-baseline' 'PhasicPainRating-baseline' 'VAS-baseline' 'VASButtonPress-baseline'};
 options.stats.firstlvl.contrasts.names.sanitycheck_tonic_phasic = {'Tonic-baseline' 'TonicPressure-baseline' 'TonicxPhasic-baseline' ...
     'Phasic-baseline' 'TonicCond-baseline' 'StimIndex-baseline' 'TonicCondxStimInd-baseline' 'VAS-baseline'};
 options.stats.firstlvl.contrasts.names.tonic = {'TonicOnset-EXP' 'TonicOnset-CON' 'TonicOnset-EXP-CON' ...
     'TonicPressure-EXP' 'TonicPressure-CON' 'TonicPressure-EXP-CON' ...
-    'TonicxPhasic-EXP' 'TonicxPhasic-CON' 'TonicxPhasic-EXP-CON'};
-options.stats.firstlvl.contrasts.names.cpm = {'Phasic pain CON-EXP'};
+    'TonicxPhasic-EXP' 'TonicxPhasic-CON' 'TonicxPhasic-EXP-CON' ...
+    'PhasicOnset-EXP' 'PhasicOnset-CON' 'PhasicOnset-EXP-CON' ...
+    'PhasicPainRating-EXP' 'PhasicPainRating-CON' 'PhasicPainRating-EXP-CON' ...
+    'VASOnset' 'VASButtonPresses'};
+options.stats.firstlvl.contrasts.names.tonic_concat = {'TonicOnset-EXP' 'TonicOnset-CON' 'TonicOnset-EXP-CON-avg' 'TonicOnset-EXP-CON-diff'...
+    'TonicPressure-EXP' 'TonicPressure-CON' 'TonicPressure-EXP-CON-avg' 'TonicPressure-EXP-CON-diff'...
+    'TonicxPhasic-EXP' 'TonicxPhasic-CON' 'TonicxPhasic-EXP-CON-avg' 'TonicxPhasic-EXP-CON-diff'...
+    'PhasicOnset-EXP' 'PhasicOnset-CON' 'PhasicOnset-EXP-CON-avg' 'PhasicOnset-EXP-CON-diff'...
+    'PhasicStimInd-EXP' 'PhasicStimInd-CON' 'PhasicStimInd-EXP-CON-avg' 'PhasicStimInd-EXP-CON-diff'...
+    'VASOnset'};
+options.stats.firstlvl.contrasts.names.cpm = {'Phasic CON-EXP'};
 options.stats.firstlvl.contrasts.names.cpmtime = {'TonicCond EXP-CON' 'StimIndex' 'TonicCond X StimIndex'};
 options.stats.firstlvl.contrasts.names.physioreg = {'PhysioReg' 'MotionReg'};
+options.stats.firstlvl.contrasts.names.hrvrvt = {'HRV' 'RVT'};
 options.stats.firstlvl.contrasts.names.fourier = {'Phasic-baseline' 'VAS-baseline' 'TonicFourier'};
 options.stats.firstlvl.contrasts.conrepl.hrf = 'replsc';
 options.stats.firstlvl.contrasts.conrepl.fir = 'replsc'; % contrasts not replicated across sessions because sessions different conditions

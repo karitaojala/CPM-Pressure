@@ -7,14 +7,19 @@ for sub = subj
     
     firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
-    brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask.nii']);
+    brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask' options.model.firstlvl.mask_name '.nii']);
     
     % Noise correction files
     physiopathsub = fullfile(options.path.physiodir,name);
     
     block = 1;
+    if sub == 5
+        runs = [2 3 5]; % run 4 excluded
+    else
+        runs = options.acq.exp_runs;
+    end
     
-    for run = options.acq.exp_runs
+    for run = runs
         
         clear EPI episcans onsetsTonic
         
@@ -66,7 +71,11 @@ for sub = subj
             %matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = options.model.firstlvl.tonic_name{conditionsTonic(1)+1};
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'TonicStim';
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsTonic;
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.fir.tonic_duration;
+            if strcmp(options.model.firstlvl.timing_units,'scans')
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.tonic_duration/options.acq.TR;
+            else
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.tonic_duration;
+            end
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
@@ -109,21 +118,25 @@ for sub = subj
     if ~specifyTonicOnly
         
         block = 1;
-        run_ind_regressors = 1:options.acq.n_scans(block+1);
+        run_ind_regressors = 1:options.acq.n_scans(runs(1));
         
         % Retrieve unestimated regressors
         SPMtonic = load(fullfile(firstlvlpath, 'SPM.mat'));
         tonicReg = SPMtonic.SPM.xX.X; % 5 sines + 5 cosines + Hanning window = 11 regressors
         
-        for run = options.acq.exp_runs
+        for run = runs
             
             % Define phasic regressors
             c = 0;
             if phasicIncluded % && ~phasicFourier
                 c = c+1;
-                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PainStim';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PhasicStim';
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsStim_all{block};
-                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration;
+                if strcmp(options.model.firstlvl.timing_units,'scans')
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration/options.acq.TR;
+                else
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration;
+                end
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
@@ -134,7 +147,11 @@ for sub = subj
                 c = c+1;
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'VAS';
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsVAS_all{block};
-                matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration;
+                if strcmp(options.model.firstlvl.timing_units,'scans')
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration/options.acq.TR;
+                else
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration;
+                end
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
@@ -165,7 +182,7 @@ for sub = subj
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).multi_reg = {newMultiFile}; % File including tonic stimulus Fourier set and nuisance regressors
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).hpf = options.model.firstlvl.hpf.tonic; % High-pass filter
             
-            run_ind_regressors = run_ind_regressors + options.acq.n_scans(block+1);
+            run_ind_regressors = run_ind_regressors + options.acq.n_scans(run);
             block = block + 1;
             
         end

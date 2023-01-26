@@ -15,7 +15,7 @@ connames = {'PhasicStim-All' 'VAS-All' ...
 
 conprefix = [options.preproc.smooth_prefix options.preproc.norm_prefix];
 
-for con = 1:numel(connames)
+for con = 9%1:numel(connames)
     
     clear conlist
     
@@ -117,7 +117,8 @@ for con = 1:numel(connames)
             tonicFourier_des = SPM_tonicBF.SPM.xX.X;
             tonicFourier_desmat = tonicFourier_des(1:nscans,1:(conf_no/2)); % take 1st run regressors for Fourier set
             
-            tonicPmod_file = fullfile(options.path.mridir,'sub001','1stlevel',['Version_' analysis_version],'HRF_phasic_tonic_pmod','SPM.mat');
+%             tonicPmod_file = fullfile(options.path.mridir,'sub001','1stlevel',['Version_' analysis_version],'HRF_phasic_tonic_pmod','SPM.mat');
+            tonicPmod_file = fullfile(options.path.mridir,'sub001','1stlevel',['Version_19Dec22'],'HRF_phasic_tonic_pmod','SPM.mat');
             SPM_tonicPmod = load(tonicPmod_file);
             %tonicPmod_con = SPM_tonicPmod.SPM.xX.X(1:nscans,2); % take 1st run regressor for tonic parametric modulator (pressure)
             col_ind = find(contains(SPM_tonicPmod.SPM.xX.name,'Sn(2) TonicStimxTonicPressure^1*bf(1)'));
@@ -130,7 +131,7 @@ for con = 1:numel(connames)
             beta_exp_mc = beta_exp-mean(beta_exp);
             
             % Wave contrasts t-tests
-            matlabbatch{4}.spm.stats.factorial_design.des.t1.scans = conlist';
+            %matlabbatch{4}.spm.stats.factorial_design.des.t1.scans = conlist';
             
             %cn = 0;
             
@@ -160,14 +161,14 @@ for con = 1:numel(connames)
         elseif con == 10
             
             % Physio regressors only contrast
-            matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'NoiseReg-Physio';
-            matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = eye(options.preproc.no_physioreg);
+            matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'NoiseReg-Physio';
+            matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = eye(options.preproc.no_physioreg);
             
             % Motion regressors only contrast
-            matlabbatch{3}.spm.stats.con.consess{3}.fcon.name = 'NoiseReg-Motion';
+            matlabbatch{3}.spm.stats.con.consess{2}.fcon.name = 'NoiseReg-Motion';
             conweights = eye(options.preproc.no_noisereg);
             conweights(:,1:options.preproc.no_physioreg) = 0;
-            matlabbatch{3}.spm.stats.con.consess{3}.fcon.weights = conweights;
+            matlabbatch{3}.spm.stats.con.consess{2}.fcon.weights = conweights;
             
         end
         

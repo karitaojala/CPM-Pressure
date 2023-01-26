@@ -7,7 +7,7 @@ for sub = subj
     
     firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
-    brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask.nii']);
+    brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask' options.model.firstlvl.mask_name '.nii']);
     
     block = 1;
     

@@ -12,7 +12,7 @@ for sub = subj
     
     firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
-    brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask.nii']);
+    brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask' options.model.firstlvl.mask_name '.nii']);
     
     if tonicIncluded
         cond_runs = allconds.conditions_list_rand(sub,:);
@@ -24,7 +24,13 @@ for sub = subj
     
     block = 1; 
     
-    for run = options.acq.exp_runs
+    if sub == 5
+        runs = [2 3 5];
+    else
+        runs = options.acq.exp_runs;
+    end
+    
+    for run = runs
         
         clear EPI episcans onsetsTonic
         
@@ -41,7 +47,7 @@ for sub = subj
         physiopathsub = fullfile(options.path.physiodir,name);
         
         if physioOn
-            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain-zscored.txt']);
+            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-' options.preproc.physio_name '.txt']);
         else % only motion regressors
             noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-motion_regressors-brain-zscored.txt']);
         end
@@ -106,6 +112,17 @@ for sub = subj
         onsetsStim = onsetdata.onsetsStim+options.basisF.onset_shift;
         onsetsVAS  = onsetdata.onsetsVAS+options.basisF.onset_shift;
         
+        if phasicIncluded && any(pmodNo(2))
+            pmodfile_phasic = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-phasic-pmod.mat']);
+            pmoddata_phasic = load(pmodfile_phasic);
+            pmodStructPhasic = struct();
+            pmodStructPhasic.name = 'PainRating';
+            pmodStructPhasic.param = pmoddata_phasic.pmodPhasic(:);
+            pmodStructPhasic.poly = 1;
+        else
+            pmodStructPhasic = struct('name', {}, 'param', {}, 'poly', {});
+        end
+        
         if VASincluded && any(pmodNo(3))
             pmodfile_vas = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-vas-pmod.mat']);
             pmoddata_vas = load(pmodfile_vas);
@@ -128,11 +145,10 @@ for sub = subj
         disp(['Found ', num2str(numel(onsetsTonic)) ' tonic, ', num2str(numel(onsetsStim)), ' phasic, and ', num2str(numel(onsetsVAS)), ' VAS rating events.'])
         disp('................................')
         
-        % Define conditions
         c = 0;
         if tonicIncluded
             c = c+1;
-            %matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = options.model.firstlvl.tonic_name{conditionsTonic(1)+1};
+%             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = ['TonicStim' cond_name];
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'TonicStim';
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsTonic;
             if strcmp(options.model.firstlvl.timing_units,'scans')
@@ -155,7 +171,7 @@ for sub = subj
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration;
             end
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = pmodStructPhasic; 
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
         end
         
@@ -169,7 +185,7 @@ for sub = subj
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.vas_duration;
             end
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
-            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = pmodStructVAS; % No parametric modulation
+            matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = pmodStructVAS; 
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
         end
         

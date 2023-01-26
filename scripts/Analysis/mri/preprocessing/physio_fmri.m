@@ -11,6 +11,8 @@ motion_dir   = fullfile(base_dir,'mri','data');
 %logdir      = fullfile(base_dir,'logs');
 
 all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
+% all_subs     = [1 2 4:13 15:18 20:24];
+% all_subs     = [25:27 29:34 37:40 42:49];
 
 n_runs            = 6;
 n_scans_all       = [56 232 232 232 232 56];
@@ -22,15 +24,20 @@ buffer_time_end   = round(TR);
 multiband_factor  = 3; % brain only
 
 % Options
-spinal              = false;
-extract_physio_runs = false;
-convert_physio2bids = false;
-run_physio_batch    = false;
-calc_manual_physio  = false;
-add_button_presses  = false;
-zscore_physio       = true;
+spinal                  = false;
+extract_physio_runs     = false;
+convert_physio2bids     = false;
+calc_extra_motionparam  = false;
+run_physio_batch        = false;
+calc_manual_physio      = false;
+add_button_presses      = false;
+copy_physio_files       = false;
+append_motionparam      = false;
+zscore_physio           = false;
+remove_physioparam      = true;
 
 if spinal % Spinal
+    
     n_slices = 12;
     onset_slice = 1; % onset slice index, here 1 as it's the first spinal slice that is closest to the slice time correction reference slice
     % slices acquired descending
@@ -39,28 +46,49 @@ if spinal % Spinal
     region = 'spinal';
     
 else % Brain
+    
     n_slices = 60/multiband_factor;
     onset_slice = n_slices; % last brain slice closest to the slice time correction reference slice (50 ms from last brain slice and first spinal)
     time_slice_to_slice  = 0.0575; % 57.5 ms in the brain, except that multiband factor 3 -> 3 slices acquired at each time
-    no_motion_reg = 6;
+%     no_motion_reg = 6;
+    no_motion_reg = 24;
     region = 'brain';
-    
 end
+
+% physio_name = '';
+physio_name = '-HRVRVT_noiseROI_6comp_6motion';
+% physio_name = '-HRVRVT';
+
+if no_motion_reg == 6
+    motionparam_name = '';
+    motion_name = '_6motion';
+elseif no_motion_reg == 12
+    motionparam_name = '-12param';
+    motion_name = '_12motion';
+else
+    motionparam_name = '-24param';
+    motion_name = '_24motion';
+end
+
+param2remove = [19 20]; % 22 = HRV, 23 = RVT
+physio_name_new = '-noiseROI_6comp';
 
 relative_start_acquisition = 0;
 
 physregopts.samp_int = 0.01; % 10 ms equals 100Hz
 physregopts.tol_s    = 5;    % taken times 10 = ms
-physregopts.order_c  = 3;    % according to Harvey 2008 --> 3C4R1X
+physregopts.order_c  = 3;    % according to Harvey 2008 --> 3 cardiac, 4 respiratory, 1 interaction
 physregopts.order_r  = 4;
 physregopts.order_cr = 1;
-physregopts.h_size   = 300; %for breathing histogram
+physregopts.h_size   = 300;  % for breathing histogram
 
-no_noise_reg = 18 + no_motion_reg;
+% no_noise_reg = 18 + no_motion_reg;
+no_noise_reg = 18 + 14 + 2 + no_motion_reg;
+% no_noise_reg = 18 + 2 + no_motion_reg;
 
 if extract_physio_runs
     
-    for sub = all_subs
+    for sub = all_subs %#ok<*UNRCH>
         
         name = sprintf('sub%03d',sub);
         disp(name);
@@ -140,6 +168,34 @@ if convert_physio2bids
     
 end
 
+if calc_extra_motionparam
+   
+    for sub = 1:numel(all_subs)
+        
+        fprintf('Creating extra motion parameters...\n')
+        name = sprintf('sub%03d',all_subs(sub));
+        disp(name);
+      
+        for run = 1:n_runs
+            
+            run_id = sprintf('run%d',run);
+            disp(run_id);
+            
+            if spinal
+                motion_file = fullfile(motion_dir,name,['epi-' run_id],'moco_params.tsv');
+            else
+                motion_file = fullfile(motion_dir,name,['epi-' run_id],['rp_a' name '-epi-' run_id '-brain.txt']);
+            end
+            
+            create_extra_motion_parameters(motion_file)
+            
+        end
+        
+    end
+    
+end
+
+
 if run_physio_batch
     
     for sub = 1:numel(all_subs)
@@ -159,9 +215,9 @@ if run_physio_batch
             physio_file = fullfile(output_dir,[name '-' run_id '-physio-bids.tsv.gz']);
             
             if spinal
-                motion_file = fullfile(motion_dir,name,['epi-' run_id],'moco_params.tsv');
+                motion_file = fullfile(motion_dir,name,['epi-' run_id],['moco_params' motionparam_name '.tsv']);
             else
-                motion_file = fullfile(motion_dir,name,['epi-' run_id],['rp_a' name '-epi-' run_id '-brain.txt']);
+                motion_file = fullfile(motion_dir,name,['epi-' run_id],['rp_a' name '-epi-' run_id '-brain' motionparam_name '.txt']);
             end
             
             if strcmp(name,'sub006') && run == 6
@@ -170,7 +226,7 @@ if run_physio_batch
                 n_scans_run = n_scans(run);
             end
             
-            matlabbatch = physio_batch(spinal,name,run_id,output_dir,physio_file,motion_file,no_motion_reg,relative_start_acquisition,n_scans_run,n_slices,onset_slice,time_slice_to_slice);
+            matlabbatch = physio_batch(spinal,physio_name,name,run_id,output_dir,physio_file,motion_file,no_motion_reg,relative_start_acquisition,n_scans_run,n_slices,onset_slice,time_slice_to_slice);
             spm_jobman('run',matlabbatch);
             
         end
@@ -211,6 +267,64 @@ if add_button_presses
     
 end
 
+if copy_physio_files
+
+    for sub = 1:numel(all_subs)
+        
+        fprintf('Copying physio files...\n')
+        name = sprintf('sub%03d',all_subs(sub));
+        disp(name);
+        
+        physio_folder = erase(physio_name,'-');
+        output_dir = fullfile(physio_dir,name);
+        
+        for run = 1:n_runs
+            
+            run_id = sprintf('run%d',run);
+            fprintf([run_id '\n']);
+            physio_file = fullfile(output_dir,physio_folder,sprintf('sub%03d-run%d-multiple_regressors-%s%s.txt',all_subs(sub),run,region,physio_name));
+            copyfile(physio_file,output_dir)
+            
+        end
+        
+    end
+    
+end
+
+if append_motionparam
+   
+    for sub = 1:numel(all_subs)
+        
+        fprintf('Appending extra motion parameters to physio files...\n')
+        name = sprintf('sub%03d',all_subs(sub));
+        disp(name);
+        
+        physio_folder = fullfile(physio_dir,name);
+        
+        for run = 1:n_runs
+            
+            run_id = sprintf('run%d',run);
+            fprintf([run_id '\n']);
+            
+            if spinal
+                motion_file = fullfile(motion_dir,name,['epi-' run_id],['moco_params' motionparam_name '.tsv']);
+            else
+                motion_file = fullfile(motion_dir,name,['epi-' run_id],['rp_a' name '-epi-' run_id '-brain' motionparam_name '.txt']);
+            end
+            
+            motionparam = erase(motionparam_name,'param');
+            motionparam = erase(motionparam,'-');
+            no_new_motion_param = str2double(motionparam);
+            
+            physio_file = fullfile(physio_folder,sprintf('sub%03d-run%d-multiple_regressors-%s%s.txt',all_subs(sub),run,region,physio_name));
+            append_motion_parameters(physio_file,motion_file,no_noise_reg,no_new_motion_param)
+            
+        end
+        
+    end
+    
+end
+
 if zscore_physio
     
     for sub = 1:numel(all_subs)
@@ -227,7 +341,7 @@ if zscore_physio
             fprintf([run_id '\n']);
             
             % Physio + motion regressors
-            physio_file = fullfile(output_dir,sprintf('sub%03d-run%d-multiple_regressors-%s.txt',all_subs(sub),run,region));
+            physio_file = fullfile(output_dir,sprintf('sub%03d-run%d-multiple_regressors-%s%s%s.txt',all_subs(sub),run,region,physio_name,motion_name));
             physiodata = load(physio_file);
             physiodata_temp = physiodata(:,1:no_noise_reg); % take only real physio regressors, not motion volume exclusion regressors
             %physiodata_temp_z = reshape(zscore(physiodata_temp(:)), size(physiodata_temp));
@@ -235,26 +349,52 @@ if zscore_physio
             physiodata_z = physiodata;
             physiodata_z(:,1:no_noise_reg) = physiodata_temp_z;
             
-            physiofile_new = fullfile(output_dir,sprintf('sub%03d-run%d-multiple_regressors-%s-zscored.txt',all_subs(sub),run,region));
+            physiofile_new = fullfile(output_dir,sprintf('sub%03d-run%d-multiple_regressors-%s%s%s-zscored.txt',all_subs(sub),run,region,physio_name,motion_name));
             writematrix(physiodata_z,physiofile_new,'Delimiter','tab');
             
             % Motion regressors only
-            if spinal
-                motion_file = fullfile(motion_dir,name,['epi-' run_id],'moco_params.tsv');
-            else
-                motion_file = fullfile(motion_dir,name,['epi-' run_id],['rp_a' name '-epi-' run_id '-brain.txt']);
-            end
-            motiondata = load(motion_file);
-            %motiondata_z = reshape(zscore(motiondata(:)), size(motiondata));
-            motiondata_z = zscore(motiondata);
-            
-            motionfile_new = fullfile(output_dir,sprintf('sub%03d-run%d-motion_regressors-%s-zscored.txt',all_subs(sub),run,region));
-            writematrix(motiondata_z,motionfile_new,'Delimiter','tab');
+%             if spinal
+%                 motion_file = fullfile(motion_dir,name,['epi-' run_id],'moco_params.tsv');
+%             else
+%                 motion_file = fullfile(motion_dir,name,['epi-' run_id],['rp_a' name '-epi-' run_id '-brain.txt']);
+%             end
+%             motiondata = load(motion_file);
+%             %motiondata_z = reshape(zscore(motiondata(:)), size(motiondata));
+%             motiondata_z = zscore(motiondata);
+%             
+%             motionfile_new = fullfile(output_dir,sprintf('sub%03d-run%d-motion_regressors-%s-zscored.txt',all_subs(sub),run,region));
+%             writematrix(motiondata_z,motionfile_new,'Delimiter','tab');
             
         end
         
     end
         
+end
+
+if remove_physioparam
+    
+    for sub = 1:numel(all_subs)
+        
+        fprintf('Removing physio parameters from physio files...\n')
+        name = sprintf('sub%03d',all_subs(sub));
+        disp(name);
+        
+        physio_folder = fullfile(physio_dir,name);
+        
+        for run = 1:n_runs
+            
+            run_id = sprintf('run%d',run);
+            fprintf([run_id '\n']);
+            
+            physio_file = fullfile(physio_folder,sprintf('sub%03d-run%d-multiple_regressors-%s%s-zscored.txt',all_subs(sub),run,region,physio_name));
+            physio_file_new = fullfile(physio_folder,sprintf('sub%03d-run%d-multiple_regressors-%s%s-zscored.txt',all_subs(sub),run,region,physio_name_new));
+            
+            remove_physio_parameters(physio_file,physio_file_new,param2remove)
+            
+        end
+        
+    end
+    
 end
 
 end

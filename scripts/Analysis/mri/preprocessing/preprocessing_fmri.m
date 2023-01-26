@@ -19,7 +19,7 @@ end
 addpath(genpath(spm_path))
 addpath(sct_path)
 
-parallel       = 0; % run several processes (matlabs/subjects) in parallel on different cores
+parallel       = 1; % run several processes (matlabs/subjects) in parallel on different cores
 
 do_sp_slicetime  = 0;
 do_sp_sct        = 0;
@@ -34,11 +34,12 @@ do_skull         = 0;
 do_norm          = 0;
 do_back          = 0;
 do_comb_dar_nlin = 0;
+do_nlin_reverse  = 1;
 do_warp          = 0;
 
 do_sm_skull      = 0; % can only be done after all of the above steps
 
-do_avg_norm      = 1; % can only be done after all subjects done
+do_avg_norm      = 0; % can only be done after all subjects done
 
 
 all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
@@ -149,6 +150,7 @@ for np = 1:size(subs,2)
         nlin_coreg_file = sprintf('%sy_meana%s-epi-run%s-brain.nii',[m_dir filesep],name,'1');
         c1_file         = ins_letter(struc_file,'c1');
         c2_file         = ins_letter(struc_file,'c2');
+        c3_file         = ins_letter(struc_file,'c3');
         rc1_file        = ins_letter(struc_file,'rc1');
         rc2_file        = ins_letter(struc_file,'rc2');
         u_rc1_file      = ins_letter(struc_file,'u_rc1');
@@ -355,6 +357,21 @@ for np = 1:size(subs,2)
 %             matlabbatch{gi}.spm.util.defs.comp{1}.inv.space = {[template_path 'Template_T1.nii']}; % checked the correspondence to the new names from the CAT12 manual
             matlabbatch{gi}.spm.util.defs.out{1}.savedef.ofname = 'inv_epi_2_template';
             matlabbatch{gi}.spm.util.defs.out{1}.savedef.savedir.saveusr = cellstr(m_dir);
+            gi = gi + 1;
+        end
+        
+        %-------------------------------
+        %Get reverse transformed T1 to mean EPI
+        if do_nlin_reverse
+            matlabbatch{gi}.spm.util.defs.comp{1}.def = cellstr(nlin_coreg_file);
+            matlabbatch{gi}.spm.util.defs.out{1}.push.fnames = {c1_file}';
+%             matlabbatch{gi}.spm.util.defs.out{1}.push.fnames = {c1_file c2_file c3_file}';
+            matlabbatch{gi}.spm.util.defs.out{1}.push.weight = {''};
+            matlabbatch{gi}.spm.util.defs.out{1}.push.savedir.savesrc = 1;
+            matlabbatch{gi}.spm.util.defs.out{1}.push.fov.file = cellstr(mean_file);
+            matlabbatch{gi}.spm.util.defs.out{1}.push.preserve = 0;
+            matlabbatch{gi}.spm.util.defs.out{1}.push.fwhm = [0 0 0];
+            matlabbatch{gi}.spm.util.defs.out{1}.push.prefix = 'inv_nlin_';
             gi = gi + 1;
         end
         %-------------------------------

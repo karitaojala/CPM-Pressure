@@ -14,16 +14,26 @@ for sub = subj
     load(fullfile(firstlvlpath,'SPM.mat'))
     
     % Define conditions & extract number of regressors
-    for run = options.acq.exp_runs
+    if sub == 5
+        runs = [2 3 5];
+    else
+        runs = options.acq.exp_runs;
+    end
+    
+    block = 1;
+    
+    for run = runs
         
         condfile = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-onsets.mat']);
         load(condfile,'conditions')
-        cond_runs(run-1) = conditions(1); % whole run is same condition
-        
-        no_reg(run-1) = numel(SPM.Sess(run-1).col);
+        cond_runs(block) = conditions(1); %#ok<*AGROW> % whole run is same condition
+        no_reg(block) = numel(SPM.Sess(block).col);
+        block = block + 1;
         
     end
     cond_runs(cond_runs == 0) = -1;
+    run_ind = [1 no_reg(1)+1 no_reg(1)+no_reg(2)+1 no_reg(1)+no_reg(2)+no_reg(3)+1];
+    run_ind = run_ind(1:numel(runs));
     
     % Add conditions
     cond_Stim = 1;
@@ -61,10 +71,16 @@ for sub = subj
     %no_reg = numel(connames) + options.preproc.no_noisereg;
     no_contr = numel(connames); % CON and EXP contrasts for each regressor
     conweights = zeros(no_contr,sum(no_reg)); % initialize zero matrix
-    run_ind = [1 no_reg(1)+1 no_reg(1)+no_reg(2)+1 no_reg(1)+no_reg(2)+no_reg(3)+1];
+    
+    if sub == 5 % only 1 experimental run but 2 control runs
+        cond_runs_scaled(cond_runs == 1) = 1;
+        cond_runs_scaled(cond_runs == -1) = -1/2;
+    else
+        cond_runs_scaled = cond_runs/2;
+    end
     
     for cn = 1:no_contr
-        conweights(cn,run_ind) = cond_runs/2; 
+        conweights(cn,run_ind) = cond_runs_scaled; 
         run_ind = run_ind + 1;
     end
     
