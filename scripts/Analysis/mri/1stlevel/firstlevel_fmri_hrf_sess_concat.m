@@ -78,7 +78,7 @@ for sub = subj
         physiopathsub = fullfile(options.path.physiodir,name);
         
         if physioOn
-            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain-zscored.txt']);
+            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-' options.preproc.physio_name '.txt']);
         else % only motion regressors
             noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-motion_regressors-brain-zscored.txt']);
         end
@@ -203,31 +203,38 @@ for sub = subj
     block = 1;
     c = 0;
     
+    % Loop over experimental conditions (CON, EXP) for setting tonic stimuli
     for cond = 1:2
         
-        c = c+1;
-        cond_name = options.model.firstlvl.stimuli.tonic_name{cond};
-        rows = size(pmodTonic1All,1)*sum(cond_runs==cond);
+        c = c+1; % counter for batch
+        cond_name = options.model.firstlvl.stimuli.tonic_name{cond}; % condition name ('CON' or 'EXP')
+        rows = size(pmodTonic1All,1)*sum(cond_runs==cond); % number of rows of the pmod array
         
+        % Initialize pmod structure
         pmodStructTonic = struct('name', {}, 'param', {}, 'poly', {});
+        
+        % Pmod 1: Tonic pressure
         pmodStructTonic(1).name = ['TonicPressure-' cond_name];
         pmodStructTonic(1).poly = 1;
         pmodTonic1All_final = reshape(pmodTonic1All(:,cond_runs==cond),[rows 1]);
         pmodTonic1All_final = pmodTonic1All_final(~isnan(pmodTonic1All_final));
         pmodStructTonic(1).param = zscore(pmodTonic1All_final);
+        
+        % Pmod 2: Interaction tonic and phasic pressure
         pmodStructTonic(2).name = ['TonicxPhasicPressure-' cond_name];
         pmodStructTonic(2).poly = 1;
         pmodTonic2All_final = reshape(pmodTonic2All(:,cond_runs==cond),[rows 1]);
         pmodTonic2All_final = pmodTonic2All_final(~isnan(pmodTonic2All_final));
         pmodStructTonic(2).param = zscore(pmodTonic2All_final);
     
+        % Onset condition
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = ['TonicStim-' cond_name];
         tonicOnset = reshape(onsetsTonicAll(:,cond_runs==cond),[rows 1]);
         tonicOnset = tonicOnset(~isnan(tonicOnset));
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = tonicOnset;
-        if strcmp(options.model.firstlvl.timing_units,'scans')
+        if strcmp(options.model.firstlvl.timing_units,'scans') % duration of the stimulus if duration is in scans
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.tonic_duration/options.acq.TR;
-        else
+        else % if timing is in seconds
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.tonic_duration;
         end
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
@@ -239,8 +246,9 @@ for sub = subj
     conditionsPhasicAll = conditionsPhasicAll*(-1); % flip sign, CON = 1, EXP = -1
     stim_ind = (1:numel(conditionsPhasicAll))'; % stimulus index across experiment
     stim_ind_meanc = stim_ind-mean(stim_ind); % mean-centered
-    stim_ind_meanc = reshape(stim_ind_meanc,[numel(stim_ind_meanc)/numel(runs) numel(runs)]);
+    stim_ind_meanc = reshape(stim_ind_meanc,[numel(stim_ind_meanc)/numel(runs) numel(runs)]); % reshaped with 1 column per run
     
+    % Loop over experimental conditions (CON, EXP) for setting phasic stimuli
     for cond = 1:2
         
         c = c+1;
@@ -252,6 +260,7 @@ for sub = subj
 %         pmodStructPhasic(1).poly = 1;
 %         pmodStructPhasic(1).param = reshape(conditionsPhasicAll(:,cond_runs==cond),[rows 1]);
 % 
+        % Pmod 1: Stimulus index over the entire experiment
         pmodStructPhasic(1).name = ['StimIndex-' cond_name];
         pmodStructPhasic(1).poly = 1;
         pmodStructPhasic(1).param = reshape(stim_ind_meanc(:,cond_runs==cond),[rows 1]);
@@ -266,9 +275,9 @@ for sub = subj
         phasicOnset = reshape(onsetsPhasicAll(:,cond_runs==cond),[rows 1]);
         phasicOnset = phasicOnset(~isnan(phasicOnset));
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = phasicOnset;
-        if strcmp(options.model.firstlvl.timing_units,'scans')
+        if strcmp(options.model.firstlvl.timing_units,'scans') % duration in scans
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration/options.acq.TR;
-        else
+        else % duration in seconds
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).duration = options.basisF.hrf.stim_duration;
         end
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none

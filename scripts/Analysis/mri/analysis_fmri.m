@@ -7,26 +7,28 @@ addpath(genpath(options.path.scriptdir))
 % subj = options.subj.all_subs(1:21);
 % subj = options.subj.all_subs(22:end);
 % subj = options.subj.all_subs(36:end);
-subj = options.subj.all_subs;
+% subj = options.subj.all_subs;
+subj = 1;
 % subj = [1 2 4 5 8 26 43 46]; % subjects with high WM activity
 n_proc = 1;
 
+analysis_version = '19Dec22';
 % analysis_version = '19Jan23';
-analysis_version = '16Jan23';
-basisF = 'HRF'; % Canonical haemodynamic response function
+% analysis_version = '16Jan23';
+% basisF = 'HRF'; % Canonical haemodynamic response function
 % basisF = 'FIR'; % Finite Impulse Response model
-% basisF = 'Fourier'; % Fourier set with Hanning window
+basisF = 'Fourier'; % Fourier set with Hanning window
 % modelname = [basisF '_phasic_tonic_pmod2_interact'];
 % modelname = [basisF '_phasic_VAS_pmod'];
 % modelname = [basisF '_phasic_tonic_pmod_sessconcat'];
 % modelname = [basisF '_phasic_tonic_pmod'];
-% modelname = [basisF '_tonic_only'];
-modelname = [basisF '_phasic_tonic_noiseROI'];
+modelname = [basisF '_tonic_only'];
+% modelname = [basisF '_phasic_tonic_noiseROI'];
 tonicIncluded       = true; 
 phasicIncluded      = true;
 VASincluded         = true;
 sessConcatenat      = false;
-specifyTonicOnly    = false;
+specifyTonicOnly    = true;
 derivsOn            = false;
     options.basisF.hrf.derivatives       = [0 0]; % temporal and dispersion derivatives
 physioOn            = true;
@@ -56,7 +58,7 @@ run_create_onsets               = false;
     onsets_as_scans             = false;
     debug_plot                  = false;
 run_firstlevel_mask             = false;
-run_firstlevel_model            = false;
+run_firstlevel_model            = true;
 run_firstlevel_contrasts        = false;
 run_firstlevel_smoothnorm       = false;
     run_norm                    = false;
@@ -65,7 +67,7 @@ run_secondlevel_mask            = false;
 run_secondlevel_model_contrasts = false;
     estimate_model              = false;
 
-run_delete_folders              = true;
+run_delete_folders              = false;
     folders_level2delete = 1; % 1: first level folders, 2: second level folders
 
 if run_create_onsets
