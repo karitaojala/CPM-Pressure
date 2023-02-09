@@ -1,11 +1,11 @@
-function firstlevel_fmri_fourier(options,analysis_version,modelname,tonicIncluded,phasicIncluded,VASincluded,physioOn,specifyTonicOnly,subj,n_proc)
+function firstlevel_fmri_fourier(options,analysis_version,model,subj,n_proc)
 
 for sub = subj
     
     name = sprintf('sub%03d',sub);
     disp(name);
     
-    firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+    firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
     brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask' options.model.firstlvl.mask_name '.nii']);
     
@@ -34,7 +34,7 @@ for sub = subj
         
         episcans_all{block} = episcans;
         
-        if physioOn
+        if model.physioOn
             noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain-zscored.txt']);
         else % only motion regressors
             noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-motion_regressors-brain-zscored.txt']);
@@ -66,7 +66,7 @@ for sub = subj
         
         % Define conditions
         c = 0;
-        if tonicIncluded
+        if model.tonicIncluded
             c = c+1;
             %matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = options.model.firstlvl.tonic_name{conditionsTonic(1)+1};
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'TonicStim';
@@ -115,7 +115,7 @@ for sub = subj
     
     %% Define phasic stimuli
     
-    if ~specifyTonicOnly
+    if ~model.specifyTonicOnly
         
         block = 1;
         run_ind_regressors = 1:options.acq.n_scans(runs(1));
@@ -128,7 +128,7 @@ for sub = subj
             
             % Define phasic regressors
             c = 0;
-            if phasicIncluded % && ~phasicFourier
+            if model.phasicIncluded
                 c = c+1;
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PhasicStim';
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsStim_all{block};
@@ -140,10 +140,9 @@ for sub = subj
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
-                %elseif phasicIncluded && phasicFourier
             end
             
-            if VASincluded% && ~phasicFourier
+            if model.VASincluded
                 c = c+1;
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'VAS';
                 matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsVAS_all{block};
@@ -161,8 +160,8 @@ for sub = subj
             % Retrieve tonic regressors for this run
             tonicReg_run = tonicReg(SPMtonic.SPM.Sess(block).row,SPMtonic.SPM.Sess(block).col(1:11));
             % Retrieve noise data
-            if physioOn
-                noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain-zscored.txt']);
+            if model.physioOn
+                noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-' options.preproc.physio_name '.txt']);
             else % only motion regressors
                 noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-motion_regressors-brain-zscored.txt']);
             end

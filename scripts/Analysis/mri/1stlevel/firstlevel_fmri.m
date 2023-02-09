@@ -1,4 +1,4 @@
-function firstlevel_fmri(options,analysis_version,modelname,tonicIncluded,phasicIncluded,VASincluded,pmodNo,physioOn,subj)
+function firstlevel_fmri(options,analysis_version,model,subj)
 
 allcondsfile = fullfile(options.path.logdir, '..', 'conditions_list.mat');
 allconds = load(allcondsfile);
@@ -10,11 +10,11 @@ for sub = subj
     name = sprintf('sub%03d',sub);
     disp(name);
     
-    firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+    firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
     brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask' options.model.firstlvl.mask_name '.nii']);
     
-    if tonicIncluded
+    if model.tonicIncluded
         cond_runs = allconds.conditions_list_rand(sub,:);
         exp_run = find(cond_runs == 1,1)+1; % find first EXP run and use its tonic pmod shape for all runs
         pmodfile_exp = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(exp_run) '-tonic-pmod.mat']);
@@ -46,7 +46,7 @@ for sub = subj
         % Noise correction files
         physiopathsub = fullfile(options.path.physiodir,name);
         
-        if physioOn
+        if model.physioOn
             noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-' options.preproc.physio_name '.txt']);
         else % only motion regressors
             noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-motion_regressors-brain-zscored.txt']);
@@ -57,7 +57,7 @@ for sub = subj
         onsetdata = load(onsetfile);
         
         % Tonic stimulus onsets
-        if tonicIncluded
+        if model.tonicIncluded
 
             pmodfile = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-tonic-pmod.mat']);
             pmoddata = load(pmodfile,'phasicRegressor_z');
@@ -81,7 +81,7 @@ for sub = subj
             end
             onsetsTonic = onsetsTonic(:);
             
-            if pmodNo(1) >= 1 % 1 parametric modulator
+            if model.pmodNo(1) >= 1 % 1 parametric modulator
                 pmodStructTonic = struct();
                 pmodStructTonic.name = 'TonicPressure';
                 if sub == 5 && run == 4 % remove tonic trial 2 from sub 5 run 3
@@ -90,7 +90,7 @@ for sub = subj
                     pmodStructTonic.param = tonicReg;
                 end
                 pmodStructTonic.poly = 1;
-                if pmodNo(1) == 2 % 2 parametric modulators
+                if model.pmodNo(1) == 2 % 2 parametric modulators
                     %pmodStructTonic = struct();
                     pmodStructTonic(2).name = 'TonicPressure x PhasicStimuli';
                     if sub == 5 && run == 4 % remove tonic trial 2 from sub 5 run 3
@@ -112,7 +112,7 @@ for sub = subj
         onsetsStim = onsetdata.onsetsStim+options.basisF.onset_shift;
         onsetsVAS  = onsetdata.onsetsVAS+options.basisF.onset_shift;
         
-        if phasicIncluded && any(pmodNo(2))
+        if model.phasicIncluded && any(model.pmodNo(2))
             pmodfile_phasic = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-phasic-pmod.mat']);
             pmoddata_phasic = load(pmodfile_phasic);
             pmodStructPhasic = struct();
@@ -123,7 +123,7 @@ for sub = subj
             pmodStructPhasic = struct('name', {}, 'param', {}, 'poly', {});
         end
         
-        if VASincluded && any(pmodNo(3))
+        if model.VASincluded && any(model.pmodNo(3))
             pmodfile_vas = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-vas-pmod.mat']);
             pmoddata_vas = load(pmodfile_vas);
             pmodStructVAS = struct();
@@ -146,7 +146,7 @@ for sub = subj
         disp('................................')
         
         c = 0;
-        if tonicIncluded
+        if model.tonicIncluded
             c = c+1;
 %             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = ['TonicStim' cond_name];
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'TonicStim';
@@ -161,7 +161,7 @@ for sub = subj
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
         end
         
-        if phasicIncluded
+        if model.phasicIncluded
             c = c+1;
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PhasicStim';
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsStim;
@@ -175,7 +175,7 @@ for sub = subj
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
         end
         
-        if VASincluded
+        if model.VASincluded
             c = c+1;
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'VAS';
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsVAS;
@@ -193,7 +193,7 @@ for sub = subj
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).multi = {''};
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).regress = struct('name', {}, 'val', {});
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).multi_reg = {noisefile}; % Physiological and head motion noise correction files for nuisance regressors
-        if tonicIncluded
+        if model.tonicIncluded
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).hpf = options.model.firstlvl.hpf.tonic; % High-pass filter
         else
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).hpf = options.model.firstlvl.hpf.phasic;

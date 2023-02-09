@@ -41,26 +41,27 @@ matlabbatch{1}.spm.tools.physio.model.censor_unreliable_recording_intervals = fa
 matlabbatch{1}.spm.tools.physio.model.retroicor.yes.order.c = 3;
 matlabbatch{1}.spm.tools.physio.model.retroicor.yes.order.r = 4;
 matlabbatch{1}.spm.tools.physio.model.retroicor.yes.order.cr = 1;
-matlabbatch{1}.spm.tools.physio.model.rvt.yes.method = 'hilbert';
-matlabbatch{1}.spm.tools.physio.model.rvt.yes.delays = 0;
-matlabbatch{1}.spm.tools.physio.model.hrv.yes.delays = 0;
+% matlabbatch{1}.spm.tools.physio.model.retroicor.no = struct([]);
+% matlabbatch{1}.spm.tools.physio.model.rvt.yes.method = 'hilbert';
+% matlabbatch{1}.spm.tools.physio.model.rvt.yes.delays = 0;
+% matlabbatch{1}.spm.tools.physio.model.hrv.yes.delays = 0;
 % matlabbatch{1}.spm.tools.physio.model.rvt.yes.delays = [-5, 5, 10, 15];
 % matlabbatch{1}.spm.tools.physio.model.hrv.yes.delays = [-5, 5, 10, 15];
-% matlabbatch{1}.spm.tools.physio.model.rvt.no = struct([]);
-% matlabbatch{1}.spm.tools.physio.model.hrv.no = struct([]);
+matlabbatch{1}.spm.tools.physio.model.rvt.no = struct([]);
+matlabbatch{1}.spm.tools.physio.model.hrv.no = struct([]);
 % matlabbatch{1}.spm.tools.physio.model.noise_rois.no = struct([]);
 fmri_file = fullfile(output_dir,'..','..','mri','data',sub_id,['epi-' run_id],['ra' sub_id '-epi-' run_id '-brain.nii']);
 roi_file_wm = fullfile(output_dir,'..','..','mri','data',sub_id,'t1_corrected','noiseROI',['inv_nlin_c2' sub_id '-t1_corrected.nii']);
 roi_file_csf = fullfile(output_dir,'..','..','mri','data',sub_id,'t1_corrected','noiseROI',['inv_nlin_c3' sub_id '-t1_corrected.nii']);
+roi_file_wm_x_csf = fullfile(output_dir,'..','..','mri','data',sub_id,'t1_corrected','noiseROI',['inv_nlin_c2xc3' sub_id '-t1_corrected.nii']);
 matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.fmri_files = {fmri_file};
-matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.roi_files = {roi_file_wm roi_file_csf}';
+% matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.roi_files = {roi_file_wm roi_file_csf}';
+matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.roi_files = {roi_file_wm roi_file_csf roi_file_wm_x_csf}';
 matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.force_coregister = 'No';
-% if strcmp(sub_id,'sub004') || strcmp(sub_id,'sub005') || strcmp(sub_id,'sub010') || strcmp(sub_id,'sub026') % some subjects need lower threshold as otherwise too few voxels in the mask
-%     matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.thresholds = 0.80;
-% else
-    matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.thresholds = 0.7;
-% end
-matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.n_voxel_crop = 1;
+% matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.thresholds = 0.7; % for WM or CSF
+% matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.n_voxel_crop = 1; % for WM or CSF
+matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.thresholds = [0.7 0.5 0.05]; % for WM x CSF boundary
+matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.n_voxel_crop = [1 1 0]; % for WM x CSF boundary
 matlabbatch{1}.spm.tools.physio.model.noise_rois.yes.n_components = 6;
 
 matlabbatch{1}.spm.tools.physio.model.movement.yes.file_realignment_parameters = {motion_file}; % Realignment motion regressors file
@@ -70,8 +71,8 @@ matlabbatch{1}.spm.tools.physio.model.movement.yes.censoring_threshold = 2; % mm
 
 matlabbatch{1}.spm.tools.physio.model.other.no = struct([]);
 
-matlabbatch{1}.spm.tools.physio.verbose.level = 2;
-matlabbatch{1}.spm.tools.physio.verbose.fig_output_file = [sub_id '-' run_id '-physio-' brain_or_spinal '-' version_name '.jpeg'];
+matlabbatch{1}.spm.tools.physio.verbose.level = 0;
+matlabbatch{1}.spm.tools.physio.verbose.fig_output_file = '';%[sub_id '-' run_id '-physio-' brain_or_spinal '-' version_name '.jpeg'];
 matlabbatch{1}.spm.tools.physio.verbose.use_tabs = false;
 
 end

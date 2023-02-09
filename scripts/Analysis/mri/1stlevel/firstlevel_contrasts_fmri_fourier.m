@@ -1,4 +1,4 @@
-function firstlevel_contrasts_fmri_fourier(options,analysis_version,modelname,subj)
+function firstlevel_contrasts_fmri_fourier(options,analysis_version,model,subj)
 
 for sub = subj
     
@@ -7,7 +7,7 @@ for sub = subj
     name = sprintf('sub%03d',sub);
     disp(name);
     
-    firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+    firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
     
     % Load SPM to extract 1st level regressor numbers
@@ -36,10 +36,10 @@ for sub = subj
     run_ind = run_ind(1:numel(runs));
     
     % Add conditions
-    cond_Stim = 1;
-    cond_VAS = 1;
+    cond_Phasic = model.phasicIncluded;
+    cond_VAS = model.VASincluded;
     cond_Tonic = 11; % 5 sine, 5 cosine, 1 Henning
-    no_cond = cond_Stim+cond_VAS+cond_Tonic;
+    no_cond = cond_Phasic+cond_VAS+cond_Tonic;
     
     % Index for accumulating contrasts
     con_ind = 0;
@@ -51,7 +51,7 @@ for sub = subj
     
     % Sanity check
     connames = {'Pain-baseline' 'VAS-baseline'};
-    no_contr = cond_Stim+cond_VAS;
+    no_contr = cond_Phasic+cond_VAS;
     conweights = eye(no_contr); % first 2 so no need to take rest of the columns/regressors into account
     conrepl = 'replsc';
     

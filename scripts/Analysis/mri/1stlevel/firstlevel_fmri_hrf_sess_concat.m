@@ -1,4 +1,4 @@
-function firstlevel_fmri_hrf_sess_concat(options,analysis_version,modelname,tonicIncluded,VASincluded,physioOn,subj)
+function firstlevel_fmri_hrf_sess_concat(options,analysis_version,model,subj)
 
 allcondsfile = fullfile(options.path.logdir, '..', 'conditions_list.mat');
 allconds = load(allcondsfile);
@@ -11,7 +11,7 @@ for sub = subj
     name = sprintf('sub%03d',sub);
     disp(name);
     
-    firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+    firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
     brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask' options.model.firstlvl.mask_name '.nii']);
     
@@ -36,7 +36,7 @@ for sub = subj
         noisedataAll = zeros(nscans_all,options.preproc.no_noisereg); % all volumes, 25th column for possible motion exclusion volume
     end
     
-    if tonicIncluded
+    if model.tonicIncluded
         cond_runs = allconds.conditions_list_rand(sub,:);
         cond_runs = cond_runs(runs-1);
         exp_run = find(cond_runs == 1,1)+1; % find first EXP run and use its tonic pmod shape for all runs
@@ -77,7 +77,7 @@ for sub = subj
         % Noise correction files
         physiopathsub = fullfile(options.path.physiodir,name);
         
-        if physioOn
+        if model.physioOn
             noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-' options.preproc.physio_name '.txt']);
         else % only motion regressors
             noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-motion_regressors-brain-zscored.txt']);
@@ -118,7 +118,7 @@ for sub = subj
         onsetdata = load(onsetfile);
         
         % Tonic stimulus onsets
-        if tonicIncluded
+        if model.tonicIncluded
             pmodfile = fullfile(options.path.logdir, name, 'pain', [name '-run' num2str(run) '-tonic-pmod.mat']);
             pmoddata = load(pmodfile);
             
@@ -214,14 +214,14 @@ for sub = subj
         pmodStructTonic = struct('name', {}, 'param', {}, 'poly', {});
         
         % Pmod 1: Tonic pressure
-        pmodStructTonic(1).name = ['TonicPressure-' cond_name];
+        pmodStructTonic(1).name = [model.pmodName(1) '-' cond_name];
         pmodStructTonic(1).poly = 1;
         pmodTonic1All_final = reshape(pmodTonic1All(:,cond_runs==cond),[rows 1]);
         pmodTonic1All_final = pmodTonic1All_final(~isnan(pmodTonic1All_final));
         pmodStructTonic(1).param = zscore(pmodTonic1All_final);
         
         % Pmod 2: Interaction tonic and phasic pressure
-        pmodStructTonic(2).name = ['TonicxPhasicPressure-' cond_name];
+        pmodStructTonic(2).name = [model.pmodName(2) '-' cond_name];
         pmodStructTonic(2).poly = 1;
         pmodTonic2All_final = reshape(pmodTonic2All(:,cond_runs==cond),[rows 1]);
         pmodTonic2All_final = pmodTonic2All_final(~isnan(pmodTonic2All_final));
@@ -256,20 +256,11 @@ for sub = subj
         rows = size(conditionsPhasicAll,1)*sum(cond_runs==cond);
         
         pmodStructPhasic = struct('name', {}, 'param', {}, 'poly', {});
-%         pmodStructPhasic(1).name = ['TonicCond-' cond_name];
-%         pmodStructPhasic(1).poly = 1;
-%         pmodStructPhasic(1).param = reshape(conditionsPhasicAll(:,cond_runs==cond),[rows 1]);
-% 
+        
         % Pmod 1: Stimulus index over the entire experiment
-        pmodStructPhasic(1).name = ['StimIndex-' cond_name];
+        pmodStructPhasic(1).name = [model.pmodName(3) '-' cond_name];
         pmodStructPhasic(1).poly = 1;
         pmodStructPhasic(1).param = reshape(stim_ind_meanc(:,cond_runs==cond),[rows 1]);
-        
-%         pmodStructPhasic(3).name = ['TonicCondxStimIndex-' cond_name];
-%         pmodStructPhasic(3).poly = 1;
-%         cond_stimind_interaction = conditionsPhasicAll .* stim_ind;
-%         cond_stimind_interaction_meanc = cond_stimind_interaction-mean(cond_stimind_interaction);
-%         pmodStructPhasic(3).param = reshape(cond_stimind_interaction_meanc(:,cond_runs==cond),[rows 1]); % stimulus index mean-centered
     
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = ['PhasicStim-' cond_name];
         phasicOnset = reshape(onsetsPhasicAll(:,cond_runs==cond),[rows 1]);
@@ -286,7 +277,7 @@ for sub = subj
         
     end
     
-    if VASincluded
+    if model.VASincluded
         c = c+1;
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'VASRating';
         VASOnset = onsetsVASAll(:);

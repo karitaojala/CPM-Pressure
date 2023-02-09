@@ -32,19 +32,11 @@ if options.spinal % Spinal
     
 else % Brain
     options.acq.n_slices = 60;
-    options.preproc.onset_slice = 60;%1065+50; % onset slice timing in ms, last brain slice + 50 ms (middle of the gap); % last brain slice closest to the slice time correction reference slice (50 ms from last brain slice and first spinal)
-    options.preproc.no_motionreg = 6;
-%     options.preproc.no_physioreg = 18; % normal RETROICOR 8 + 6 + 4
-%     options.preproc.physio_name = 'multiple_regressors-brain-zscored';
-    options.preproc.no_physioreg = 18;% + 14; % nNoiseROI (= 2) x (6 components + 1)
-%     options.preproc.no_physioreg = 18 + 14 + 2; % nNoiseROI (= 2) x (6 components + 1) + HRV + RVT
-%     options.preproc.physio_name = ['multiple_regressors-brain-HRVRVT_noiseROI_6comp_' num2str(options.preproc.no_motionreg) 'motion-zscored'];
-%     options.preproc.physio_name = ['multiple_regressors-brain-noiseROI_6comp_' num2str(options.preproc.no_motionreg) 'motion-zscored'];
-%     options.preproc.physio_name = ['multiple_regressors-brain-noiseROI_6comp-zscored'];
-%     options.preproc.no_physioreg = 18 + 2; % HRV and RVT without delays
-%     options.preproc.physio_name = 'multiple_regressors-brain-HRVRVT-zscored';
-    options.preproc.physio_name = ['multiple_regressors-brain-zscored'];
-    options.preproc.no_noisereg = options.preproc.no_physioreg+options.preproc.no_motionreg; % 18 physio + 6 movement = 24
+    options.preproc.onset_slice  = 60;%1065+50; % onset slice timing in ms, last brain slice + 50 ms (middle of the gap); % last brain slice closest to the slice time correction reference slice (50 ms from last brain slice and first spinal)
+    options.preproc.no_motionreg = 24;
+    options.preproc.no_physioreg = 18; % normal RETROICOR 8 + 6 + 4
+    options.preproc.physio_name  = 'multiple_regressors-brain-zscored';
+    options.preproc.no_noisereg = options.preproc.no_physioreg+options.preproc.no_motionreg; 
     
 end
 

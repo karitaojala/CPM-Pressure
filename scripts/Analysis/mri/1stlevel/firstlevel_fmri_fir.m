@@ -1,11 +1,11 @@
-function firstlevel_fmri_fir(options,analysis_version,modelname,tonicIncluded,phasicIncluded,physioOn,subj)
+function firstlevel_fmri_fir(options,analysis_version,model,subj)
 
 for sub = subj
     
     name = sprintf('sub%03d',sub);
     disp(name);
     
-    firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+    firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
     brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask' options.model.firstlvl.mask_name '.nii']);
     
@@ -27,7 +27,7 @@ for sub = subj
         % Noise correction files
         physiopathsub = fullfile(options.path.physiodir,name);
         
-        if physioOn
+        if model.physioOn
             noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-multiple_regressors-brain.txt']);
         else % only motion regressors
             noisefile = fullfile(epipath, ['rp_a' name '-epi-run' num2str(run) '-brain.txt']);
@@ -56,7 +56,7 @@ for sub = subj
         
         % Define conditions
         c = 0;
-        if tonicIncluded
+        if model.tonicIncluded
             c = c+1;
             %matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = options.model.firstlvl.tonic_name{conditionsTonic(1)+1};
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'TonicStim';
@@ -65,7 +65,7 @@ for sub = subj
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).pmod = struct('name', {}, 'param', {}, 'poly', {}); % No parametric modulation
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).tmod = 0; % Temporal derivatives - none
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).orth = options.model.firstlvl.orthogonalization; % Orthogonalization
-        elseif phasicIncluded
+        elseif model.phasicIncluded
             c = c+1;
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = 'PainStim';
             matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).onset = onsetsStim;

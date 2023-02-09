@@ -28,5 +28,12 @@ for c = 1:18
     namesPhysContrasts{c} = sprintf('NoiseReg%02d - All Sessions',c);
 end
 
-tapas_physio_compute_tsnr_gains(physio, SPM, indexContrastForSnrRatio, namesPhysContrasts)
+% tapas_physio_compute_tsnr_gains(physio, SPM, indexContrastForSnrRatio, namesPhysContrasts)
 % tapas_physio_compute_tsnr_gains(physio, SPM, indexContrastForSnrRatio)
+
+iC = 44;
+iCForRatio = 0;
+doInvert = true;
+doSaveNewContrasts = false;
+
+tapas_physio_compute_tsnr_spm(SPM, iC, iCForRatio, doInvert, doSaveNewContrasts)

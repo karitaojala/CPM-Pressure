@@ -8,11 +8,8 @@ addpath(spm_path, PhysIO_path)
 base_dir    = 'C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\';
 physio_dir   = fullfile(base_dir,'physio');
 motion_dir   = fullfile(base_dir,'mri','data');
-%logdir      = fullfile(base_dir,'logs');
 
 all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
-% all_subs     = [1 2 4:13 15:18 20:24];
-% all_subs     = [25:27 29:34 37:40 42:49];
 
 n_runs            = 6;
 n_scans_all       = [56 232 232 232 232 56];
@@ -29,12 +26,10 @@ extract_physio_runs     = false;
 convert_physio2bids     = false;
 calc_extra_motionparam  = false;
 run_physio_batch        = false;
-calc_manual_physio      = false;
-add_button_presses      = false;
 copy_physio_files       = false;
 append_motionparam      = false;
-zscore_physio           = false;
-remove_physioparam      = true;
+change_physioparam      = false;
+zscore_physio           = true;
 
 if spinal % Spinal
     
@@ -55,9 +50,8 @@ else % Brain
     region = 'brain';
 end
 
-% physio_name = '';
-physio_name = '-HRVRVT_noiseROI_6comp_6motion';
-% physio_name = '-HRVRVT';
+physio_name = '-noiseROI_WMxCSF_6comp_24motion_v2';
+% physio_name = '-noiseROI_WM_CSF_WMxCSF_6comp_24motion-gradient_v2';
 
 if no_motion_reg == 6
     motionparam_name = '';
@@ -66,12 +60,16 @@ elseif no_motion_reg == 12
     motionparam_name = '-12param';
     motion_name = '_12motion';
 else
-    motionparam_name = '-24param';
+    motionparam_name = '-24param-gradient';
+%     motionparam_name = '-24param';
     motion_name = '_24motion';
 end
 
-param2remove = [19 20]; % 22 = HRV, 23 = RVT
-physio_name_new = '-noiseROI_6comp';
+change_action = 2; % 1 = append, 2 = remove
+param2change = 26:39; % start index where to append/indices to remove parameters
+param2take = [26:39]; % parameters from the source file
+physio_name_source = '-noiseROI_WM_CSF_WMxCSF_6comp_24motion_v2-zscored';
+physio_name_new = '-noiseROI_WMxCSF_6comp_24motion_v2';
 
 relative_start_acquisition = 0;
 
@@ -83,7 +81,8 @@ physregopts.order_cr = 1;
 physregopts.h_size   = 300;  % for breathing histogram
 
 % no_noise_reg = 18 + no_motion_reg;
-no_noise_reg = 18 + 14 + 2 + no_motion_reg;
+% no_noise_reg = 18 + 14 + 2 + no_motion_reg;
+no_noise_reg = 18 + 7 + no_motion_reg;
 % no_noise_reg = 18 + 2 + no_motion_reg;
 
 if extract_physio_runs
@@ -127,41 +126,6 @@ if extract_physio_runs
     
 end
 
-if calc_manual_physio
-    
-    for sub = 1:numel(all_subs)
-        
-        fprintf('Manually calculating physiological noise regressors...\n')
-        name = sprintf('sub%03d',all_subs(sub));
-        disp(name);
-        
-        output_dir = fullfile(physio_dir,name);
-        
-        for run = 1:n_runs
-        
-            run_id = sprintf('run%d',run);
-            fprintf([run_id '\n']);
-            
-            physio_file = fullfile(output_dir,sprintf('sub%03d-run%d-physio.mat',all_subs(sub),run));
-            physio_reg_file = fullfile(output_dir,sprintf('sub%03d-run%d-physio-regressors.mat',all_subs(sub),run));
-            physio_fig_file = fullfile(output_dir,sprintf('sub%03d-run%d-physio-fig',all_subs(sub),run));
-            
-            load(physio_file,'physio');
-            
-            [physio_reg,physio_fig] = calc_physio_regressors(physio,physregopts);
-            
-            save(physio_reg_file,'physio_reg');
-            sgtitle([name ' ' run_id])
-            savefig(physio_fig,physio_fig_file);
-            saveas(physio_fig,[physio_fig_file '.png']);
-            close all
-            
-        end
-        
-    end
-    
-end
-
 if convert_physio2bids
 
     physio2bids(physio_dir,all_subs,n_runs);
@@ -194,7 +158,6 @@ if calc_extra_motionparam
     end
     
 end
-
 
 if run_physio_batch
     
@@ -238,35 +201,6 @@ if run_physio_batch
     
 end
 
-if add_button_presses
-
-    for sub = 1:numel(all_subs)
-        
-        fprintf('Adding button presses to noise regressors...\n')
-        name = sprintf('sub%03d',all_subs(sub));
-        disp(name);
-        
-        output_dir = fullfile(physio_dir,name);
-        
-        for run = 1:n_runs
-        
-            run_id = sprintf('run%d',run);
-            fprintf([run_id '\n']);
-            
-            behav_file = fullfile(output_dir,sprintf('sub%03d-run%d-behav.mat',all_subs(sub),run));
-            behavdata = load(behav_file);
-            
-            physio_file = fullfile(output_dir,sprintf('sub%03d-run%d-multiple_regressors-%s.txt',all_subs(sub),run,region));
-            physiodata = load(physio_file);
-
-            bpPerScan = behavdata.behav.buttonPresses;
-            
-        end
-        
-    end
-    
-end
-
 if copy_physio_files
 
     for sub = 1:numel(all_subs)
@@ -276,6 +210,7 @@ if copy_physio_files
         disp(name);
         
         physio_folder = erase(physio_name,'-');
+%         physio_folder = 'noiseROI_WM_CSF_WMxCSF_6comp_24motion_v2';
         output_dir = fullfile(physio_dir,name);
         
         for run = 1:n_runs
@@ -299,7 +234,7 @@ if append_motionparam
         name = sprintf('sub%03d',all_subs(sub));
         disp(name);
         
-        physio_folder = fullfile(physio_dir,name);
+        physio_folder = fullfile(physio_dir,name,physio_name(2:end));
         
         for run = 1:n_runs
             
@@ -325,6 +260,33 @@ if append_motionparam
     
 end
 
+if change_physioparam
+    
+    for sub = 1:numel(all_subs)
+        
+        fprintf('Removing physio parameters from physio files...\n')
+        name = sprintf('sub%03d',all_subs(sub));
+        disp(name);
+        
+        physio_folder = fullfile(physio_dir,name);
+        
+        for run = 1:n_runs
+            
+            run_id = sprintf('run%d',run);
+            fprintf([run_id '\n']);
+            
+            physio_file = fullfile(physio_folder,sprintf('sub%03d-run%d-multiple_regressors-%s%s.txt',all_subs(sub),run,region,physio_name));
+            physio_file_source = fullfile(physio_folder,sprintf('sub%03d-run%d-multiple_regressors-%s%s.txt',all_subs(sub),run,region,physio_name_source));
+            physio_file_new = fullfile(physio_folder,sprintf('sub%03d-run%d-multiple_regressors-%s%s.txt',all_subs(sub),run,region,physio_name_new));
+            
+            change_physio_parameters(change_action,physio_file,physio_file_source,physio_file_new,param2change,param2take)
+            
+        end
+        
+    end
+    
+end
+
 if zscore_physio
     
     for sub = 1:numel(all_subs)
@@ -341,7 +303,7 @@ if zscore_physio
             fprintf([run_id '\n']);
             
             % Physio + motion regressors
-            physio_file = fullfile(output_dir,sprintf('sub%03d-run%d-multiple_regressors-%s%s%s.txt',all_subs(sub),run,region,physio_name,motion_name));
+            physio_file = fullfile(output_dir,sprintf('sub%03d-run%d-multiple_regressors-%s%s.txt',all_subs(sub),run,region,physio_name));
             physiodata = load(physio_file);
             physiodata_temp = physiodata(:,1:no_noise_reg); % take only real physio regressors, not motion volume exclusion regressors
             %physiodata_temp_z = reshape(zscore(physiodata_temp(:)), size(physiodata_temp));
@@ -349,7 +311,7 @@ if zscore_physio
             physiodata_z = physiodata;
             physiodata_z(:,1:no_noise_reg) = physiodata_temp_z;
             
-            physiofile_new = fullfile(output_dir,sprintf('sub%03d-run%d-multiple_regressors-%s%s%s-zscored.txt',all_subs(sub),run,region,physio_name,motion_name));
+            physiofile_new = fullfile(output_dir,sprintf('sub%03d-run%d-multiple_regressors-%s%s-zscored.txt',all_subs(sub),run,region,physio_name));
             writematrix(physiodata_z,physiofile_new,'Delimiter','tab');
             
             % Motion regressors only
@@ -369,32 +331,6 @@ if zscore_physio
         
     end
         
-end
-
-if remove_physioparam
-    
-    for sub = 1:numel(all_subs)
-        
-        fprintf('Removing physio parameters from physio files...\n')
-        name = sprintf('sub%03d',all_subs(sub));
-        disp(name);
-        
-        physio_folder = fullfile(physio_dir,name);
-        
-        for run = 1:n_runs
-            
-            run_id = sprintf('run%d',run);
-            fprintf([run_id '\n']);
-            
-            physio_file = fullfile(physio_folder,sprintf('sub%03d-run%d-multiple_regressors-%s%s-zscored.txt',all_subs(sub),run,region,physio_name));
-            physio_file_new = fullfile(physio_folder,sprintf('sub%03d-run%d-multiple_regressors-%s%s-zscored.txt',all_subs(sub),run,region,physio_name_new));
-            
-            remove_physio_parameters(physio_file,physio_file_new,param2remove)
-            
-        end
-        
-    end
-    
 end
 
 end

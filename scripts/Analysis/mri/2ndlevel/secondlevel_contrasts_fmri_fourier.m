@@ -1,6 +1,6 @@
-function secondlevel_contrasts_fmri_fourier(options,analysis_version,modelname,subj,estimate_model)
+function secondlevel_contrasts_fmri_fourier(options,analysis_version,model,subj,estimate_model)
 
-secondlvlpath = fullfile(options.path.mridir,'2ndlevel',['Version_' analysis_version],modelname);
+secondlvlpath = fullfile(options.path.mridir,'2ndlevel',['Version_' analysis_version],model.name);
 if ~exist(secondlvlpath, 'dir'); mkdir(secondlvlpath); end
 
 secondlvl_maskpath = fullfile(options.path.mridir,'2ndlevel','meanmasks');
@@ -15,7 +15,7 @@ connames = {'PhasicStim-All' 'VAS-All' ...
 
 conprefix = [options.preproc.smooth_prefix options.preproc.norm_prefix];
 
-for con = 9%1:numel(connames)
+for con = 1:numel(connames)
     
     clear conlist
     
@@ -48,7 +48,7 @@ for con = 9%1:numel(connames)
         con_id = sprintf('%02d',con_indices{con});
         for sub = 1:numel(subj)
             name = sprintf('sub%03d',subj(sub));
-            conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+            conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
             conlist(sub) = cellstr(spm_select('ExtFPList',conpathsub,['^' conprefix 'con_00' con_id '.*.nii$'],1)); %#ok<*AGROW>
         end
         matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = conlist';
@@ -60,7 +60,7 @@ for con = 9%1:numel(connames)
         for sub = 1:numel(subj)
             clear conlist
             name = sprintf('sub%03d',subj(sub));
-            conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+            conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
             con_id = sprintf('%02d',con_indices{con}(1));
             conlist(1) = cellstr(spm_select('ExtFPList',conpathsub,['^' conprefix 'con_00' con_id '.*.nii$'],1));
             con_id = sprintf('%02d',con_indices{con}(2));
@@ -79,7 +79,7 @@ for con = 9%1:numel(connames)
             con_id = sprintf('%02d',con_indices{con}(conf));
             for sub = 1:numel(subj)
                 name = sprintf('sub%03d',subj(sub));
-                conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
+                conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
                 conlist(sub) = cellstr(spm_select('ExtFPList',conpathsub,['^' conprefix 'con_00' con_id '.*.nii$'],1));
             end
             matlabbatch{1}.spm.stats.factorial_design.des.anova.icell(conf).scans = conlist';
@@ -112,13 +112,16 @@ for con = 9%1:numel(connames)
             
             % Load betas wave contrast
             nscans = options.acq.n_scans(2);
-            tonicBF_file = fullfile(options.path.mridir,'sub001','1stlevel',['Version_' analysis_version],'Fourier_tonic_only','SPM.mat');
+            try
+                tonicBF_file = fullfile(options.path.mridir,'sub001','1stlevel',['Version_' analysis_version],'Fourier_tonic_only','SPM.mat');
+            catch
+                error('Fourier tonic only model does not exist! Run that model first (for sub001 -  same for every subject).');
+            end
             SPM_tonicBF = load(tonicBF_file);
             tonicFourier_des = SPM_tonicBF.SPM.xX.X;
             tonicFourier_desmat = tonicFourier_des(1:nscans,1:(conf_no/2)); % take 1st run regressors for Fourier set
             
-%             tonicPmod_file = fullfile(options.path.mridir,'sub001','1stlevel',['Version_' analysis_version],'HRF_phasic_tonic_pmod','SPM.mat');
-            tonicPmod_file = fullfile(options.path.mridir,'sub001','1stlevel',['Version_19Dec22'],'HRF_phasic_tonic_pmod','SPM.mat');
+            tonicPmod_file = fullfile(options.path.mridir,'sub001','1stlevel',['Version_' analysis_version],'HRF_phasic_tonic_pmod','SPM.mat');
             SPM_tonicPmod = load(tonicPmod_file);
             %tonicPmod_con = SPM_tonicPmod.SPM.xX.X(1:nscans,2); % take 1st run regressor for tonic parametric modulator (pressure)
             col_ind = find(contains(SPM_tonicPmod.SPM.xX.name,'Sn(2) TonicStimxTonicPressure^1*bf(1)'));
