@@ -23,18 +23,41 @@ for sub = subj
     nscans_run = options.acq.n_scans(2);
     nscans_all = numel(runs)*options.acq.n_scans(2);
     
-    tonic_SPM_file = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],'HRF_phasic_tonic_pmod','SPM.mat');
-    tonic_SPM = load(tonic_SPM_file);
-    col_no = size(tonic_SPM.SPM.xX.X,2)-numel(runs); % number of design matrix columns without constants
+    % Noise correction files
+    physiopathsub = fullfile(options.path.physiodir,name);
+    
+    run_ind = 1;
+    col_no = 0;
+    for run = runs
+        noisefiles{run_ind} = fullfile(physiopathsub, [name '-run' num2str(run) '-' options.preproc.physio_name '.txt']);
+        delimiter = ' '; %or whatever
+        fid = fopen(noisefiles{run_ind},'rt');
+        tLines = fgets(fid);
+        col_no = col_no + numel(strfind(tLines,delimiter)) + 1;
+        fclose(fid);
+        run_ind = run_ind + 1;
+    end
+
     cond_reg_no = col_no/numel(runs)-options.preproc.no_noisereg;
     assumed_col_no = numel(runs)*(cond_reg_no+options.preproc.no_noisereg);
     if col_no > assumed_col_no
         col_diff = col_no - assumed_col_no;
-        noisedataAll = zeros(nscans_all,options.preproc.no_noisereg+col_diff); % all volumes, 25th column for possible motion exclusion volume
+        noisedataAll = zeros(nscans_all,options.preproc.no_noisereg+col_diff); % all volumes, final column(s) for possible motion exclusion volume
     else
-        %reg_diff = 0;
-        noisedataAll = zeros(nscans_all,options.preproc.no_noisereg); % all volumes, 25th column for possible motion exclusion volume
+        noisedataAll = zeros(nscans_all,options.preproc.no_noisereg);
     end
+        
+    %     tonic_SPM_file = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],'HRF_phasic_tonic_pmod','SPM.mat');
+    %     tonic_SPM = load(tonic_SPM_file);
+    %     col_no = size(tonic_SPM.SPM.xX.X,2)-numel(runs); % number of design matrix columns without constants
+    %     cond_reg_no = col_no/numel(runs)-options.preproc.no_noisereg;
+    %     assumed_col_no = numel(runs)*(cond_reg_no+options.preproc.no_noisereg);
+    %     if col_no > assumed_col_no
+    %         col_diff = col_no - assumed_col_no;
+    %         noisedataAll = zeros(nscans_all,options.preproc.no_noisereg+col_diff); % all volumes, final column(s) for possible motion exclusion volume
+    %     else
+    %         noisedataAll = zeros(nscans_all,options.preproc.no_noisereg);
+    %     end
     
     if model.tonicIncluded
         cond_runs = allconds.conditions_list_rand(sub,:);
@@ -57,7 +80,7 @@ for sub = subj
     scans2add = 0;
     run_vols = 1:nscans_run;
     excl_vol_no = 0;
-
+    
     for run = runs
         
         clear EPI episcans onsetdata pmoddata onsetsTonic
@@ -68,48 +91,25 @@ for sub = subj
         EPI.epiFiles = spm_vol(spm_select('ExtFPList',epipath,['^ra' name '-epi-run' num2str(run) '-brain.nii$']));
         
         for epino = 1:size(EPI.epiFiles,1)
-            episcans{epino} = [EPI.epiFiles(epino).fname, ',',num2str(epino)]; 
+            episcans{epino} = [EPI.epiFiles(epino).fname, ',',num2str(epino)];
         end
         
         % Concantenate EPI files
         episcansAll = [episcansAll episcans];
         
-        % Noise correction files
-        physiopathsub = fullfile(options.path.physiodir,name);
-        
-        if model.physioOn
-            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-' options.preproc.physio_name '.txt']);
-        else % only motion regressors
-            noisefile = fullfile(physiopathsub, [name '-run' num2str(run) '-motion_regressors-brain-zscored.txt']);
+        % Physiological noise parameters
+        noisedata = importdata(noisefiles{run-1});
+        if size(noisedata,2) > options.preproc.no_noisereg
+            excl_vol_cols_run = size(noisedata,2)-options.preproc.no_noisereg;
+            excl_vol_cind = excl_vol_cols_run-1;
+            for col = 1:excl_vol_cols_run
+                excl_vol_no = excl_vol_no + 1;
+                excl_vol_row = find(noisedata(:,end-excl_vol_cind) == 1);
+                excl_vol_row_ind(excl_vol_no) = run_vols(excl_vol_row); %#ok<*FNDSB>
+                excl_vol_cind = excl_vol_cind - 1;
+            end
         end
         
-        noisedata = importdata(noisefile);
-         if size(noisedata,2) > options.preproc.no_noisereg
-             excl_vol_cols_run = size(noisedata,2)-options.preproc.no_noisereg;
-             excl_vol_cind = excl_vol_cols_run-1;
-             for col = 1:excl_vol_cols_run
-                 excl_vol_no = excl_vol_no + 1;
-                 excl_vol_row = find(noisedata(:,end-excl_vol_cind) == 1);
-                 excl_vol_row_ind(excl_vol_no) = run_vols(excl_vol_row); %#ok<*FNDSB>
-                 excl_vol_cind = excl_vol_cind - 1;
-             end
-         end
-         
-%         if reg_diff > 0 && size(noisedata,2) == options.preproc.no_noisereg
-%             noisedataAll(run_vols,:) = [noisedata zeros(nscans_run,reg_diff)]; 
-%         else
-%             excl_vol_cols_run = size(noisedata,2)-options.preproc.no_noisereg;
-%             excl_vol_cind = excl_vol_cols_run-1;
-%             for col = 1:numel(excl_vol_cols_run)
-%                 excl_vol_col(:,excl_vol_col_no) = noisedata(:,end-excl_vol_cind);
-%                 excl_vol_col_no = excl_vol_col_no + 1;
-%             end
-%             
-%             padded_extra_zeros = reg_diff-(size(noisedata,2)-options.preproc.no_noisereg);
-%             noisedataAll(run_vols,:) = [noisedata zeros(nscans_run,padded_extra_zeros)]; 
-%             excl_vol_col_no = excl_vol_col_no + (size(noisedata,2)-options.preproc.no_noisereg);
-%         end
-
         noisedataAll(run_vols,1:options.preproc.no_noisereg) = noisedata(:,1:options.preproc.no_noisereg);
         run_vols = run_vols + nscans_run;
         
@@ -131,7 +131,7 @@ for sub = subj
                 else
                     lastStick = (onsetsTonicStart(ons)+options.basisF.hrf.tonic_durationtrue); % as seconds
                 end
-                onsetsTonic_temp = firstStick:resStick:lastStick; 
+                onsetsTonic_temp = firstStick:resStick:lastStick;
                 onsetsTonic(:,ons) = onsetsTonic_temp(1:end-1)'; %#ok<*AGROW> % remove last element to reach even number matching with pmod
             end
             onsetsTonic = onsetsTonic(:);
@@ -139,13 +139,13 @@ for sub = subj
             if numel(onsetsTonic) < 2*durationTonic; onsetsTonic = [onsetsTonic; NaN(durationTonic,1)]; end
             
             phasicReg = pmoddata.phasicRegressor_z;
-%             if sub == 5 && run == 4 % remove tonic trial 2 from sub 5 run 3
-%                 pmodTonic1 = [tonicReg(1:durationTonic) NaN(durationTonic,1)];
-%                 pmodTonic2 = [zscore(phasicReg(1:durationTonic) .* tonicReg(1:durationTonic)) NaN(durationTonic,1)];
-%             else
-                pmodTonic1 = tonicReg;
-                pmodTonic2 = zscore(phasicReg .* tonicReg);
-%             end
+            %             if sub == 5 && run == 4 % remove tonic trial 2 from sub 5 run 3
+            %                 pmodTonic1 = [tonicReg(1:durationTonic) NaN(durationTonic,1)];
+            %                 pmodTonic2 = [zscore(phasicReg(1:durationTonic) .* tonicReg(1:durationTonic)) NaN(durationTonic,1)];
+            %             else
+            pmodTonic1 = tonicReg;
+            pmodTonic2 = zscore(phasicReg .* tonicReg);
+            %             end
             
             % Concatenate pmods
             pmodTonic1All(:,block) = pmodTonic1(:);
@@ -214,19 +214,19 @@ for sub = subj
         pmodStructTonic = struct('name', {}, 'param', {}, 'poly', {});
         
         % Pmod 1: Tonic pressure
-        pmodStructTonic(1).name = [model.pmodName(1) '-' cond_name];
+        pmodStructTonic(1).name = [model.pmodName{1} '-' cond_name];
         pmodStructTonic(1).poly = 1;
         pmodTonic1All_final = reshape(pmodTonic1All(:,cond_runs==cond),[rows 1]);
         pmodTonic1All_final = pmodTonic1All_final(~isnan(pmodTonic1All_final));
         pmodStructTonic(1).param = zscore(pmodTonic1All_final);
         
         % Pmod 2: Interaction tonic and phasic pressure
-        pmodStructTonic(2).name = [model.pmodName(2) '-' cond_name];
+        pmodStructTonic(2).name = [model.pmodName{2} '-' cond_name];
         pmodStructTonic(2).poly = 1;
         pmodTonic2All_final = reshape(pmodTonic2All(:,cond_runs==cond),[rows 1]);
         pmodTonic2All_final = pmodTonic2All_final(~isnan(pmodTonic2All_final));
         pmodStructTonic(2).param = zscore(pmodTonic2All_final);
-    
+        
         % Onset condition
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = ['TonicStim-' cond_name];
         tonicOnset = reshape(onsetsTonicAll(:,cond_runs==cond),[rows 1]);
@@ -258,10 +258,10 @@ for sub = subj
         pmodStructPhasic = struct('name', {}, 'param', {}, 'poly', {});
         
         % Pmod 1: Stimulus index over the entire experiment
-        pmodStructPhasic(1).name = [model.pmodName(3) '-' cond_name];
+        pmodStructPhasic(1).name = [model.pmodName{3} '-' cond_name];
         pmodStructPhasic(1).poly = 1;
         pmodStructPhasic(1).param = reshape(stim_ind_meanc(:,cond_runs==cond),[rows 1]);
-    
+        
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).cond(c).name = ['PhasicStim-' cond_name];
         phasicOnset = reshape(onsetsPhasicAll(:,cond_runs==cond),[rows 1]);
         phasicOnset = phasicOnset(~isnan(phasicOnset));
@@ -297,7 +297,7 @@ for sub = subj
     matlabbatch{1}.spm.stats.fmri_spec.sess(block).multi = {''};
     matlabbatch{1}.spm.stats.fmri_spec.sess(block).regress = struct('name', {}, 'val', {});
     matlabbatch{1}.spm.stats.fmri_spec.sess(block).multi_reg = {noisefileAll}; % Physiological and head motion noise correction files for nuisance regressors
-    if tonicIncluded
+    if model.tonicIncluded
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).hpf = options.model.firstlvl.hpf.tonic; % High-pass filter
     else
         matlabbatch{1}.spm.stats.fmri_spec.sess(block).hpf = options.model.firstlvl.hpf.phasic;

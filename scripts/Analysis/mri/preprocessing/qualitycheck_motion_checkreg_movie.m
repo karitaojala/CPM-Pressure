@@ -18,14 +18,14 @@ end
 addpath(spm_path)
 addpath(sct_path)
 
-% all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
+all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
 % all_subs     = [1 2 4:10 12:13 15:18 20:24 26:27 29:34 37:40 42:49]; % subs 11 and 25 not run
 % all_subs2     = [1 2 4:7 12:13 15:18 24:27 29:30 37:39 42:44]; % if sc_proc data
 % all_subs = setdiff(all_subs,all_subs2);
 % data1 = true;
 % data2 = false;
 
-subs2check = 8;
+subs2check = all_subs;
 epis2check = 2;
 
 for sub = subs2check

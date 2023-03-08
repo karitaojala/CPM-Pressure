@@ -19,10 +19,10 @@ end
 addpath(genpath(spm_path))
 addpath(sct_path)
 
-parallel       = 1; % run several processes (matlabs/subjects) in parallel on different cores
+parallel       = 0; % run several processes (matlabs/subjects) in parallel on different cores
 
 do_sp_slicetime  = 0;
-do_sp_sct        = 0;
+do_sp_sct        = 1;
 
 do_shift         = 0;
 do_slicetime     = 0;
@@ -34,15 +34,16 @@ do_skull         = 0;
 do_norm          = 0;
 do_back          = 0;
 do_comb_dar_nlin = 0;
-do_nlin_reverse  = 1;
+do_nlin_reverse  = 0;
 do_warp          = 0;
 
 do_sm_skull      = 0; % can only be done after all of the above steps
 
 do_avg_norm      = 0; % can only be done after all subjects done
+spinal = 1;
 
-
-all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
+all_subs     = 1;%[1 2 4:13 15:18 20:27 29:34 37:40 42:49];
+% all_subs     = all_subs;
 
 %DEBUG
 % all_subs    = 1;
@@ -59,6 +60,7 @@ mean_func_name    = 'tmeanasub001-epi-run1-brain.nii';
 all_wskull_files = [];
 all_wmean_files  = [];
 all_wc1_files    = [];
+all_t2norm_files = [];
             
 if size(all_subs) < n_proc
     n_proc = size(all_subs,2);
@@ -431,8 +433,24 @@ if do_avg_norm
   
     clear matlabbatch
     
-    matlabbatch{1}.spm.util.imcalc.input = cellstr(all_wskull_files);
-    matlabbatch{1}.spm.util.imcalc.output = 'mean_wskull';
+    if spinal
+        
+        for s = 1:numel(all_subs)
+            name           = sprintf('sub%0.3d',all_subs(s));
+            t2_dir         = [base_dir name filesep 't2_spinalcord' filesep];
+            t2norm_file    = 't2_norm_cropped.nii';%sprintf('%s-t2_norm_cropped.nii',name);
+            t2norm_file    = [t2_dir t2norm_file];
+            all_t2norm_files  = strvcat(all_t2norm_files,t2norm_file);
+        end
+        
+        input_files = all_t2norm_files;
+        output_file = 'mean_t2norm';
+    else
+        input_files = all_wskull_files;
+        output_file = 'mean_wskull';
+    end
+    matlabbatch{1}.spm.util.imcalc.input = cellstr(input_files);
+    matlabbatch{1}.spm.util.imcalc.output = output_file;
     matlabbatch{1}.spm.util.imcalc.outdir = cellstr(fullfile(base_dir,'2ndlevel','meanmasks'));
     matlabbatch{1}.spm.util.imcalc.expression = 'mean(X)';
     matlabbatch{1}.spm.util.imcalc.var = struct('name', {}, 'value', {});
@@ -441,13 +459,13 @@ if do_avg_norm
     matlabbatch{1}.spm.util.imcalc.options.interp = 1;
     matlabbatch{1}.spm.util.imcalc.options.dtype = 4;
 
-    matlabbatch{2} = matlabbatch{1};
-    matlabbatch{2}.spm.util.imcalc.input = cellstr(all_wmean_files);
-    matlabbatch{2}.spm.util.imcalc.output = 'mean_wmean';
-    
-    matlabbatch{3} = matlabbatch{1};
-    matlabbatch{3}.spm.util.imcalc.input = cellstr(all_wc1_files);
-    matlabbatch{3}.spm.util.imcalc.output = 'mean_wc1';
+%     matlabbatch{2} = matlabbatch{1};
+%     matlabbatch{2}.spm.util.imcalc.input = cellstr(all_wmean_files);
+%     matlabbatch{2}.spm.util.imcalc.output = 'mean_wmean';
+%     
+%     matlabbatch{3} = matlabbatch{1};
+%     matlabbatch{3}.spm.util.imcalc.input = cellstr(all_wc1_files);
+%     matlabbatch{3}.spm.util.imcalc.output = 'mean_wc1';
     
     spm_jobman('initcfg');
     spm_jobman('run',matlabbatch);

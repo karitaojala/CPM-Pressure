@@ -9,6 +9,7 @@ path.code = pwd;
 path.main = fullfile(path.code,'..','..','..','..');
 path.nifti = fullfile(path.main,'data',project.name,project.phase,'mri','rawdata');
 
+all_subs = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
 sub_folders = ls(path.nifti);
 sub_folders = sub_folders(3:end,:);
 
@@ -16,7 +17,7 @@ series_names = {'field_map_mag' 'field_map_phase' 't1_corrected' 't1_uncorrected
     'epi-run1' 'epi-run2' 'epi-run3' 'epi-run4' 'epi-run5' 'epi-run6'};
 series2take = size(series_names,2);
 
-for sub = 48:50
+for sub = all_subs
     
     subID = ['sub' sprintf('%03d',sub);];
     sub_ind = find(contains(cellstr(sub_folders),subID)==1);

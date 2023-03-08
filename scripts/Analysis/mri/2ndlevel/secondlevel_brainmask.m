@@ -1,27 +1,6 @@
 function secondlevel_brainmask(options)
 
-%mask_name = [options.preproc.norm_prefix 'mask.nii'];
-%masks = cell(length(subj), 1);
-
-%secondlvlpath = fullfile(options.path.mridir,'2ndlevel',['Version_' analysis_version],modelname);
-
-% sub_ind = 1;
-% 
-% for sub = subj
-%     
-%     name = sprintf('sub%03d',sub);
-%     disp(name);
-%     
-%     firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],modelname);
-%     
-%     maskfile = spm_select('FPList', firstlvlpath, mask_name);
-%     assert(size(maskfile, 1) == 1);
-%     masks{sub_ind} = maskfile;
-%     
-%     
-%     sub_ind = sub_ind + 1;
-%     
-% end
+% ONLY FOR BRAIN - FOR SPINAL CORD, MASK CREATED WITH SCT
 
 secondlvlpath = fullfile(options.path.mridir,'2ndlevel','meanmasks');
 

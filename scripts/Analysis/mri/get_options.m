@@ -19,16 +19,20 @@ options.acq.n_dummy           = 5;
 options.acq.n_scans           = options.acq.n_scans_all-options.acq.n_dummy;
 options.acq.TR                = 1.991;
 
-options.spinal = false; 
+options.spinal = true; 
 
 % MRI preprocessing
 if options.spinal % Spinal
     options.acq.n_slices = 12;
     options.preproc.onset_slice = 1;%1065+50; % onset slice timing in ms, last brain slice + 50 ms (middle of the gap); % onset slice index, here 1 as it's the first spinal slice that is closest to the slice time correction reference slice
     % slices acquired descending
-    options.preproc.no_motionreg = 2;
+    options.preproc.no_motionreg = 32;
     options.preproc.no_physioreg = 18;
+    options.preproc.physio_name  = 'multiple_regressors-spinal-RETROICOR_32motion-zscored';
     options.preproc.no_noisereg = options.preproc.no_physioreg+options.preproc.no_motionreg; % 18 physio + 2 movement = 20
+    options.model.firstlvl.mask_name = 'epi-run2\SUBID-spinalmask.nii';
+    options.preproc.norm_prefix = 'w_';
+    options.stats.secondlvl.mask_name = 'spinalmask_secondlevel.nii';
     
 else % Brain
     options.acq.n_slices = 60;
@@ -37,14 +41,21 @@ else % Brain
     options.preproc.no_physioreg = 18; % normal RETROICOR 8 + 6 + 4
     options.preproc.physio_name  = 'multiple_regressors-brain-zscored';
     options.preproc.no_noisereg = options.preproc.no_physioreg+options.preproc.no_motionreg; 
+    % options.model.firstlvl.mask_name = 't1_corrected\SUBID-brainmask-v2.nii';
+    options.model.firstlvl.mask_name = 't1_corrected\SUBID-brainmask.nii'; 
+    options.preproc.norm_prefix = 'w_nlco_dartel_';
+    options.stats.secondlvl.mask_name = 'brainmask_secondlevel.nii';
     
 end
 
-options.preproc.norm_prefix = 'w_nlco_dartel_';
 options.preproc.smooth_prefix = 's_';
 options.preproc.normsmooth_prefix = [options.preproc.smooth_prefix options.preproc.norm_prefix];
 
-options.preproc.smooth_kernel = [6 6 6];
+if options.spinal
+    options.preproc.smooth_kernel = [2 2 3]; 
+else
+    options.preproc.smooth_kernel = [6 6 6]; 
+end
 
 % Basis function (HRF, FIR or Fourier set Hanning)
 options.basisF.fir.nBase      = 5+5; % depending on duration of longest stimulus, for FIR model
@@ -72,10 +83,6 @@ options.model.firstlvl.timing_units = 'scans'; % scans or secs
 
 % Orthogonalization
 options.model.firstlvl.orthogonalization = 0;
-
-% Brain mask
-% options.model.firstlvl.mask_name = '-v2'; 
-options.model.firstlvl.mask_name = ''; 
 
 % High-pass filter
 options.model.firstlvl.hpf.phasic = 128; % 128 for phasic only models
@@ -116,7 +123,6 @@ options.stats.firstlvl.contrasts.conrepl.fir = 'replsc'; % contrasts not replica
 options.stats.firstlvl.contrasts.conrepl.fourier = 'replsc';
 options.stats.firstlvl.contrasts.delete = 0;
 
-options.stats.secondlvl.mask_name = 'brainmask_secondlevel.nii';
 options.stats.secondlvl.contrasts.names = options.stats.firstlvl.contrasts.names;
 options.stats.secondlvl.contrasts.direction = 1;
 options.stats.secondlvl.contrasts.conrepl.hrf = 'none';

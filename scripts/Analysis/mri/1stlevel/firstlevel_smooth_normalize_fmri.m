@@ -14,10 +14,6 @@ for sub = subj
         
         contrasts = model.contrasts_1stlvl.indices{cong};
         
-        % Retrieve flow field
-        deffield_file = fullfile(options.path.mridir,name,'epi-run1','y_epi_2_template.nii');
-        %     flowfield_file = fullfile(mridir,name,'t1_corrected','u_rc1sub001-t1_corrected.nii');
-        
         % Retrieve 1st level con images
         cn = 1;
         for con = contrasts
@@ -31,8 +27,13 @@ for sub = subj
         %mask_file = char(spm_select('FPList', firstlvlpath, '^mask.*nii$'));
         %con_files{end+1} = mask_file;
         
-        % Normalization using nlin coreg + DARTEL
         if run_norm
+            
+            % Retrieve flow field
+            deffield_file = fullfile(options.path.mridir,name,'epi-run1','y_epi_2_template.nii');
+            %     flowfield_file = fullfile(mridir,name,'t1_corrected','u_rc1sub001-t1_corrected.nii');
+            
+            % Normalization using nlin coreg + DARTEL
             n = n + 1;
             matlabbatch{n}.spm.util.defs.comp{1}.def = {deffield_file};
             matlabbatch{n}.spm.util.defs.out{1}.pull.fnames = input_files;
@@ -42,6 +43,7 @@ for sub = subj
             matlabbatch{n}.spm.util.defs.out{1}.pull.fwhm = [0 0 0];
             matlabbatch{n}.spm.util.defs.out{1}.pull.prefix = options.preproc.norm_prefix;
         end
+        
         % Retrieve normalized 1st level con images
         %     norm_con_files = char(spm_select('FPList', firstlvlpath, ['^' norm_prefix 'con.*nii$']));
         %     norm_con_files = cellstr(char(norm_con_files));

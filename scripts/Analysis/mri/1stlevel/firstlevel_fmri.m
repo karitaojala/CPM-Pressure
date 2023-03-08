@@ -12,7 +12,8 @@ for sub = subj
     
     firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
-    brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask' options.model.firstlvl.mask_name '.nii']);
+    masksub = fullfile(options.path.mridir,name,options.model.firstlvl.mask_name);
+    masksub = replace(masksub,'SUBID',name);
     
     if model.tonicIncluded
         cond_runs = allconds.conditions_list_rand(sub,:);
@@ -37,7 +38,11 @@ for sub = subj
         % Select EPI files
         epipath = fullfile(options.path.mridir,name,['epi-run' num2str(run)]);
         cd(epipath)
-        EPI.epiFiles = spm_vol(spm_select('ExtFPList',epipath,['^ra' name '-epi-run' num2str(run) '-brain.nii$']));
+        if options.spinal
+            EPI.epiFiles = spm_vol(spm_select('ExtFPList',epipath,['^a' name '-epi-run' num2str(run) '-spinal_moco.nii$']));
+        else
+            EPI.epiFiles = spm_vol(spm_select('ExtFPList',epipath,['^ra' name '-epi-run' num2str(run) '-brain.nii$']));
+        end
         
         for epino = 1:size(EPI.epiFiles,1)
             episcans{epino} = [EPI.epiFiles(epino).fname, ',',num2str(epino)];
@@ -214,7 +219,7 @@ for sub = subj
     matlabbatch{1}.spm.stats.fmri_spec.volt = 1;
     matlabbatch{1}.spm.stats.fmri_spec.global = 'None';
     %matlabbatch{1}.spm.stats.fmri_spec.mthresh = 0.5; % Mask threshold, original 0.8
-    matlabbatch{1}.spm.stats.fmri_spec.mask = {brainmasksub}; % Brain mask to exclude e.g. eyes
+    matlabbatch{1}.spm.stats.fmri_spec.mask = {masksub}; % Brain/spinal mask to exclude e.g. eyes
     matlabbatch{1}.spm.stats.fmri_spec.cvi = 'FAST'; % Temporal autocorrelation removal algorithm to use
     
     %% Estimate 1st level model

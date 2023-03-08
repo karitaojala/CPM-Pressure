@@ -2,6 +2,7 @@ function [model,options] = get_model(options,modelNo)
 
 model = struct();
 
+if options.spinal; region = 'spinal'; else; region = 'brain'; end
 % if sessConcatenat
 %     sessconcat = '_sessconcat';
 % else
@@ -25,18 +26,21 @@ switch modelNo
         options.basisF.hrf.derivatives  = [0 0]; % temporal and dispersion derivatives
         
         model.physioOn                  = true;
-        options.preproc.no_motionreg    = 24;
+        options.preproc.no_motionreg    = 32; % 24 brain, 32 spinal cord
         options.preproc.no_physioreg    = 18;
         options.preproc.no_noisereg     = options.preproc.no_physioreg+options.preproc.no_motionreg;
-        options.preproc.physio_name     = ['multiple_regressors-brain-' num2str(options.preproc.no_motionreg) 'motion-zscored'];
+        options.preproc.physio_name     = ['multiple_regressors-' region '-RETROICOR_' num2str(options.preproc.no_motionreg) 'motion-zscored'];
         
         model.pmodNo = [0 0 0]; % # of parametric modulators of onsets: 1) Tonic stimulus, 2) Phasic stimulus, 3) VAS rating
 
         model.congroups_1stlvl.names    = {'SanityCheck' 'NoiseReg'};
-        model.contrasts_1stlvl.indices  = {1:3 4:21};
-        model.congroups_2ndlvl.names    = {'SanityCheck' 'RETROICOR'};
-        model.contrasts_2ndlvl.indices  = {1:3 4:21};
-        model.contrasts_2ndlvl.Ftest    = {false true};
+%         model.contrasts_1stlvl.indices  = {1:3 4:21};
+        model.contrasts_1stlvl.indices  = {1:3 4:53};
+        
+        model.congroups_2ndlvl.names    = {'SanityCheck' 'RETROICOR' 'Motion'};
+%         model.contrasts_2ndlvl.indices  = {1:3 4:21};
+        model.contrasts_2ndlvl.indices  = {1:3 4:21 22:53};
+        model.contrasts_2ndlvl.Ftest    = {false true true};
 
     case 2 % HRF - tonic phasic - RETROICOR, noise ROI WMxCSF, 24 motion
         
@@ -56,7 +60,7 @@ switch modelNo
         options.preproc.no_motionreg    = 24;
         options.preproc.no_physioreg    = 18 + 7; 
         options.preproc.no_noisereg     = options.preproc.no_physioreg+options.preproc.no_motionreg;
-        options.preproc.physio_name     = ['multiple_regressors-brain-noiseROI_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion_v2-zscored'];
+        options.preproc.physio_name     = ['multiple_regressors-' region '-noiseROI_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion_v2-zscored'];
         
         model.pmodNo = [0 0 0]; % # of parametric modulators of onsets: 1) Tonic stimulus, 2) Phasic stimulus, 3) VAS rating
 
@@ -87,8 +91,8 @@ switch modelNo
         options.preproc.no_noisereg     = options.preproc.no_physioreg+options.preproc.no_motionreg;
         options.preproc.no_noisereg     = options.preproc.no_physioreg+options.preproc.no_motionreg;
         
-        options.preproc.physio_name     = ['multiple_regressors-brain-noiseROI_WM_CSF_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion_v2-zscored'];
-%         options.preproc.physio_name     = ['multiple_regressors-brain-noiseROI_WM_CSF_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion-gradient_v2-zscored'];
+        options.preproc.physio_name     = ['multiple_regressors-' region '-noiseROI_WM_CSF_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion_v2-zscored'];
+%         options.preproc.physio_name     = ['multiple_regressors-' region '-noiseROI_WM_CSF_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion-gradient_v2-zscored'];
         
         model.pmodNo = [0 0 0]; % # of parametric modulators of onsets: 1) Tonic stimulus, 2) Phasic stimulus, 3) VAS rating
 
@@ -116,7 +120,7 @@ switch modelNo
         options.preproc.no_motionreg    = 24;
         options.preproc.no_physioreg    = 18 + 21; 
         options.preproc.no_noisereg     = options.preproc.no_physioreg+options.preproc.no_motionreg;
-        options.preproc.physio_name     = ['multiple_regressors-brain-noiseROI_WM_CSF_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion-zscored'];
+        options.preproc.physio_name     = ['multiple_regressors-' region '-noiseROI_WM_CSF_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion-zscored'];
         
         model.pmodNo    = [2 1 1]; % # of parametric modulators of onsets: 1) Tonic stimulus, 2) Phasic stimulus, 3) VAS rating
         model.pmodName  = {'TonicPressure' 'TonicxPhasic' 'PhasicPainRating' 'ButtonPress'};
@@ -145,7 +149,7 @@ switch modelNo
         options.preproc.no_motionreg    = 24;
         options.preproc.no_physioreg    = 18 + 21; 
         options.preproc.no_noisereg     = options.preproc.no_physioreg+options.preproc.no_motionreg;
-        options.preproc.physio_name     = ['multiple_regressors-brain-noiseROI_WM_CSF_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion-zscored'];
+        options.preproc.physio_name     = ['multiple_regressors-' region '-noiseROI_WM_CSF_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion_v2-zscored'];
         
         model.pmodNo    = [2 1 0]; % # of parametric modulators of onsets: 1) Tonic stimulus, 2) Phasic stimulus, 3) VAS rating
         model.pmodName  = {'TonicPressure' 'TonicxPhasicPressure' 'PhasicStimInd'};

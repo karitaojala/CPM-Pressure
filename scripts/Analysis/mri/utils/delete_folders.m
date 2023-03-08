@@ -16,14 +16,16 @@ if folders_level2delete == 1
         disp(name);
         
         if delete_model_only
+            folder2delete = [analysis_version ' ' model.name];
             firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
         else
+            folder2delete = analysis_version;
             firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version]);
         end
         
         try
             rmdir(firstlvlpath,'s')
-            fprintf(['Deleted ' firstlvlpath '\n'])
+            fprintf(['\nDeleted 1st level folder ' folder2delete '\n'])
         catch
             warning('Folder does not exist or cannot delete folder')
         end
@@ -32,14 +34,16 @@ if folders_level2delete == 1
 else % 2nd level folders
     
     if delete_model_only
+        folder2delete = [analysis_version ' ' model.name];
         secondlvlpath = fullfile(options.path.mridir,'2ndlevel',['Version_' analysis_version],model.name);
     else
+        folder2delete = analysis_version;
         secondlvlpath = fullfile(options.path.mridir,'2ndlevel',['Version_' analysis_version]);
     end
     
     try
         rmdir(secondlvlpath,'s')
-        fprintf(['Deleted ' secondlvlpath '\n'])
+        fprintf(['\nDeleted 2nd level folder ' folder2delete '\n'])
     catch
         warning('Folder does not exist or cannot delete folder')
     end

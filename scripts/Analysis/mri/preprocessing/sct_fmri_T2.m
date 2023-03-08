@@ -12,6 +12,8 @@ cparam_1 = '-param step=1,type=seg,algo=affine,metric=MeanSquares,smooth=10'; % 
                                                                               
 cparam_2 = '-param step=1,type=seg,algo=translation,metric=MeanSquares,smooth=20:step=2,type=seg,algo=affine,metric=MeanSquares:step=3,type=im,algo=syn,metric=MI,iter=5'; % had to add step 1 with 10mm smoothing to get non-overlapping segs to come together
 
+%cparam_3 = 'step=1,type=seg,algo=centermass:step=2,type=seg,algo=bsplinesyn,slicewise=1,iter=3';
+
 %cmd_slicetime      = '"slicetimer -i %s -o %s "'; % to be completed
 
 
@@ -20,7 +22,7 @@ cmd_mean           = '"sct_maths -i %s -mean t -o %s"';
 cmd_deep_seg_t2    = '"sct_deepseg_sc -i %s -o %s -c %s -kernel 3d -qc %s"';
 %cmd_deep_seg_t2    = '"sct_deepseg_sc -i %s -o %s -c %s -qc %s"'; % older 2d version which did not work well for some subjects
 cmd_centerline_t2  = '"sct_get_centerline -i %s -c %s -method fitseg -o %s -qc %s"';
-cmd_multimodal     = '"sct_register_multimodal -i %s -d %s -identity 1 -ofolder %s -qc %s"';
+%cmd_multimodal     = '"sct_register_multimodal -i %s -d %s -identity 1 -ofolder %s -qc %s"';
 cmd_mask           = '"sct_create_mask -i %s -p centerline,%s -size 35mm -f cylinder -o %s"';
 cmd_moco           = '"sct_fmri_moco -i %s -m %s -qc-seg %s -ofolder %s -qc %s"';
 cmd_label          = '"sct_label_vertebrae -i %s -s %s -c %s -ofolder %s -qc %s"';
@@ -35,6 +37,13 @@ cmd_deep_seg_epi_2d   = '"sct_deepseg_sc -i %s -o %s -c %s -qc %s -centerline sv
 
 cmd_apply_transform   = '"sct_apply_transfo -i %s -d %s -o %s -w %s"';
 
+% cmd_crop_image        = '"sct_crop_image -i %s -zmax 987 -zmin 592 -o %s"';
+cmd_crop_image        = '"sct_crop_image -i %s -zmax 960 -zmin 680 -o %s"';
+
+%cmd_warp_epi2template = ['"sct_register_multimodal -i %s -iseg %s -d %s -dseg %s -m %s -initwarp %s -param ' cparam_3 ' -ofolder %s -qc %s"'];
+
+% cmd_apply_transform_con = '"sct_apply_transfo -i %s -d %s -w %s"';
+
 epi_mask_file       = 'spinal_mask.nii.gz';
 epi_mean_file       = 'spinal_mean.nii.gz';
 epi_mean_seg_file   = 'spinal_mean_seg.nii.gz';
@@ -48,9 +57,11 @@ epi_warp2t2_inv      = 'warp_t22epi.nii.gz';
 epi_warped2t2        = 'spinal_warped_t2.nii.gz';
 
 t2_seg_file          = 't2_seg.nii.gz';
+t2_seg_warped2epi    = 't2_seg_warped_epi.nii.gz';
 t2_seg_center_file   = 't2_seg_center.nii.gz';
 
 t2_template_win         = 'PAM50_t2.nii.gz';
+t2_template_win_cropped = 'PAM50_t2_cropped.nii.gz';
 t2_template_win_levels  = 'PAM50_levels.nii.gz';
 t2_template_win_gm      = 'PAM50_gm.nii.gz';
 t2_template_win_cord    = 'PAM50_cord.nii.gz';
@@ -83,83 +94,133 @@ t2_file  = sprintf('%s-t2_spinalcord.nii.gz',name);
 % fix qform mismatch
 qc_dir   = [t2_dir 'qc'];
 command = sprintf([sct_gen cmd_qform],p2wsl([t2_dir t2_file]));
-run(command);
+% run(command);
 
 % Segment t2
 command = sprintf([sct_gen cmd_deep_seg_t2],p2wsl([t2_dir t2_file]),p2wsl([t2_dir t2_seg_file]),t2_mod,p2wsl(qc_dir));
-run(command);
+% run(command);
 % let's have a look
 % spm_check_registration(strvcat([t2_dir t2_file],[t2_dir t2_seg_file]));input('press return to continue');
 
 % Find centerline in segmented t2
 command = sprintf([sct_gen cmd_centerline_t2],p2wsl([t2_dir t2_seg_file]),t2_mod,p2wsl([t2_dir t2_seg_center_file]),p2wsl(qc_dir));
-run(command);
+% run(command);
 
 % Label vertebrae in T2
 command = sprintf([sct_gen cmd_label],p2wsl([t2_dir t2_file]),p2wsl([t2_dir t2_seg_file]),t2_mod,p2wsl(t2_dir),p2wsl(qc_dir));
-run(command);
+% run(command);
 
 % Register T2 to template
 command = sprintf([sct_gen cmd_register],p2wsl([t2_dir t2_file]),p2wsl([t2_dir t2_seg_file]),p2wsl([t2_dir t2_label_d_file]),t2_mod,p2wsl(t2_dir),p2wsl(qc_dir));
-run(command);
+% run(command);
 
-% WSL : 238s ; native Windows 263s
+% % Crop native T2 segmented cord mask
+% t2_seg_cord_crop = 't2_seg_cropped.nii.gz';
+% command = sprintf([sct_gen cmd_crop_image],p2wsl([t2_dir t2_seg_file]),p2wsl([t2_dir t2_seg_cord_crop]));
+% run(command);
 
-for ep=1:numel(epi_dirs)
+% Crop PAM50 segmented cord template
+t2_template_win_cord_crop = 'spinalmask_secondlevel.nii.gz';
+command = sprintf([sct_gen cmd_crop_image],p2wsl([templ_dir t2_template_win_cord]),p2wsl([t2_dir t2_template_win_cord_crop]));
+% run(command);
+
+% Crop PAM50 T2 template
+% t2_template_win_cropped = 't2_template_cropped.nii.gz';
+command = sprintf([sct_gen cmd_crop_image],p2wsl([templ_dir t2_template_win]),p2wsl([templ_dir t2_template_win_cropped]));
+% run(command);
+
+% Crop normalized T2
+t2_norm = 'anat2template.nii.gz';
+t2_norm_cropped = 't2_norm_cropped.nii.gz';
+command = sprintf([sct_gen cmd_crop_image],p2wsl([t2_dir t2_norm]),p2wsl([t2_dir t2_norm_cropped]));
+% run(command);
+
+for ep=2%:5%1:numel(epi_dirs)
 %for ep=3
     qc_dir   = [epi_dirs{ep} 'qc'];
     epi_file  = sprintf('a%s-epi-run%s-spinal.nii.gz',name,num2str(ep));
-    
     epi_moco_mean_file  = sprintf('a%s-epi-run%s-spinal_moco_mean.nii.gz',name,num2str(ep));
+    epi_moco_file       = sprintf('a%s-epi-run%s-spinal_moco.nii.gz',name,num2str(ep));
+    epi_moco_norm_file  = sprintf('a%s-epi-run%s-spinal_moco_norm.nii.gz',name,num2str(ep));
     
-    copyfile([t2_dir t2_file],epi_dirs{ep});
-    copyfile([t2_dir t2_seg_file],epi_dirs{ep});
+%     copyfile([t2_dir t2_file],epi_dirs{ep});
+%     copyfile([t2_dir t2_seg_file],epi_dirs{ep});
     
     % create mean epi
     command = sprintf([sct_gen cmd_mean],p2wsl([epi_dirs{ep} epi_file]),p2wsl([epi_dirs{ep} epi_mean_file]));
-    run(command);
+%     run(command);
     
     %segment mean EPI
     command = sprintf([sct_gen cmd_deep_seg_epi_2d],p2wsl([epi_dirs{ep} epi_mean_file]),p2wsl([epi_dirs{ep} epi_mean_seg_file]),epi_mod,p2wsl(qc_dir));
-    run(command);
+%     run(command);
     
     % Coarse register T2 to EPI for mask
     command = sprintf([sct_gen cmd_coregister_t2_epi],p2wsl([epi_dirs{ep} t2_file]),p2wsl([epi_dirs{ep} t2_seg_file]),p2wsl([epi_dirs{ep} epi_mean_file]),p2wsl([epi_dirs{ep} epi_mean_seg_file]),p2wsl([epi_dirs{ep} t2_reg_coarse_file]),p2wsl(epi_dirs{ep}),p2wsl(qc_dir));
-    run(command);
+%     run(command);
     
     % now segment it to get a good centerline
     command = sprintf([sct_gen cmd_deep_seg_t2],p2wsl([epi_dirs{ep} t2_reg_coarse_file]),p2wsl([epi_dirs{ep} t2_reg_coarse_seg_file]),t2_mod,p2wsl(qc_dir));
-    run(command);
+%     run(command);
     
     % and create a mask
     command = sprintf([sct_gen cmd_mask],p2wsl([epi_dirs{ep} epi_file]),p2wsl([epi_dirs{ep} t2_reg_coarse_seg_file]),p2wsl([epi_dirs{ep} epi_mask_file]));
-    run(command);
+%     run(command);
     
     %run moco
     command = sprintf([sct_gen cmd_moco],p2wsl([epi_dirs{ep} epi_file]),p2wsl([epi_dirs{ep} epi_mask_file]),p2wsl([epi_dirs{ep} epi_mean_seg_file]),p2wsl(epi_dirs{ep}),p2wsl(qc_dir));
-    run(command);
+%     run(command);
     
     %segment mean moco EPI --> this should be better than the segmented mean
     command = sprintf([sct_gen cmd_deep_seg_epi_2d],p2wsl([epi_dirs{ep} epi_moco_mean_file]),p2wsl([epi_dirs{ep} epi_moco_mean_seg_file]),epi_mod,p2wsl(qc_dir));
-    run(command);
+%     run(command);
     
     % Precise Coregister mean to T2
     command = sprintf([sct_gen cmd_coregister],p2wsl([epi_dirs{ep} epi_moco_mean_file]),p2wsl([epi_dirs{ep} epi_moco_mean_seg_file]),p2wsl([t2_dir t2_file]),p2wsl([t2_dir t2_seg_file]),p2wsl([epi_dirs{ep} epi_warped2t2]),p2wsl([epi_dirs{ep} epi_warp2t2_inv]),p2wsl([epi_dirs{ep} epi_warp2t2]),p2wsl(epi_dirs{ep}),p2wsl(qc_dir));
-    run(command);
+%     run(command);
     %spm_check_registration(strvcat([epi_dirs{ep} epi_moco_mean_file],[epi_dirs{ep} epi_moco_mean_seg_file],[t2_dir t2_file],[t2_dir t2_seg_file],[epi_dirs{ep}  epi_warped2t2]));
-    
+
+    % Warp T2 to the template
     warp_combined = [p2wsl([epi_dirs{ep} epi_warp2t2_inv]) ' ' p2wsl([t2_dir t2_warp2template])];
-    
     command = sprintf([sct_gen cmd_apply_transform],p2wsl([epi_dirs{ep} epi_moco_mean_file]),p2wsl([templ_dir t2_template_win]),p2wsl([epi_dirs{ep} epi_moco_mean_norm_file]),warp_combined);
-    run(command);
+%     run(command);
     %spm_check_registration(strvcat([epi_dirs{ep} epi_moco_mean_file],[epi_dirs{ep} epi_moco_mean_norm_file],[t2_dir t2_file],[templ_dir t2_template_win],[templ_dir t2_template_win_cord]));
     
+    % Register EPI to the template according to T2->template warp field
+%     command = sprintf([sct_gen cmd_warp_epi2template],p2wsl([epi_dirs{ep} epi_moco_mean_file]),p2wsl([epi_dirs{ep} epi_mean_seg_file]),p2wsl([templ_dir t2_template_win]),p2wsl([templ_dir t2_template_win_cord]),p2wsl([epi_dirs{ep} epi_mask_file]),p2wsl([t2_dir t2_warp2template]),p2wsl(epi_dirs{ep}),p2wsl(qc_dir));
+%     run(command);
+    
+    % Apply warp field from previous step to 4D EPI (timeseries) - EPI->T2
+    %warp_combined2 = [p2wsl([epi_dirs{ep} epi_warp2t2]) ' ' p2wsl([t2_dir t2_warp2template])];
+    command = sprintf([sct_gen cmd_apply_transform],p2wsl([epi_dirs{ep} epi_moco_file]),p2wsl([templ_dir t2_template_win_cropped]),p2wsl([epi_dirs{ep} epi_moco_norm_file]),warp_combined);
+    run(command);
+   
 end
+
+% Warping CON images to template space
+% which warp field to use? (from which run -> currently use warp from last run)
+% warp_combined = [p2wsl([epi_dirs{5} epi_warp2t2_inv]) ' ' p2wsl([t2_dir t2_warp2template])];
+% con_dir  = fullfile(base_dir, name,'1stlevel','Version_01Mar23-spinal','HRF_phasic_tonic_RETROICOR\');
+% 
+% for con = 1:53
+%     
+%     epi_con_file        = sprintf('con_00%02d.nii',con);
+%     warped_con_file     = sprintf('w_con_00%02d.nii',con);
+%     %wcropped_con_file     = sprintf('w_con_00%02d.nii',con);
+%     
+%     % Warp con image to PAM50 template space
+%     command = sprintf([sct_gen cmd_apply_transform],p2wsl([con_dir epi_con_file]),p2wsl([templ_dir t2_template_win]),p2wsl([con_dir warped_con_file]),warp_combined);
+% %     run(command);
+%     
+%     % Crop normalized con images to reduce their size
+%     command = sprintf([sct_gen cmd_crop_image],p2wsl([con_dir warped_con_file]),p2wsl([con_dir warped_con_file]));
+% %     run(command);
+%     
+% end
 
 
 function out = p2wsl(in)
-% out = strrep(in, 'c:', '/mnt/c');
-% out = strrep(out, 'd:', '/mnt/d');
+% out = strrep(in, 'C:', '/mnt/c');
+% out = strrep(out, 'D:', '/mnt/d');
 % out = strrep(out,'\','/');
 out = in; %bypass for win
 

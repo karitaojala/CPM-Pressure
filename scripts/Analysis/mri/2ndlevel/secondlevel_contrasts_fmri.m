@@ -39,7 +39,7 @@ for cong = 1:numel(model.congroups_2ndlvl.names)
                 conname = options.stats.secondlvl.contrasts.names.sanitycheck_tonic{con};
             elseif strcmp(congroup,'TonicPressure')
                 conname = options.stats.secondlvl.contrasts.names.tonic{con_ind};
-            elseif strcmp(congroup,'TonicPressureConcatTime')
+            elseif strcmp(congroup,'TonicPhasicTimeConcat')
                 conname = options.stats.secondlvl.contrasts.names.tonic_concat{con_ind};
             elseif strcmp(congroup,'CPM')
                 conname = options.stats.secondlvl.contrasts.names.cpm{con};
