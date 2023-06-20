@@ -81,7 +81,7 @@ xmax = no_stims_total;
 [~,con_sort_ind] = sort(data.StimulusCentered(con_ind),'ascend');
 [~,exp_sort_ind] = sort(data.StimulusCentered(exp_ind),'ascend');
 
-figure('Position',[50,50,1200,300]);
+figure('Position',[50,50,800,400]);
 
 hold on
 
@@ -153,9 +153,9 @@ ylim([ymin ymax])
 set(gca,'yTick',ymin:10:ymax, 'FontSize',14)
 ylabel('Test stimulus pain rating', 'FontSize',14)
 
-xlabel('Test stimulus index', 'FontSize',14)
+xlabel('Test stimulus trial index', 'FontSize',14)
 %title(['Block ' num2str(block)])
-lgd = legend([p_con,p_exp],{'Control','Experimental'},'FontSize',14);
+lgd = legend([p_con,p_exp],{'Non-painful conditioning stimulus','Painful conditioning stimulus'},'FontSize',14);
 %lgd.NumColumns = 2;
 legend('boxoff')
-title('Development of Conditioned Pain Modulation over the experiment','FontSize',14)
+title('Development of conditioned pain modulation over time','FontSize',14)

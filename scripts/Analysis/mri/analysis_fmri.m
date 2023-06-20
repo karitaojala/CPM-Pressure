@@ -12,29 +12,55 @@ subj = options.subj.all_subs;
 % subj = [1 2 4 5 8 26 34 43 46]; % subjects with high WM activity
 n_proc = 1;
 
-analysis_version = '01Mar23-spinal';
-modelNo = 1;
+% First change options.spinal in get_options.m!
+if options.spinal
+    analysis_version = '13Apr23-spinal';
+else
+    analysis_version = '13Apr23-brain';
+end
+modelNo = 5;
 [model,options] = get_model(options,modelNo);
 % 1 = HRF - tonic phasic - RETROICOR, full motion (24 brain / 32 spinal)
 % 2 = HRF - tonic phasic - RETROICOR, noise ROI WMxCSF, full motion
 % 3 = HRF - tonic phasic - RETROICOR, noise ROI WM CSF WMxCSF, full motion
 % 4 = HRF - tonic phasic pmod - run-wise design (EXP/CON same column) - RETROICOR, noise ROI WM CSF WMxCSF, full motion
 % 5 = HRF - tonic phasic pmod with time (stimulus index) - concatenated design (EXP/CON different columns) - RETROICOR, noise ROI WM CSF WMxCSF, 24 motion
+contrasts = [1:3 13:14 17:18];
+% contrasts = [4:12 15:16 19:21];%[1:2 13:14 17:18];
+compare_cond = false;
+roitype = 'Clusters'; % or Anatomical
+if options.spinal
+    rois = 1:4;%8;%1:6;
+else
+    rois = [1 10:11];%1:11;
+end
 
 % create a pipeline for physio scripts
 
 run_create_onsets               = false;
     onsets_as_scans             = false;
     debug_plot                  = false;
+    
 run_firstlevel_mask             = false;
 run_firstlevel_model            = false;
 run_firstlevel_contrasts        = false;
 run_firstlevel_smoothnorm       = false;
     run_norm                    = false;
     run_smooth                  = false;
+    
+run_ppi_init                    = true;
+    
 run_secondlevel_mask            = false; 
+run_spinal_masks                = false;
 run_secondlevel_model_contrasts = false;
     estimate_model              = false;
+    
+run_tfce                        = false;
+run_extract_tfce_results        = false;
+
+run_roi_extract_param           = false;
+run_roi_plot_param              = false;
+run_roi_save_roi_hemispheres    = false;
 
 run_delete_folders              = false;
     folders_level2delete = 1; % 1: first level folders, 2: second level folders
@@ -78,8 +104,16 @@ if run_firstlevel_smoothnorm
     firstlevel_smooth_normalize_fmri(options,analysis_version,model,subj,run_norm,run_smooth)
 end
 
+if run_ppi_init
+    ppi_wrapper(options,analysis_version,model,rois,subj)
+end
+
 if run_secondlevel_mask
     secondlevel_brainmask(options)
+end
+
+if run_spinal_masks
+    create_spinal_masks(options)
 end
 
 if run_secondlevel_model_contrasts
@@ -88,6 +122,26 @@ if run_secondlevel_model_contrasts
     elseif strcmp(model.basisF,'Fourier')
         secondlevel_contrasts_fmri_fourier(options,analysis_version,model,subj,estimate_model)
     end
+end
+
+if run_tfce
+    tfce_wrapper(options,analysis_version,model,subj,contrasts)
+end
+
+if run_extract_tfce_results
+    extract_TFCE_thresholded(options,analysis_version,model,contrasts)
+end
+
+if run_roi_extract_param
+    roi_extract_parameters(options,analysis_version,model,contrasts,roitype,rois,subj)
+end
+
+if run_roi_plot_param
+    roi_plot_parameters(options,analysis_version,model,roitype,rois,contrasts,compare_cond)
+end
+
+if run_roi_save_roi_hemispheres
+    save_roi_hemisphere_data(options,analysis_version,model,rois)
 end
 
 if run_delete_folders

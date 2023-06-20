@@ -152,7 +152,7 @@ for sub = 1:numel(subjects)
         hold on
         ylim([0 100])
         set(gca,'yTick',0:20:100)
-        ylabel('Pain rating (VAS)')
+        ylabel('Conditioning stimulus pain rating')
         xlabel('Time (s)')
         set(gca,'xTick',0:20:rating_duration)
         xlim([0 rating_duration])
@@ -191,7 +191,7 @@ ramp_down_start = rating_duration-10;
 mean_allsubs_control = nanmean(ratings_allsubs_mean_control(:,ramp_up_end:ramp_down_start),2);
 mean_allsubs_exp = nanmean(ratings_allsubs_mean_exp(:,ramp_up_end:ramp_down_start),2);
 
-figure('Position',[10 10 900 400]);
+figure('Position',[10 10 800 300]);
 hold on
 p1 = plot(mean_control,'Color',colors(1,:),'LineWidth',2);
 x = 1:rating_duration;
@@ -209,12 +209,12 @@ hl = boundedline(x, y, errorsem, 'linewidth', 2, 'cmap', colors(2,:),'alpha');
 hold on
 ylim([0 100])
 set(gca,'yTick',0:20:100,'FontSize',14)
-ylabel('Conditioning stimulus pain rating','FontSize',14)
-xlabel('Time (seconds)','FontSize',14)
+ylabel('Pain rating','FontSize',13)
+xlabel('Time (s)','FontSize',14)
 set(gca,'xTick',0:10:rating_duration,'FontSize',14)
 xlim([0 rating_duration])
 if prepost
-    legend([p1,p2],{'Pre-experiment rating','Post-experiment rating'},'Location','northeast','FontSize',14)
+    legend([p1,p2],{'Pre-experiment','Post-experiment'},'Location','northeast','FontSize',14)
     legend('boxoff')
 else
     legend({'Control','Experimental'},'Location','southeast') %#ok<UNRCH>

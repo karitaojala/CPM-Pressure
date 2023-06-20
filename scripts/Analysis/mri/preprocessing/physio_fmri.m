@@ -27,11 +27,11 @@ extract_physio_runs     = false;
 convert_physio2bids     = false;
 calc_extra_motionparam  = false;
 run_physio_batch        = false;
-copy_physio_files       = true;
-create_censoring_reg    = true;
-append_motionparam      = true;
+copy_physio_files       = false;
+create_censoring_reg    = false;
+append_motionparam      = false;
 change_physioparam      = false;
-zscore_physio           = true;
+zscore_physio           = false;
 
 if spinal % Spinal
     
@@ -41,7 +41,7 @@ if spinal % Spinal
     time_slice_to_slice  = 0.0725; % 72.5 ms in spinal cord
     no_orig_motion_param = 2;
     no_motion_reg = 8;
-    no_motion_reg_final  = 32;
+    no_motion_reg_final  = 8;
     region = 'spinal';
     
 else % Brain
@@ -63,8 +63,8 @@ noise_name  = [physio_name '_' num2str(no_motion_reg_final) 'motion'];
 change_action = 2; % 1 = append, 2 = remove
 param2change = 26:39; % start index where to append/indices to remove parameters
 param2take = [26:39]; % parameters from the source file
-physio_name_source = '-noiseROI_WM_CSF_WMxCSF_6comp_24motion_v2-zscored';
-physio_name_new = '-noiseROI_WMxCSF_6comp_24motion_v2';
+physio_name_source = '-RETROICOR_32motion-zscored';
+physio_name_new = '-RETROICOR_8motion-zscored';
 
 relative_start_acquisition = 0;
 

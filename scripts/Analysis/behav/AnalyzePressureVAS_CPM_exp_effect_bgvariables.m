@@ -56,14 +56,26 @@ elseif blocks_to_take == 2
     ratings_allsubs_mean_control = nanmean(squeeze(control_ratings(:,2,:)),2); 
 end
 
+% exp_1stblock_mean = nanmean(exp_ratings(:,1,:),3);
+% exp_2ndblock_mean = nanmean(exp_ratings(:,2,:),3);
+% 
+% control_1stblock_mean = nanmean(control_ratings(:,1,:),3);
+% control_2ndblock_mean = nanmean(control_ratings(:,2,:),3);
+% 
+% exp_1stblock_vs_2ndblock = exp_2ndblock_mean-control_1stblock_mean;
+% control_1stblock_vs_2ndblock = control_2ndblock_mean-control_1stblock_mean; % mean diff from 1st block to 2nd block
+
 cpm_data = [ratings_allsubs_mean_control ratings_allsubs_mean_exp];
 cpm_diff_data = ratings_allsubs_mean_control-ratings_allsubs_mean_exp;
+% cpm_data = [control_1stblock_vs_2ndblock exp_1stblock_vs_2ndblock];
+% cpm_diff_data = control_1stblock_vs_2ndblock-exp_1stblock_vs_2ndblock; % diff per subj for CON-EXP
 
 Subject = [1:2 4:13 15:18 20:27 29:34 37:40 42:49]';
 RatedCPM = cpm_diff_data;
 VerbalCPM = backgroundvar.SubjectiveCPM;
 cpmtable = table(Subject,RatedCPM,VerbalCPM);
-writetable(cpmtable,'CPM_rated_reported.csv')
+%writetable(cpmtable,'CPM_rated_reported.csv')
+% writetable(cpmtable,'CPM_rated_reported_block1vs2.csv')
 % Scatterplot CPM effect magnitude vs. backgroundvar
 
 %% Subjective CPM
@@ -95,14 +107,16 @@ hold on
 errorbar(1:3,bardata',errorbars,'k','LineStyle','none','LineWidth',2,'CapSize',0)
 
 ylim([-10 10])
+set(gca,'xTickLabel', {sprintf('Hypoalgesia'),sprintf('No difference'),sprintf('Hyperalgesia')},'FontSize',10)
+%set(gca,'yAxisLabel', {'Rated CPM magnitude'},'FontSize',14)
+ylabel('Rated CPM magnitude','FontSize',14)
 set(gca,'yTick',-10:2:10,'FontSize',14)
-ylabel('CPM magnitude (CON-EXP test ratings)','FontSize',14)
-set(gca,'xTickLabel', {sprintf('Hypo'),sprintf('No diff'),sprintf('Hyper')},'FontSize',14)
 box off
-title({'Pain ratings vs. Verbal report';['N = ' num2str(numel(cpm_diff_pos)) ' - ' ...
-    num2str(numel(cpm_diff_zero)) ' - ' num2str(numel(cpm_diff_neg))]},'FontSize',14)
+title({'Rated vs. verbally reported CPM'},'FontSize',14)
+%;['N = ' num2str(numel(cpm_diff_pos)) ' - ' ...
+%    num2str(numel(cpm_diff_zero)) ' - ' num2str(numel(cpm_diff_neg))]
 
-% [~,ttest_p,~,ttest_stats] = ttest2(cpm_diff_tonic,cpm_diff_phasic)
+[~,ttest_p,~,ttest_stats] = ttest2(cpm_diff_pos,cpm_diff_neg,'tail','right','Vartype','unequal')
 % % addpath(cd,'..','Utils')
 % d = computeCohen_d(cpm_diff_tonic,cpm_diff_phasic)
 

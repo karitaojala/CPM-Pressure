@@ -129,7 +129,7 @@ for sub = subj
                     conweights(cn,9) = 1; cn = cn + 1; % EXP contrast
                     conweights(cn,[7 9]) = [-1 1]; cn = cn + 1; % EXP > CON contrast
                     
-                    % Phasic pain rating contrasts
+                    % Phasic stimulus index contrasts
                     conweights(cn,8)  = 1; cn = cn + 1; % CON contrast
                     conweights(cn,10) = 1; cn = cn + 1; % EXP contrast
                     conweights(cn,[8 10]) = [-1 1]; cn = cn + 1; % EXP > CON contrast

@@ -39,14 +39,14 @@ for sub = 1:numel(all_subs)
     epi_files = {};
     epi_ind = 1;
     
-    for epi = [1 6]
+    for epi = 2:5%[1 6]
         
         % Find EPIs in both data folders
-%         func_name = sprintf('%s-epi-run%d-spinal_moco.nii.gz',name,epi);
+        func_name = sprintf('a%s-epi-run%d-spinal_moco.nii',name,epi);
         
         fprintf(['EPI run ' num2str(epi) '\n']);
 
-        func_name = 'spinal_warped_t2.nii.gz';
+%         func_name = 'spinal_warped_t2.nii.gz';
         
         full_epi_dir = [base_dir name filesep epi_folders{epi}];
         full_epi_dir2 = strrep(full_epi_dir,'mri\data','mri\sc_proc');

@@ -32,6 +32,10 @@ data2$StimulusCentered <- scale(data2$Stimulus, scale = FALSE)
 
 # LMEs
 # Only time effects as random effects
+nlme_s0 <- nlme::lme(PainRating ~ StimulusCentered * Condition,
+                     random = ~ (1)|Subject, data = data, na.action=na.omit, 
+                     control = nlme::lmeControl(maxIter = 1e8, msMaxIter = 1e8), method = "REML")
+
 nlme_s1 <- nlme::lme(PainRating ~ StimulusCentered * Condition,
                      random = ~ (StimulusCentered)|Subject, data = data, na.action=na.omit, 
                      control = nlme::lmeControl(maxIter = 1e8, msMaxIter = 1e8), method = "REML")
@@ -53,11 +57,14 @@ nlme_b3 <- nlme::lme(PainRating ~ Condition * Block * StimInBlock,
                      random = ~ (Block*StimInBlock)|Subject, data = data, na.action=na.omit, 
                      control = nlme::lmeControl(maxIter = 1e8, msMaxIter = 1e8), method = "REML")
 
+car::Anova(nlme_s0, type = "III")
 car::Anova(nlme_s1, type = "III")
 car::Anova(nlme_s2, type = "III")
 
 car::Anova(nlme_b1, type = "III")
 car::Anova(nlme_b2, type = "III")
+
+bayestestR::bayesfactor_models(nlme_s1, denominator = nlme_s0) # model comparison
 
 anova(nlme_s1, type = "marginal", adjustSigma = F) # same as above
 #drop1(nlme_b1, .~., test="Chisq")
@@ -80,7 +87,7 @@ sjPlot::tab_model(nlme_s1) # Cleaner table of results
 # Fitted responses
 effects_3w <- effects::effect(term= "StimulusCentered*Condition", mod= nlme_s1,
                               xlevels=72)
-summary(effects_3w)
+#summary(effects_3w)
 x_effects_3w <- as.data.frame(effects_3w)
 write.csv(x_effects_3w,"C:\\Data\\CPM-Pressure\\scripts\\Analysis\\behav\\Experiment-01-nlmes1-fit.csv", row.names = TRUE)
 
@@ -103,3 +110,34 @@ ggplot(data = data,
   scale_color_manual(name   =" Condition",
                      labels = c("Control (non-painful)", "Experimental (painful)"),
                      values = c("yellow", "orange"))
+
+
+
+# Split data into CON and EXP conditions
+data_CON <- data[data$Condition == "Con",]
+data_EXP <- data[data$Condition == "Exp",]
+
+lme4_CON <- lmer(PainRating ~ StimulusCentered + (1|Subject), REML = TRUE, data = data_CON)
+lme4_EXP <- lmer(PainRating ~ StimulusCentered + (1|Subject), REML = TRUE, data = data_EXP)
+
+nlme_CON <- nlme::lme(PainRating ~ StimulusCentered,
+                      random = ~ (StimulusCentered)|Subject, data = data_CON, na.action=na.omit, 
+                      control = nlme::lmeControl(maxIter = 1e8, msMaxIter = 1e8), method = "REML")
+car::Anova(nlme_CON, type = "III")
+
+nlme_EXP <- nlme::lme(PainRating ~ StimulusCentered,
+                      random = ~ (StimulusCentered)|Subject, data = data_EXP, na.action=na.omit, 
+                      control = nlme::lmeControl(maxIter = 1e8, msMaxIter = 1e8), method = "REML")
+car::Anova(nlme_EXP, type = "III")
+
+CON_coef <- coef(lme4_CON)
+CON_coef <- coef(nlme_CON)
+mean(CON_coef$StimulusCentered)
+EXP_coef <- coef(lme4_EXP)
+EXP_coef <- coef(nlme_EXP)
+mean(EXP_coef$StimulusCentered)
+
+# With subject-specific slope for StimulusCentered, a bit smaller effects
+# CON coef = -0.05, EXP coef = -0.13
+# With only subject-specific intercept, larger effects if StimulusCentered
+# CON coef = -0.07, EXP coef = -0.18

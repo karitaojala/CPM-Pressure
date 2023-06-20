@@ -13,9 +13,14 @@ for sub = subj
     
     firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
     if ~exist(firstlvlpath, 'dir'); mkdir(firstlvlpath); end
-    brainmasksub = fullfile(options.path.mridir,name,'t1_corrected',[name '-brainmask' options.model.firstlvl.mask_name '.nii']);
-    
-    if sub == 5
+    if options.spinal
+        masksub = fullfile(options.path.mridir,'2ndlevel','meanmasks',options.model.firstlvl.mask_name);
+    else
+        masksub = fullfile(options.path.mridir,name,options.model.firstlvl.mask_name);
+    end
+    masksub = replace(masksub,'SUBID',name);
+
+    if sub == 5 || sub == 7
         runs = [2 3 5];
     else
         runs = options.acq.exp_runs;
@@ -83,13 +88,17 @@ for sub = subj
     
     for run = runs
         
-        clear EPI episcans onsetdata pmoddata onsetsTonic
+        clear EPI episcans onsetdata pmoddata onsetsPhasic onsetsVAS onsetsTonic
         
         % Select EPI files
         epipath = fullfile(options.path.mridir,name,['epi-run' num2str(run)]);
         cd(epipath)
-        EPI.epiFiles = spm_vol(spm_select('ExtFPList',epipath,['^ra' name '-epi-run' num2str(run) '-brain.nii$']));
-        
+        if options.spinal
+            EPI.epiFiles = spm_vol(spm_select('ExtFPList',epipath,['^a' name '-epi-run' num2str(run) '-' options.model.firstlvl.epi_name '.nii$']));
+        else
+            EPI.epiFiles = spm_vol(spm_select('ExtFPList',epipath,['^ra' name '-epi-run' num2str(run) '-brain.nii$']));
+        end
+
         for epino = 1:size(EPI.epiFiles,1)
             episcans{epino} = [EPI.epiFiles(epino).fname, ',',num2str(epino)];
         end
@@ -98,7 +107,7 @@ for sub = subj
         episcansAll = [episcansAll episcans];
         
         % Physiological noise parameters
-        noisedata = importdata(noisefiles{run-1});
+        noisedata = importdata(noisefiles{block});
         if size(noisedata,2) > options.preproc.no_noisereg
             excl_vol_cols_run = size(noisedata,2)-options.preproc.no_noisereg;
             excl_vol_cind = excl_vol_cols_run-1;
@@ -180,18 +189,24 @@ for sub = subj
         
     end
     
-    if size(noisedata,2) > options.preproc.no_noisereg
+    noisedataAll = zscore(noisedataAll);
+    
+    if excl_vol_no ~= 0
         for col = 1:numel(excl_vol_row_ind)
-            col_ind = size(noisedataAll,2)-numel(excl_vol_row_ind)+col;
+            col_ind = size(noisedataAll,2)+1;
             noisedataAll(excl_vol_row_ind(col),col_ind) = 1;
         end
     end
     
-    noisedataAll = zscore(noisedataAll);
-    noisefileAll = fullfile(physiopathsub, [name '-all_runs-multiple_regressors-brain-zscored.txt']);
+    %noisedataAll = zscore(noisedataAll);
+    if options.spinal
+        noisefileAll = fullfile(physiopathsub, [name '-all_runs-multiple_regressors-spinal-zscored.txt']);
+    else
+        noisefileAll = fullfile(physiopathsub, [name '-all_runs-multiple_regressors-brain-zscored.txt']);
+    end
     writematrix(noisedataAll,noisefileAll,'Delimiter','tab')
     
-    disp(['...Blocks ' num2str(options.acq.exp_runs(1)), ' to ' num2str(options.acq.n_runs(end)), '. Found ', num2str(numel(episcansAll)), ' EPIs...' ])
+    disp(['...Blocks ' num2str(options.acq.exp_runs(1)), ' to ' num2str(options.acq.exp_runs(end)), '. Found ', num2str(numel(episcansAll)), ' EPIs...' ])
     disp(['Found ', num2str(numel(onsetsTonicAll)) ' tonic, ', num2str(numel(onsetsPhasicAll)), ' phasic, and ', num2str(numel(onsetsVASAll)), ' VAS rating events.'])
     disp('................................')
     
@@ -200,7 +215,7 @@ for sub = subj
     %pmodTonic2All = zscore(pmodTonic2All);
     cond_runs = cond_runs + 1; % CON = 1, EXP = 2
     
-    block = 1;
+    block = 1; % does not change
     c = 0;
     
     % Loop over experimental conditions (CON, EXP) for setting tonic stimuli
@@ -245,7 +260,8 @@ for sub = subj
     
     conditionsPhasicAll = conditionsPhasicAll*(-1); % flip sign, CON = 1, EXP = -1
     stim_ind = (1:numel(conditionsPhasicAll))'; % stimulus index across experiment
-    stim_ind_meanc = stim_ind-mean(stim_ind); % mean-centered
+    %stim_ind_meanc = stim_ind-mean(stim_ind); % mean-centered
+    stim_ind_meanc = zscore(stim_ind); % zscored
     stim_ind_meanc = reshape(stim_ind_meanc,[numel(stim_ind_meanc)/numel(runs) numel(runs)]); % reshaped with 1 column per run
     
     % Loop over experimental conditions (CON, EXP) for setting phasic stimuli
@@ -315,8 +331,8 @@ for sub = subj
     matlabbatch{1}.spm.stats.fmri_spec.volt = 1;
     matlabbatch{1}.spm.stats.fmri_spec.global = 'None';
     %matlabbatch{1}.spm.stats.fmri_spec.mthresh = 0.5; % Mask threshold, original 0.8
-    matlabbatch{1}.spm.stats.fmri_spec.mask = {brainmasksub}; % Brain mask to exclude e.g. eyes
-    matlabbatch{1}.spm.stats.fmri_spec.cvi = 'FAST'; % Temporal autocorrelation removal algorithm to use
+    matlabbatch{1}.spm.stats.fmri_spec.mask = {masksub}; % Mask to exclude e.g. eyes
+    matlabbatch{1}.spm.stats.fmri_spec.cvi = options.model.firstlvl.temp_autocorr; % Temporal autocorrelation removal algorithm to use
     
     %% Specify 1st level model with concatenated sessions
     spm_jobman('run', matlabbatch);

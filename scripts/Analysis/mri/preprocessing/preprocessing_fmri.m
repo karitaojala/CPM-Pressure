@@ -5,7 +5,7 @@ switch hostname
     case 'isnb05cda5ba721' % work laptop
         base_dir          = 'C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\mri\data\';
         l_string          = '';
-        n_proc            = 2; % maximum processes on 2 cores
+        n_proc            = 1; % maximum processes on 2 cores = 2
         sct_path          = 'C:\Users\ojala\spinalcordtoolbox';
         spm_path          = 'C:\Data\Toolboxes\spm12';
 %     case 'motown'
@@ -42,7 +42,7 @@ do_sm_skull      = 0; % can only be done after all of the above steps
 do_avg_norm      = 0; % can only be done after all subjects done
 spinal = 1;
 
-all_subs     = 1;%[1 2 4:13 15:18 20:27 29:34 37:40 42:49];
+all_subs     = 1;%21;%[18 21];%[1 2 4:13 15:18 20:27 29:34 37:40 42:49];
 % all_subs     = all_subs;
 
 %DEBUG

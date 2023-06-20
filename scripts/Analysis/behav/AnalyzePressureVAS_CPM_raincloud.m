@@ -11,7 +11,7 @@
 % Version notes
 % 1.0
 
-function AnalyzePressureVAS_CPM
+function AnalyzePressureVAS_CPM_raincloud
 
 close all; clear all
 
@@ -21,7 +21,7 @@ project.name = 'CPM-Pressure-01';
 project.phase = 'Pilot-02';
 
 path.code = pwd;
-path.main = fullfile(path.code,'..','..');
+path.main = fullfile(path.code,'..','..','..');
 path.data = fullfile(path.main,'data',project.name,project.phase,'logs');
 
 subjects = [1:2 4 6 7 10:17];

@@ -1,9 +1,21 @@
 function [options] = get_options()
 
+options.spinal = true; % current analysis volume (spinal/brain)
+
 % Paths
-options.path.spmdir      = 'C:\Data\Toolboxes\spm12';
-options.path.scriptdir   = 'C:\Data\CPM-Pressure\scripts\Analysis\mri';
-options.path.basedir     = 'C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\';
+hostname = char(getHostName(java.net.InetAddress.getLocalHost));
+
+switch hostname
+    case 'isnb05cda5ba721' % work laptop
+        options.path.spmdir      = 'C:\Data\Toolboxes\spm12';
+        options.path.marsbardir  = 'C:\Data\Toolboxes\spm12\toolbox\marsbar';
+        options.path.scriptdir   = 'C:\Data\CPM-Pressure\scripts\Analysis\mri';
+        options.path.basedir     = 'C:\Data\CPM-Pressure\data\CPM-Pressure-01\Experiment-01\';
+    case 'revelations.nin.uke.uni-hamburg.de' % server
+        options.path.spmdir      = '/common/apps/spm12';
+        options.path.scriptdir   = '/projects/crunchie/ojala/scripts/Analysis/mri/';
+        options.path.basedir     = '/projects/crunchie/ojala/data/CPM-Pressure/cpm01/'; 
+end
 options.path.mridir      = fullfile(options.path.basedir,'mri','data');
 options.path.physiodir   = fullfile(options.path.basedir,'physio');
 options.path.logdir      = fullfile(options.path.basedir,'logs');
@@ -19,10 +31,9 @@ options.acq.n_dummy           = 5;
 options.acq.n_scans           = options.acq.n_scans_all-options.acq.n_dummy;
 options.acq.TR                = 1.991;
 
-options.spinal = true; 
-
 % MRI preprocessing
 if options.spinal % Spinal
+    options.volume_name = 'spinal';
     options.acq.n_slices = 12;
     options.preproc.onset_slice = 1;%1065+50; % onset slice timing in ms, last brain slice + 50 ms (middle of the gap); % onset slice index, here 1 as it's the first spinal slice that is closest to the slice time correction reference slice
     % slices acquired descending
@@ -30,11 +41,13 @@ if options.spinal % Spinal
     options.preproc.no_physioreg = 18;
     options.preproc.physio_name  = 'multiple_regressors-spinal-RETROICOR_32motion-zscored';
     options.preproc.no_noisereg = options.preproc.no_physioreg+options.preproc.no_motionreg; % 18 physio + 2 movement = 20
-    options.model.firstlvl.mask_name = 'epi-run2\SUBID-spinalmask.nii';
-    options.preproc.norm_prefix = 'w_';
-    options.stats.secondlvl.mask_name = 'spinalmask_secondlevel.nii';
+    options.model.firstlvl.epi_name = 'spinal_moco_norm_cropped';
+    options.model.firstlvl.mask_name = 'spinalmask.nii';%['epi-run2' filesep 'SUBID-spinalmask.nii'];
+    options.preproc.norm_prefix = '';
+    options.stats.secondlvl.mask_name = 'spinalmask.nii';
     
 else % Brain
+    options.volume_name = 'brain';
     options.acq.n_slices = 60;
     options.preproc.onset_slice  = 60;%1065+50; % onset slice timing in ms, last brain slice + 50 ms (middle of the gap); % last brain slice closest to the slice time correction reference slice (50 ms from last brain slice and first spinal)
     options.preproc.no_motionreg = 24;
@@ -42,7 +55,7 @@ else % Brain
     options.preproc.physio_name  = 'multiple_regressors-brain-zscored';
     options.preproc.no_noisereg = options.preproc.no_physioreg+options.preproc.no_motionreg; 
     % options.model.firstlvl.mask_name = 't1_corrected\SUBID-brainmask-v2.nii';
-    options.model.firstlvl.mask_name = 't1_corrected\SUBID-brainmask.nii'; 
+    options.model.firstlvl.mask_name = ['t1_corrected' filesep 'SUBID-brainmask.nii']; 
     options.preproc.norm_prefix = 'w_nlco_dartel_';
     options.stats.secondlvl.mask_name = 'brainmask_secondlevel.nii';
     
@@ -88,6 +101,9 @@ options.model.firstlvl.orthogonalization = 0;
 options.model.firstlvl.hpf.phasic = 128; % 128 for phasic only models
 options.model.firstlvl.hpf.tonic = 200; % 200 for tonic models
 
+% Temporal autocorrelation model
+options.model.firstlvl.temp_autocorr = 'FAST';
+
 options.model.firstlvl.stimuli.phasic_run   = 18;
 options.model.firstlvl.stimuli.phasic_total = options.model.firstlvl.stimuli.phasic_run*numel(options.acq.exp_runs);
 options.model.firstlvl.stimuli.tonic_name = {'CON' 'EXP'};
@@ -123,11 +139,46 @@ options.stats.firstlvl.contrasts.conrepl.fir = 'replsc'; % contrasts not replica
 options.stats.firstlvl.contrasts.conrepl.fourier = 'replsc';
 options.stats.firstlvl.contrasts.delete = 0;
 
+options.stats.firstlevel.ppi.smooth_kernel = 0; % no smoothing
+options.stats.firstlevel.ppi.roi_coords = [-4, -45, -152; ... % Tonic Onset Non-painful > baseline peak C5
+                                           0, -48, -174; ... % Tonic Onset Painful > baseline peak C6/C7
+                                           -1, -48, -174; ... % Tonic Onset Painful > non-painful peak C6/C7
+                                           2, -46, -136];    % Phasic Onset average peak C4
+if options.spinal
+    options.stats.firstlevel.ppi.roi_sphere_radius = 2; % mm
+    options.stats.firstlevel.ppi.roi_search_radius = 1; % mm
+    options.stats.firstlevel.ppi.roi_names = {'Tonic-CON-peak' 'Tonic-EXP-peak' 'Tonic-diff-peak' 'Phasic-avg-peak'}; 
+    options.stats.firstlevel.ppi.roi_Tcons = [1 2 4 15]; % number of T-contrast for each ROI to look at
+else
+    options.stats.firstlevel.ppi.roi_sphere_radius = 8; % mm
+    options.stats.firstlevel.ppi.roi_search_radius = 6; % mm
+    options.stats.firstlevel.ppi.roi_names = {'ACC_LR' 'RVM_LR' 'PAG_LR'}; 
+end
+
 options.stats.secondlvl.contrasts.names = options.stats.firstlvl.contrasts.names;
 options.stats.secondlvl.contrasts.direction = 1;
 options.stats.secondlvl.contrasts.conrepl.hrf = 'none';
 options.stats.secondlvl.contrasts.conrepl.fir = 'none';
 options.stats.secondlvl.contrasts.conrepl.fourier = 'none';
 options.stats.secondlvl.contrasts.delete = 0;
+
+options.stats.secondlvl.tfce.analysis = 'onesample'; % 1-sample t-test
+options.stats.secondlvl.tfce.tails = 2; % 2-tailed
+
+if options.spinal
+    options.stats.secondlvl.roi.names = {'DorsalHorn_level_5_L' 'DorsalHorn_level_5_R' ...
+        'DorsalHorn_level_6_L' 'DorsalHorn_level_6_R' ...
+        'DorsalHorn_level_7_L' 'DorsalHorn_level_7_R' ...
+        'Spinal_TonicOnset-EXPoverCON_SVC_c1' 'Spinal_PhasicOnset-EXPandCON_SVC_c1'}; % significant clusters
+        % for anatomical ROIs divide p-value by 3 (per side; always Tonic left, Phasic right)
+    
+else
+    
+    options.stats.secondlvl.roi.names = {'ACC_LR' 'AnteriorInsula_L' 'AnteriorInsula_R' 'DLPFC_LR' ...
+        'ParietalOperculum_L' 'ParietalOperculum_R' 'PosteriorInsula_L' 'PosteriorInsula_R' ...
+        'VMPFC_LR' 'RVM_LR' 'PAG_LR'}; 
+        % for anatomical ROIs divide p-value by 11
+    
+end
 
 end

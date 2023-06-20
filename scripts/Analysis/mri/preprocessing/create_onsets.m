@@ -285,9 +285,9 @@ for sub = subj
         phasicRegressor_z = zscore(phasicRegressor(:));
         %pmodTonic2 = zscore(phasicReg_z .* pmodTonic);
 %         save(pmodfile,'tonicRegressor_z','phasicRegressor_z','onsetsTonic')
-%         save(behavfile,'onsetsTonic','onsetsStim','onsetsVAS','conditions')
+        save(behavfile,'onsetsTonic','onsetsStim','onsetsVAS','conditions')
 %         save(pmodfile,'onsetsTonic','pmodTonic','pmodTonic2','conditionsTonic')
-        save(pmodfile2,'onsetsStim','pmodPhasic')
+%         save(pmodfile2,'onsetsStim','pmodPhasic')
 %         save(pmodfile3,'onsetsVAS','pmodVAS')
         
     end

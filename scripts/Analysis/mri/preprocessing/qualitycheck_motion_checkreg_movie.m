@@ -26,7 +26,7 @@ all_subs     = [1 2 4:13 15:18 20:27 29:34 37:40 42:49];
 % data2 = false;
 
 subs2check = all_subs;
-epis2check = 2;
+epis2check = 2:5;
 
 for sub = subs2check
     
@@ -57,7 +57,7 @@ for sub = subs2check
         epi_file = epi_file(1:end-2);
         
         % Gunzip file
-        if ~exist([epi_file '.gz'],'file')
+        if ~exist(epi_file(1:end-3),'file')
             gunzip(epi_file,full_epi_dir)
         end
         
