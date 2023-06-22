@@ -1,6 +1,9 @@
 function ppi_wrapper(options,analysis_version,model,rois,subj)
 
-for sub = 1%subj
+ppipath = fullfile(options.path.mridir,'2ndlevel',['Version_' analysis_version],model.name,'PPI');
+if ~exist(ppipath,'dir'); mkdir(ppipath); end
+
+for sub = subj
     
     clear matlabbatch
 
@@ -9,7 +12,7 @@ for sub = 1%subj
     
     firstlvlpath = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name);
     if options.spinal
-        firstlvlpath = [firstlvlpath '_32motion']; % add to 1st level name
+        firstlvlpath = [firstlvlpath '_32motion']; %#ok<AGROW> % add to 1st level name
     end
     SPMfile = fullfile(firstlvlpath,'SPM.mat');
     
@@ -19,21 +22,21 @@ for sub = 1%subj
     roipath = fullfile(options.path.mridir,'2ndlevel','roimasks','final','PPI');
     
     for roi = 1:numel(rois)
-
-        roi_name = options.stats.firstlevel.ppi.roi_names{rois(roi)};
         
-        if options.spinal
+        if options.spinal % spinal ROI seeds for brain analysis
             
+            roi_name = options.stats.firstlevel.ppi.brain.roi_names{rois(roi)};
             xY(roi).def  = 'sphere';
-            xY(roi).xyz  = options.stats.firstlevel.ppi.roi_coords(rois(roi),:)';
-            xY(roi).spec = options.stats.firstlevel.ppi.roi_sphere_radius;
-            xY(roi).rad  = options.stats.firstlevel.ppi.roi_search_radius;
+            xY(roi).xyz  = options.stats.firstlevel.ppi.brain.roi_coords(rois(roi),:)';
+            xY(roi).spec = options.stats.firstlevel.ppi.brain.roi_sphere_radius;
+            xY(roi).rad  = options.stats.firstlevel.ppi.brain.roi_search_radius;
             xY(roi).str  = roi_name;
             xY(roi).Ic   = numel(SPM.SPM.xCon); % F-contrast number -> last one
-            xY(roi).T    = options.stats.firstlevel.ppi.roi_Tcons(rois(roi)); % Contrast number for effect of interest
+            xY(roi).T    = options.stats.firstlevel.ppi.brain.roi_Tcons(rois(roi)); % Contrast number for effect of interest
             
-        else % brain
+        else % brain ROI seeds for spinal analysis
             
+            roi_name = options.stats.firstlevel.ppi.spinal.roi_names{rois(roi)};
             roi_file = fullfile(roipath,[roi_name '.nii']);
             
             xY(roi).name = strrep(roi_name,'_',' ');
@@ -66,7 +69,7 @@ for sub = 1%subj
         %epi2template = fullfile(epipath,'warp_t22epi.nii'); %??? warp epi to template
     else
         meanepi = fullfile(options.path.mridir,name,'epi-run1',['wtmeana' name '-epi-run1-brain.nii']);
-        epi2template = fullfile(epipath,'y_epi_2_template.nii');
+        epi2template = fullfile(options.path.mridir,name,'epi-run1','y_epi_2_template.nii');
     end
     
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{1}.string    = SPMfile;
@@ -75,7 +78,7 @@ for sub = 1%subj
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{4}.evaluated = options.stats.firstlevel.ppi.smooth_kernel;
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{5}.evaluated = xY;
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{6}.evaluated = Uu;
-    matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{7}.evaluated = [options.volume_name '_ppi_roi_'];
+    matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{7}.evaluated = fullfile(ppipath,[name '-' options.volume_name '_ppi_roi_']);
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.outputs = {};
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.fun = 'get_roi_ts';
     

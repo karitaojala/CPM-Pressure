@@ -171,16 +171,51 @@ switch modelNo
         
         model.congroups_1stlvl.names    = {'TonicPhasicTimeConcat'};
         model.congroups_1stlvl.names_cons = options.stats.firstlvl.contrasts.names.tonic_concat;
-        model.contrasts_1stlvl.indices  = {1:21};
+        model.contrasts_1stlvl.indices  = {1:numel(options.stats.firstlvl.contrasts.names.tonic_concat)};
         model.congroups_2ndlvl.names    = {'TonicPhasicTimeConcat'};
         model.congroups_2ndlvl.names_cons = options.stats.secondlvl.contrasts.names.tonic_concat;
-        model.contrasts_2ndlvl.indices  = {1:21};
+        model.contrasts_2ndlvl.indices  = {1:numel(options.stats.secondlvl.contrasts.names.tonic_concat)};
+        model.contrasts_2ndlvl.Ftest    = {false};
+        
+    case 6 % HRF - tonic phasic concatenated design - full Physio - for PPI
+        
+        model.basisF    = 'HRF'; % Canonical haemodynamic response function
+        model.name      = [model.basisF '_phasic_tonic_concat_PPI_fullPhysio'];
+        model.tonicIncluded       = true;
+        model.phasicIncluded      = true;
+        model.VASincluded         = false;
+        
+        model.sessConcatenat      = true;
+        model.PPI                 = true;
+        model.specifyTonicOnly    = false;
+        
+        model.derivsOn                  = false;
+        options.basisF.hrf.derivatives  = [0 0]; % temporal and dispersion derivatives
+        
+        model.physioOn                  = true;
+        if options.spinal
+            options.preproc.no_motionreg    = 32; % 24 brain, 32 spinal
+            options.preproc.no_physioreg    = 18; % 18 + 21 brain, 18 spinal; 
+            options.preproc.physio_name     = ['multiple_regressors-' region '-RETROICOR_' num2str(options.preproc.no_motionreg) 'motion-zscored'];
+            options.model.firstlvl.temp_autocorr = 'FAST';
+        else
+            options.preproc.no_motionreg    = 24; 
+            options.preproc.no_physioreg    = 18 + 21;
+            options.preproc.physio_name     = ['multiple_regressors-' region '-noiseROI_WM_CSF_WMxCSF_6comp_' num2str(options.preproc.no_motionreg) 'motion_v2-zscored'];
+            options.model.firstlvl.temp_autocorr = 'FAST';
+        end
+        options.preproc.no_noisereg     = options.preproc.no_physioreg+options.preproc.no_motionreg;
+
+        model.pmodNo    = [0 0 0]; 
+        
+        model.congroups_1stlvl.names    = {'TonicPhasicPPIConcat'};
+        model.congroups_1stlvl.names_cons = options.stats.firstlvl.contrasts.names.tonic_concat_ppi;
+        model.contrasts_1stlvl.indices  = {1:numel(options.stats.firstlvl.contrasts.names.tonic_concat_ppi)};
+        model.congroups_2ndlvl.names    = {'TonicPhasicPPIConcat'};
+        model.congroups_2ndlvl.names_cons = options.stats.secondlvl.contrasts.names.tonic_concat_ppi;
+        model.contrasts_2ndlvl.indices  = {1:numel(options.stats.secondlvl.contrasts.names.tonic_concat_ppi)};
         model.contrasts_2ndlvl.Ftest    = {false};
         
 end
-        
-% modelname = [basisF '_tonic_only'];
-% basisF = 'FIR'; % Finite Impulse Response model
-% basisF = 'Fourier'; % Fourier set with Hanning window
 
 end

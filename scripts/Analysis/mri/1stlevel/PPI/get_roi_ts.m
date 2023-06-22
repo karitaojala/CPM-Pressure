@@ -126,7 +126,8 @@ for i = 1:numel(xY) %loop across all ROIs
     end
 end
 %now save
-mat_f = [SPM.swd filesep prep 'VOIs.mat'];
+%mat_f = [SPM.swd filesep prep 'VOIs.mat'];
+mat_f = [prep 'VOIs.mat'];
 save(mat_f,'data');
 
 cd(cwd);
@@ -146,7 +147,8 @@ end
 
 
 function [y, XYZ] = get_ts(SPM,xY,V_epi, V_wmean_scan, N_back_scan, V_beta)
-[~, XYZmm, ~] = spm_ROI(xY, V_epi(1)); % get the voxels in the image
+%[~, XYZmm, ~] = spm_ROI(xY, V_epi(1)); % get the voxels in the image
+[~, XYZmm, ~] = spm_ROI(xY, V_wmean_scan); % get the voxels in the image
 XYZ = mean(XYZmm,2);
 [oXYZvox, ~]  = transform_back(XYZmm, V_wmean_scan, V_epi(1), N_back_scan, 1);
 

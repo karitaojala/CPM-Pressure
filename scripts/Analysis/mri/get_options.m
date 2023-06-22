@@ -1,6 +1,6 @@
 function [options] = get_options()
 
-options.spinal = true; % current analysis volume (spinal/brain)
+options.spinal = false; % current analysis volume (spinal/brain)
 
 % Paths
 hostname = char(getHostName(java.net.InetAddress.getLocalHost));
@@ -129,6 +129,9 @@ options.stats.firstlvl.contrasts.names.tonic_concat = {'TonicOnset-CON' 'TonicOn
     'PhasicOnset-CON' 'PhasicOnset-EXP' 'PhasicOnset-CON-EXP-avg' 'PhasicOnset-CON-EXP-diff'...
     'PhasicStimInd-CON' 'PhasicStimInd-EXP' 'PhasicStimInd-CON-EXP-avg' 'PhasicStimInd-CON-EXP-diff'...
     'VASOnset'};
+options.stats.firstlvl.contrasts.names.tonic_concat_ppi = {'Timecourse' ...
+    'TonicOnset-CON' 'TonicPPI-CON' 'TonicOnset-EXP' 'TonicPPI-EXP' 'TonicPPI-CON-EXP-diff'...
+    'PhasicOnset-CON' 'PhasicPPI-CON' 'PhasicOnset-EXP' 'PhasicPPI-EXP' 'PhasicPPI-CON-EXP-diff'};
 options.stats.firstlvl.contrasts.names.cpm = {'Phasic CON-EXP'};
 options.stats.firstlvl.contrasts.names.cpmtime = {'TonicCond EXP-CON' 'StimIndex' 'TonicCond X StimIndex'};
 options.stats.firstlvl.contrasts.names.physioreg = {'PhysioReg' 'MotionReg'};
@@ -137,30 +140,29 @@ options.stats.firstlvl.contrasts.names.fourier = {'Phasic-baseline' 'VAS-baselin
 options.stats.firstlvl.contrasts.conrepl.hrf = 'replsc';
 options.stats.firstlvl.contrasts.conrepl.fir = 'replsc'; % contrasts not replicated across sessions because sessions different conditions
 options.stats.firstlvl.contrasts.conrepl.fourier = 'replsc';
-options.stats.firstlvl.contrasts.delete = 0;
+options.stats.firstlvl.contrasts.delete = 1;
 
 options.stats.firstlevel.ppi.smooth_kernel = 0; % no smoothing
-options.stats.firstlevel.ppi.roi_coords = [-4, -45, -152; ... % Tonic Onset Non-painful > baseline peak C5
+
+options.stats.firstlevel.ppi.brain.roi_coords = [-4, -45, -152; ... % Tonic Onset Non-painful > baseline peak C5
                                            0, -48, -174; ... % Tonic Onset Painful > baseline peak C6/C7
                                            -1, -48, -174; ... % Tonic Onset Painful > non-painful peak C6/C7
-                                           2, -46, -136];    % Phasic Onset average peak C4
-if options.spinal
-    options.stats.firstlevel.ppi.roi_sphere_radius = 2; % mm
-    options.stats.firstlevel.ppi.roi_search_radius = 1; % mm
-    options.stats.firstlevel.ppi.roi_names = {'Tonic-CON-peak' 'Tonic-EXP-peak' 'Tonic-diff-peak' 'Phasic-avg-peak'}; 
-    options.stats.firstlevel.ppi.roi_Tcons = [1 2 4 15]; % number of T-contrast for each ROI to look at
-else
-    options.stats.firstlevel.ppi.roi_sphere_radius = 8; % mm
-    options.stats.firstlevel.ppi.roi_search_radius = 6; % mm
-    options.stats.firstlevel.ppi.roi_names = {'ACC_LR' 'RVM_LR' 'PAG_LR'}; 
-end
+                                           2, -46, -136];    % Phasic Onset average peak C4              
+options.stats.firstlevel.ppi.brain.roi_sphere_radius = 2; % mm
+options.stats.firstlevel.ppi.brain.roi_search_radius = 1; % mm
+options.stats.firstlevel.ppi.brain.roi_names = {'Tonic-CON-peak' 'Tonic-EXP-peak' 'Tonic-diff-peak' 'Phasic-avg-peak'}; 
+options.stats.firstlevel.ppi.brain.roi_Tcons = [1 2 4 15]; % number of T-contrast for each ROI to look at
+    
+% options.stats.firstlevel.ppi.spinal.roi_sphere_radius = 8; % mm
+% options.stats.firstlevel.ppi.spinal.roi_search_radius = 6; % mm
+options.stats.firstlevel.ppi.spinal.roi_names = {'ACC_LR' 'RVM_LR' 'PAG_LR'}; 
 
 options.stats.secondlvl.contrasts.names = options.stats.firstlvl.contrasts.names;
 options.stats.secondlvl.contrasts.direction = 1;
 options.stats.secondlvl.contrasts.conrepl.hrf = 'none';
 options.stats.secondlvl.contrasts.conrepl.fir = 'none';
 options.stats.secondlvl.contrasts.conrepl.fourier = 'none';
-options.stats.secondlvl.contrasts.delete = 0;
+options.stats.secondlvl.contrasts.delete = 1;
 
 options.stats.secondlvl.tfce.analysis = 'onesample'; % 1-sample t-test
 options.stats.secondlvl.tfce.tails = 2; % 2-tailed
