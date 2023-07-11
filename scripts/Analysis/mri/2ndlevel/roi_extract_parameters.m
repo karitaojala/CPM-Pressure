@@ -16,6 +16,7 @@ for con = contrasts
     
     for roi = rois
         
+        
         roi_name = options.stats.secondlvl.roi.names{roi};
         roi_file = fullfile(roipath,[roi_name '.nii']);
         if options.spinal

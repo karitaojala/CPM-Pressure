@@ -5,8 +5,8 @@ addpath(options.path.spmdir)
 % addpath(genpath(fullfile(options.path.spmdir,'toolbox')))
 addpath(genpath(options.path.scriptdir))
 
-% subj = options.subj.all_subs;
-subj = options.subj.all_subs([1:34 36:end]); % 42 excluded from brain PPI as no spinal Tonic ROIs (out of FOV)
+subj = options.subj.all_subs;
+% subj = options.subj.all_subs([1:34 36:end]); % 42 excluded from brain PPI as no spinal Tonic ROIs (out of FOV)
 % subj = options.subj.all_subs(1:21);
 % subj = options.subj.all_subs(22:end);
 % subj = options.subj.all_subs(36:end);
@@ -15,9 +15,10 @@ n_proc = 1;
 
 % First change options.spinal in get_options.m!
 if options.spinal
+    %analysis_version = '13Apr23-spinal';
     analysis_version = '20Jun23-spinal';
 else
-    analysis_version = '20Jun23-brain';
+    analysis_version = '13Apr23-brain';
 end
 modelNo = 6;
 [model,options] = get_model(options,modelNo);
@@ -28,14 +29,14 @@ modelNo = 6;
 % 5 = HRF - tonic phasic pmod with time (stimulus index) - concatenated design (EXP/CON different columns) - RETROICOR, noise ROI WM CSF WMxCSF, 24 motion
 
 % Contrast and ROI settings
-contrasts = 1:11;%[1:3 13:14 17:18];
+contrasts = [6 7 12 13];%1:13;%1:21;%[3 5:7 9 11:13];%[1:3 13:14 17:18];
 % contrasts = [4:12 15:16 19:21];%[1:2 13:14 17:18];
 compare_cond = false;
 roitype = 'Clusters'; % or Anatomical (or PPI)
 if options.spinal
-    rois = 1;%1:4;%8;%1:6; % set to 0 if no ROI
+    rois = 2:3;%1:3;%1:4;%8;%1:6; % set to 0 if no ROI
 else
-    rois = 1:4;%[1 10:11];%1:11;
+    rois = 0;%1:4;%[1 10:11];%1:11;
 end
 
 % create a pipeline for physio scripts
@@ -47,18 +48,18 @@ run_create_onsets               = false;
 run_firstlevel_mask             = false;
 run_firstlevel_model            = false;
 run_firstlevel_contrasts        = false;
-run_firstlevel_smoothnorm       = true;
-    run_norm                    = true;
-    run_smooth                  = true;
+run_firstlevel_smoothnorm       = false;
+    run_norm                    = false;
+    run_smooth                  = false;
     
 run_ppi_init                    = false;
     
 run_secondlevel_mask            = false; 
 run_spinal_masks                = false;
-run_secondlevel_model_contrasts = true;
-    estimate_model              = true;
+run_secondlevel_model_contrasts = false;
+    estimate_model              = false;
     
-run_tfce                        = false;
+run_tfce                        = true;
 run_extract_tfce_results        = false;
 
 run_roi_extract_param           = false;
@@ -132,7 +133,7 @@ if run_secondlevel_model_contrasts
 end
 
 if run_tfce
-    tfce_wrapper(options,analysis_version,model,subj,contrasts)
+    tfce_wrapper(options,analysis_version,model,rois,contrasts)
 end
 
 if run_extract_tfce_results

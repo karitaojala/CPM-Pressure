@@ -244,23 +244,21 @@ for sub = subj
                     % ROI timecourse contrast
                     conweights(cn,1) = 1; cn = cn + 1; % 1) Timecourse contrast
                     
-                    % Tonic onset contrasts
-                    conweights(cn,2) = 1; cn = cn + 1; % 2) CON contrast
-                    conweights(cn,4) = 1; cn = cn + 1; % 3) EXP contrast
+                    % Tonic contrasts
+                    conweights(cn,2) = 1; cn = cn + 1; % 2) CON onset contrast
+                    conweights(cn,3) = 1; cn = cn + 1; % 3) CON PPI contrast
+                    conweights(cn,4) = 1; cn = cn + 1; % 4) EXP onset contrast
+                    conweights(cn,5) = 1; cn = cn + 1; % 5) EXP PPI contrast
+                    conweights(cn,[3 5]) = [1 1]; cn = cn + 1;  % 6) EXP/CON average PPI contrast
+                    conweights(cn,[3 5]) = [-1 1]; cn = cn + 1; % 7) EXP > CON PPI contrast
                     
-                    % Tonic PPI contrasts
-                    conweights(cn,3) = 1; cn = cn + 1; % 4) CON contrast
-                    conweights(cn,5) = 1; cn = cn + 1; % 5) EXP contrast
-                    conweights(cn,[3 5]) = [-1 1]; cn = cn + 1; % 6) EXP > CON contrast
-                    
-                    % Phasic onset contrasts
-                    conweights(cn,6) = 1; cn = cn + 1; % 7) CON contrast
-                    conweights(cn,8) = 1; cn = cn + 1; % 8) EXP contrast
-                    
-                    % Phasic PPI contrasts
-                    conweights(cn,7) = 1; cn = cn + 1; % 9) CON contrast
-                    conweights(cn,9) = 1; cn = cn + 1; % 10) EXP contrast
-                    conweights(cn,[7 9]) = [-1 1]; cn = cn + 1; % 11) EXP > CON contrast
+                    % Phasic contrasts
+                    conweights(cn,6) = 1; cn = cn + 1; % 8) CON onset contrast
+                    conweights(cn,7) = 1; cn = cn + 1; % 9) CON PPI contrast
+                    conweights(cn,8) = 1; cn = cn + 1; % 10) EXP onset contrast
+                    conweights(cn,9) = 1; cn = cn + 1; % 11) EXP PPI contrast
+                    conweights(cn,[7 9]) = [1 1]; cn = cn + 1;  % 12) EXP/CON average PPI contrast
+                    conweights(cn,[7 9]) = [-1 1]; % 13) EXP > CON contrast
                     
                     conrepl = 'none'; % no replication of contrasts across sessions when all runs concatenated in a single session
                     

@@ -20,10 +20,9 @@ for roi = rois
         if ~exist(secondlvlpath, 'dir'); mkdir(secondlvlpath); end
         
         secondlvl_maskpath = fullfile(options.path.mridir,'2ndlevel','meanmasks');
-        conprefix = [options.preproc.smooth_prefix options.preproc.norm_prefix];
+        conprefix = options.preproc.normsmooth_prefix;
         
         clear matlabbatch
-        matlabbatch{1}.spm.stats.factorial_design.cov = struct('c', {}, 'cname', {}, 'iCFI', {}, 'iCC', {});
         matlabbatch{1}.spm.stats.factorial_design.multi_cov = struct('files', {}, 'iCFI', {}, 'iCC', {});
         matlabbatch{1}.spm.stats.factorial_design.masking.tm.tm_none = 1;
         matlabbatch{1}.spm.stats.factorial_design.masking.im = 1;
@@ -31,6 +30,28 @@ for roi = rois
         matlabbatch{1}.spm.stats.factorial_design.globalc.g_omit = 1;
         matlabbatch{1}.spm.stats.factorial_design.globalm.gmsca.gmsca_no = 1;
         matlabbatch{1}.spm.stats.factorial_design.globalm.glonorm = 1;
+        
+        if model.covariate
+            
+            if strcmp(model.name,'HRF_phasic_tonic_pmod_time_concat_VerbRepcov_fullPhysio')
+                covdata = load(fullfile(options.path.mridir,'..','..','verbalreportCPM.mat'));
+                covvalues = covdata.verbal_cpm';
+                covvalues = covvalues-mean(covvalues); % mean center
+                covname = 'VerbalCPM';
+            elseif strcmp(model.name,'HRF_phasic_tonic_pmod_time_concat_CPMcov_fullPhysio')
+                covdata = load(fullfile(options.path.mridir,'..','..','meanbehavCPM.mat'));
+                covvalues = covdata.behav_cpm';
+                covvalues = covvalues-mean(covvalues); % mean center
+                covname = 'BehavCPM';
+            end
+            matlabbatch{1}.spm.stats.factorial_design.cov.c = covvalues;
+            matlabbatch{1}.spm.stats.factorial_design.cov.cname = covname;
+            matlabbatch{1}.spm.stats.factorial_design.cov.iCFI = 1;
+            matlabbatch{1}.spm.stats.factorial_design.cov.iCC = 1;
+            
+        else
+            matlabbatch{1}.spm.stats.factorial_design.cov = struct('c', {}, 'cname', {}, 'iCFI', {}, 'iCC', {});
+        end
         
         matlabbatch{2}.spm.stats.fmri_est.write_residuals = 0;
         matlabbatch{2}.spm.stats.fmri_est.method.Classical = 1;
@@ -50,11 +71,9 @@ for roi = rois
                 elseif strcmp(congroup,'TonicPressure')
                     conname = options.stats.secondlvl.contrasts.names.tonic{con_ind};
                 elseif strcmp(congroup,'TonicPhasicTimeConcat')
-                    conname = options.stats.secondlvl.contrasts.names.tonic_concat{con_ind};
+                    conname = options.stats.secondlvl.contrasts.names.tonic_concat{con};
                 elseif strcmp(congroup,'TonicPhasicPPIConcat')
-                    conname = options.stats.secondlvl.contrasts.names.tonic_concat_ppi{con_ind};
-                elseif strcmp(congroup,'CPM')
-                    conname = options.stats.secondlvl.contrasts.names.cpm{con};
+                    conname = options.stats.secondlvl.contrasts.names.tonic_concat_ppi{con};
                 elseif strcmp(congroup,'PhysioReg')
                     conname = options.stats.secondlvl.contrasts.names.physioreg{con};
                 elseif strcmp(congroup,'HRV-RVT')
@@ -67,6 +86,20 @@ for roi = rois
                 matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = actualname;
                 matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = options.stats.secondlvl.contrasts.direction;
                 matlabbatch{3}.spm.stats.con.consess{1}.tcon.sessrep = options.stats.secondlvl.contrasts.conrepl.hrf;
+                
+                matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = [actualname '-1'];
+                matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = -options.stats.secondlvl.contrasts.direction;
+                matlabbatch{3}.spm.stats.con.consess{2}.tcon.sessrep = options.stats.secondlvl.contrasts.conrepl.hrf;
+                
+                if model.covariate
+                    matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = [covname '+'];
+                    matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = [0 1];
+                    matlabbatch{3}.spm.stats.con.consess{3}.tcon.sessrep = options.stats.secondlvl.contrasts.conrepl.hrf;
+                    
+                    matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = [covname '-'];
+                    matlabbatch{3}.spm.stats.con.consess{4}.tcon.weights = [0 -1];
+                    matlabbatch{3}.spm.stats.con.consess{4}.tcon.sessrep = options.stats.secondlvl.contrasts.conrepl.hrf;
+                end
                 
             else
                 contrastpath = secondlvlpath;
@@ -84,7 +117,11 @@ for roi = rois
                 clear conlist
                 for sub = 1:numel(subj)
                     name = sprintf('sub%03d',subj(sub));
-                    conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name,roi_name);
+                    if model.covariate
+                        conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name_1stlvl,roi_name);
+                    else
+                        conpathsub = fullfile(options.path.mridir,name,'1stlevel',['Version_' analysis_version],model.name,roi_name);
+                    end
                     conlist(sub) = cellstr(spm_select('ExtFPList',conpathsub,['^' conprefix 'con_' con_id '.nii$'],1)); %#ok<*AGROW>
                 end
                 %conlist = cellstr(spm_select('ExtFPList',conpath,['^*_00' con_id '.*.nii$'],1));

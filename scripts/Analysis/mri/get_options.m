@@ -1,6 +1,6 @@
 function [options] = get_options()
 
-options.spinal = false; % current analysis volume (spinal/brain)
+options.spinal = true; % current analysis volume (spinal/brain)
 
 % Paths
 hostname = char(getHostName(java.net.InetAddress.getLocalHost));
@@ -130,8 +130,14 @@ options.stats.firstlvl.contrasts.names.tonic_concat = {'TonicOnset-CON' 'TonicOn
     'PhasicStimInd-CON' 'PhasicStimInd-EXP' 'PhasicStimInd-CON-EXP-avg' 'PhasicStimInd-CON-EXP-diff'...
     'VASOnset'};
 options.stats.firstlvl.contrasts.names.tonic_concat_ppi = {'Timecourse' ...
-    'TonicOnset-CON' 'TonicPPI-CON' 'TonicOnset-EXP' 'TonicPPI-EXP' 'TonicPPI-CON-EXP-diff'...
-    'PhasicOnset-CON' 'PhasicPPI-CON' 'PhasicOnset-EXP' 'PhasicPPI-EXP' 'PhasicPPI-CON-EXP-diff'};
+    'TonicOnset-CON' 'TonicPPI-CON' 'TonicOnset-EXP' 'TonicPPI-EXP' 'TonicPPI-CON-EXP-avg' 'TonicPPI-CON-EXP-diff'...
+    'PhasicOnset-CON' 'PhasicPPI-CON' 'PhasicOnset-EXP' 'PhasicPPI-EXP' 'PhasicPPI-CON-EXP-avg' 'PhasicPPI-CON-EXP-diff'};
+options.stats.firstlvl.contrasts.names.tonic_concat_cpmcov = {'TonicOnset-CON' 'TonicOnset-EXP' 'TonicOnset-CON-EXP-avg' 'TonicOnset-CON-EXP-diff'...
+    'TonicPressure-CON' 'TonicPressure-EXP' 'TonicPressure-CON-EXP-avg' 'TonicPressure-CON-EXP-diff'...
+    'TonicxPhasic-CON' 'TonicxPhasic-EXP' 'TonicxPhasic-CON-EXP-avg' 'TonicxPhasic-CON-EXP-diff'...
+    'PhasicOnset-CON' 'PhasicOnset-EXP' 'PhasicOnset-CON-EXP-avg' 'PhasicOnset-CON-EXP-diff'...
+    'PhasicStimInd-CON' 'PhasicStimInd-EXP' 'PhasicStimInd-CON-EXP-avg' 'PhasicStimInd-CON-EXP-diff'...
+    'VASOnset'};
 options.stats.firstlvl.contrasts.names.cpm = {'Phasic CON-EXP'};
 options.stats.firstlvl.contrasts.names.cpmtime = {'TonicCond EXP-CON' 'StimIndex' 'TonicCond X StimIndex'};
 options.stats.firstlvl.contrasts.names.physioreg = {'PhysioReg' 'MotionReg'};
@@ -140,7 +146,7 @@ options.stats.firstlvl.contrasts.names.fourier = {'Phasic-baseline' 'VAS-baselin
 options.stats.firstlvl.contrasts.conrepl.hrf = 'replsc';
 options.stats.firstlvl.contrasts.conrepl.fir = 'replsc'; % contrasts not replicated across sessions because sessions different conditions
 options.stats.firstlvl.contrasts.conrepl.fourier = 'replsc';
-options.stats.firstlvl.contrasts.delete = 1;
+options.stats.firstlvl.contrasts.delete = 0;
 
 options.stats.firstlevel.ppi.smooth_kernel = 0; % no smoothing
 
@@ -162,10 +168,11 @@ options.stats.secondlvl.contrasts.direction = 1;
 options.stats.secondlvl.contrasts.conrepl.hrf = 'none';
 options.stats.secondlvl.contrasts.conrepl.fir = 'none';
 options.stats.secondlvl.contrasts.conrepl.fourier = 'none';
-options.stats.secondlvl.contrasts.delete = 1;
+options.stats.secondlvl.contrasts.delete = 0;
 
-options.stats.secondlvl.tfce.analysis = 'onesample'; % 1-sample t-test
-options.stats.secondlvl.tfce.tails = 2; % 2-tailed
+options.stats.secondlvl.tfce.permutations = 500;%5000;
+%options.stats.secondlvl.tfce.analysis = 'onesample'; % 1-sample t-test
+%options.stats.secondlvl.tfce.tails = 2; % 2-tailed
 
 if options.spinal
     options.stats.secondlvl.roi.names = {'DorsalHorn_level_5_L' 'DorsalHorn_level_5_R' ...
