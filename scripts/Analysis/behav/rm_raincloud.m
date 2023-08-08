@@ -77,7 +77,8 @@ for i = 1:n_plots_per_series
 end
 
 % determine spacing between plots
-spacing     = 2 * mean(mean(cellfun(@max, ks)));
+spacing_multiplier = 0.3;
+spacing     = spacing_multiplier * mean(mean(cellfun(@max, ks)));
 ks_offsets  = [0:n_plots_per_series-1] .* spacing;
 
 % flip so first plot in series is plotted on the *top*
@@ -94,11 +95,11 @@ end
 
 %% jitter for the raindrops
 
-jit_width = spacing / 8;
+jit_width = spacing;% / 4;
 
 % TO-DO: This should probably not be hardcoded either...
 % Although it can be overridden later
-raindrop_size = 100;
+raindrop_size = 25;%100;
 
 for i = 1:n_plots_per_series
     for j = 1:n_series
@@ -116,6 +117,10 @@ cell_means = cellfun(@mean, data);
 
 hold on
 
+scatteredge = [118, 113, 113]./255;
+
+series_offset = 0;
+
 % patches
 for i = 1:n_plots_per_series
     for j = 1:n_series
@@ -124,7 +129,8 @@ for i = 1:n_plots_per_series
         h.p{i, j} = patch('Faces', faces{i, j}, 'Vertices', verts{i, j}, 'FaceVertexCData', colours(j, :), 'FaceColor', 'flat', 'EdgeColor', 'none', 'FaceAlpha', 0.5);
         
         % scatter rainclouds
-        h.s{i, j} = scatter(data{i, j}, -jit{i, j} + ks_offsets(i), 'MarkerFaceColor', colours(j, :), 'MarkerEdgeColor', 'none', 'MarkerFaceAlpha', 0.5, 'SizeData', raindrop_size);
+        h.s{i, j} = scatter(data{i, j}, -jit{i, j} + ks_offsets(i) - series_offset, 'MarkerFaceColor', colours(j, :), 'MarkerEdgeColor', scatteredge, 'MarkerFaceAlpha', 0.5, 'SizeData', raindrop_size);
+        series_offset = series_offset + spacing_multiplier;
         
     end
 end
@@ -142,7 +148,7 @@ end
 for i = 1:n_plots_per_series
     for j = 1:n_series
         
-        h.m(i, j) = scatter(cell_means(i, j), ks_offsets(i), 'MarkerFaceColor', colours(j, :), 'MarkerEdgeColor', [0 0 0], 'MarkerFaceAlpha', 1, 'SizeData', raindrop_size * 2, 'LineWidth', 2);
+        h.m(i, j) = scatter(cell_means(i, j), ks_offsets(i), 'MarkerFaceColor', colours(j, :), 'MarkerEdgeColor', [71 67 67]./255, 'MarkerFaceAlpha', 1, 'SizeData', raindrop_size * 2, 'LineWidth', 2);
     
     end
 end

@@ -25,18 +25,18 @@ for sub = subj
         
         if options.spinal % spinal ROI seeds for brain analysis
             
-            roi_name = options.stats.firstlevel.ppi.brain.roi_names{rois(roi)};
+            roi_name = options.stats.firstlvl.ppi.brain.roi_names{rois(roi)};
             xY(roi).def  = 'sphere';
-            xY(roi).xyz  = options.stats.firstlevel.ppi.brain.roi_coords(rois(roi),:)';
-            xY(roi).spec = options.stats.firstlevel.ppi.brain.roi_sphere_radius;
-            xY(roi).rad  = options.stats.firstlevel.ppi.brain.roi_search_radius;
+            xY(roi).xyz  = options.stats.firstlvl.ppi.brain.roi_coords(rois(roi),:)';
+            xY(roi).spec = options.stats.firstlvl.ppi.brain.roi_sphere_radius;
+            xY(roi).rad  = options.stats.firstlvl.ppi.brain.roi_search_radius;
             xY(roi).str  = roi_name;
             xY(roi).Ic   = numel(SPM.SPM.xCon); % F-contrast number -> last one
-            xY(roi).T    = options.stats.firstlevel.ppi.brain.roi_Tcons(rois(roi)); % Contrast number for effect of interest
+            xY(roi).T    = options.stats.firstlvl.ppi.brain.roi_Tcons(rois(roi)); % Contrast number for effect of interest
             
         else % brain ROI seeds for spinal analysis
             
-            roi_name = options.stats.firstlevel.ppi.spinal.roi_names{rois(roi)};
+            roi_name = options.stats.firstlvl.ppi.spinal.roi_names{rois(roi)};
             roi_file = fullfile(roipath,[roi_name '.nii']);
             
             xY(roi).name = strrep(roi_name,'_',' ');
@@ -75,7 +75,7 @@ for sub = subj
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{1}.string    = SPMfile;
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{2}.string    = meanepi;
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{3}.string    = epi2template;
-    matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{4}.evaluated = options.stats.firstlevel.ppi.smooth_kernel;
+    matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{4}.evaluated = options.stats.firstlvl.ppi.smooth_kernel;
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{5}.evaluated = xY;
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{6}.evaluated = Uu;
     matlabbatch{1}.cfg_basicio.run_ops.call_matlab.inputs{7}.evaluated = fullfile(ppipath,[name '-' options.volume_name '_ppi_roi_']);

@@ -14,6 +14,9 @@ library(r2mlm)
 data <- read.csv("C:/Data/CPM-Pressure/scripts/Analysis/behav/Experiment-01_ratings_table_long.csv")
 options(contrasts = c("contr.sum","contr.poly"))
 
+# Delete last subject (50), excluded from sample
+data <- data[!(data$Subject==50),]
+
 data$Subject <- factor(data$Subject)
 #data$Block <- factor(data$Block)
 data$Condition <- factor(data$Condition)
@@ -56,6 +59,8 @@ nlme_b2 <- nlme::lme(PainRating ~ Condition * BlockCentered * StimInBlockCentere
 nlme_b3 <- nlme::lme(PainRating ~ Condition * Block * StimInBlock,
                      random = ~ (Block*StimInBlock)|Subject, data = data, na.action=na.omit, 
                      control = nlme::lmeControl(maxIter = 1e8, msMaxIter = 1e8), method = "REML")
+
+#lmer_s1 <- lmer(PainRating ~ StimulusCentered * Condition + (1|Subject), REML = TRUE, data = data)
 
 car::Anova(nlme_s0, type = "III")
 car::Anova(nlme_s1, type = "III")

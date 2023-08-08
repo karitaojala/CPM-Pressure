@@ -15,12 +15,13 @@ n_proc = 1;
 
 % First change options.spinal in get_options.m!
 if options.spinal
-    %analysis_version = '13Apr23-spinal';
-    analysis_version = '20Jun23-spinal';
+    analysis_version = '13Apr23-spinal';
+%     analysis_version = '20Jun23-spinal';
 else
     analysis_version = '13Apr23-brain';
+    %analysis_version = '20Jun23-brain';
 end
-modelNo = 6;
+modelNo = 7;
 [model,options] = get_model(options,modelNo);
 % 1 = HRF - tonic phasic - RETROICOR, full motion (24 brain / 32 spinal)
 % 2 = HRF - tonic phasic - RETROICOR, noise ROI WMxCSF, full motion
@@ -29,14 +30,18 @@ modelNo = 6;
 % 5 = HRF - tonic phasic pmod with time (stimulus index) - concatenated design (EXP/CON different columns) - RETROICOR, noise ROI WM CSF WMxCSF, 24 motion
 
 % Contrast and ROI settings
-contrasts = [6 7 12 13];%1:13;%1:21;%[3 5:7 9 11:13];%[1:3 13:14 17:18];
+contrasts = [1:4 12:16];%[6 7 12 13];%1:2;%13:14;%[7 13];%%1:13;%1:21;%[3 5:7 9 11:13];%17:18];
 % contrasts = [4:12 15:16 19:21];%[1:2 13:14 17:18];
-compare_cond = false;
-roitype = 'Clusters'; % or Anatomical (or PPI)
+compare_cond = true;
+comparison_name = 'TonicPain';
+roitype = 'Anatomical'; % or Anatomical (or PPI)
+plottype = 2; % 1 = bar graph, 2 = raincloud
 if options.spinal
-    rois = 2:3;%1:3;%1:4;%8;%1:6; % set to 0 if no ROI
+    rois = 0;%1:6;%1:6;%2:3;%1:3;%1:4;%8;%1:6; % set to 0 if no ROI
+    seeds = 0;%1:3; 
 else
-    rois = 0;%1:4;%[1 10:11];%1:11;
+    rois = 0;%5:8;%1:11;%1:4;%[1 10:11];
+    seeds = 0;%1:4;
 end
 
 % create a pipeline for physio scripts
@@ -60,7 +65,6 @@ run_secondlevel_model_contrasts = false;
     estimate_model              = false;
     
 run_tfce                        = true;
-run_extract_tfce_results        = false;
 
 run_roi_extract_param           = false;
 run_roi_plot_param              = false;
@@ -136,16 +140,16 @@ if run_tfce
     tfce_wrapper(options,analysis_version,model,rois,contrasts)
 end
 
-if run_extract_tfce_results
-    extract_TFCE_thresholded(options,analysis_version,model,contrasts)
-end
+% if run_extract_tfce_results
+%     extract_TFCE_thresholded(options,analysis_version,model,contrasts)
+% end
 
 if run_roi_extract_param
-    roi_extract_parameters(options,analysis_version,model,contrasts,roitype,rois,subj)
+    roi_extract_parameters(options,analysis_version,model,contrasts,roitype,rois,seeds,subj)
 end
 
 if run_roi_plot_param
-    roi_plot_parameters(options,analysis_version,model,roitype,rois,contrasts,compare_cond)
+    roi_plot_parameters(options,analysis_version,model,roitype,rois,seeds,contrasts,compare_cond,comparison_name,plottype)
 end
 
 if run_roi_save_roi_hemispheres

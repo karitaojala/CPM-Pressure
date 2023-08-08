@@ -3,9 +3,9 @@ function secondlevel_contrasts_fmri(options,analysis_version,model,subj,estimate
 for roi = rois
     
     if any(rois) && options.spinal
-        roi_name = options.stats.firstlevel.ppi.spinal.roi_names{roi};
+        roi_name = options.stats.firstlvl.ppi.spinal.roi_names{roi};
     elseif any(rois) && ~options.spinal
-        roi_name = options.stats.firstlevel.ppi.brain.roi_names{roi};
+        roi_name = options.stats.firstlvl.ppi.brain.roi_names{roi};
     else
         roi_name = [];
     end

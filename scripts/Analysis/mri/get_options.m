@@ -1,6 +1,6 @@
 function [options] = get_options()
 
-options.spinal = true; % current analysis volume (spinal/brain)
+options.spinal = false; % current analysis volume (spinal/brain)
 
 % Paths
 hostname = char(getHostName(java.net.InetAddress.getLocalHost));
@@ -148,20 +148,20 @@ options.stats.firstlvl.contrasts.conrepl.fir = 'replsc'; % contrasts not replica
 options.stats.firstlvl.contrasts.conrepl.fourier = 'replsc';
 options.stats.firstlvl.contrasts.delete = 0;
 
-options.stats.firstlevel.ppi.smooth_kernel = 0; % no smoothing
+options.stats.firstlvl.ppi.smooth_kernel = 0; % no smoothing
 
 options.stats.firstlevel.ppi.brain.roi_coords = [-4, -45, -152; ... % Tonic Onset Non-painful > baseline peak C5
                                            0, -48, -174; ... % Tonic Onset Painful > baseline peak C6/C7
                                            -1, -48, -174; ... % Tonic Onset Painful > non-painful peak C6/C7
                                            2, -46, -136];    % Phasic Onset average peak C4              
-options.stats.firstlevel.ppi.brain.roi_sphere_radius = 2; % mm
-options.stats.firstlevel.ppi.brain.roi_search_radius = 1; % mm
-options.stats.firstlevel.ppi.brain.roi_names = {'Tonic-CON-peak' 'Tonic-EXP-peak' 'Tonic-diff-peak' 'Phasic-avg-peak'}; 
-options.stats.firstlevel.ppi.brain.roi_Tcons = [1 2 4 15]; % number of T-contrast for each ROI to look at
+options.stats.firstlvl.ppi.brain.roi_sphere_radius = 2; % mm
+options.stats.firstlvl.ppi.brain.roi_search_radius = 1; % mm
+options.stats.firstlvl.ppi.brain.roi_names = {'Tonic-CON-peak' 'Tonic-EXP-peak' 'Tonic-diff-peak' 'Phasic-avg-peak'}; 
+options.stats.firstlvl.ppi.brain.roi_Tcons = [1 2 4 15]; % number of T-contrast for each ROI to look at
     
-% options.stats.firstlevel.ppi.spinal.roi_sphere_radius = 8; % mm
-% options.stats.firstlevel.ppi.spinal.roi_search_radius = 6; % mm
-options.stats.firstlevel.ppi.spinal.roi_names = {'ACC_LR' 'RVM_LR' 'PAG_LR'}; 
+% options.stats.firstlvl.ppi.spinal.roi_sphere_radius = 8; % mm
+% options.stats.firstlvl.ppi.spinal.roi_search_radius = 6; % mm
+options.stats.firstlvl.ppi.spinal.roi_names = {'ACC_LR' 'RVM_LR' 'PAG_LR'}; 
 
 options.stats.secondlvl.contrasts.names = options.stats.firstlvl.contrasts.names;
 options.stats.secondlvl.contrasts.direction = 1;
@@ -180,6 +180,11 @@ if options.spinal
         'DorsalHorn_level_7_L' 'DorsalHorn_level_7_R' ...
         'Spinal_TonicOnset-EXPoverCON_SVC_c1' 'Spinal_PhasicOnset-EXPandCON_SVC_c1'}; % significant clusters
         % for anatomical ROIs divide p-value by 3 (per side; always Tonic left, Phasic right)
+        
+    options.stats.secondlvl.roi.plot_names = {{'Dorsal horn','Left C4'} {'Dorsal horn','Right C4'} ...
+        {'Dorsal horn','Left C5'} {'Dorsal horn','Right C5'} ...
+        {'Dorsal horn','Left C6'} {'Dorsal horn','Right C6'} ...
+        {'Conditioning stimulus','Painful > Non-painful cluster'} {'Test stimulus','Conditioning average cluster'}};
     
 else
     
@@ -187,6 +192,10 @@ else
         'ParietalOperculum_L' 'ParietalOperculum_R' 'PosteriorInsula_L' 'PosteriorInsula_R' ...
         'VMPFC_LR' 'RVM_LR' 'PAG_LR'}; 
         % for anatomical ROIs divide p-value by 11
+        
+    options.stats.secondlvl.roi.plot_names = {'Rostral ACC' {'Anterior insula','Left'} {'Anterior insula','Right'} 'dlPFC' ...
+        {'Parietal operculum','Left'} {'Parietal operculum','Right'} {'Posterior insula','Left'} {'Posterior insula','Right'} ...
+        'vmPFC' 'RVM' 'PAG'};
     
 end
 

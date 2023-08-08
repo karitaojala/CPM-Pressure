@@ -6,20 +6,22 @@ function tfce_wrapper(options,analysis_version,model,rois,contrasts)
 for roi = rois
     
     if any(rois) && options.spinal
-        roi_name = options.stats.firstlevel.ppi.spinal.roi_names{roi};
+        roi_name = options.stats.firstlvl.ppi.spinal.roi_names{roi};
     elseif any(rois) && ~options.spinal
-        roi_name = options.stats.firstlevel.ppi.brain.roi_names{roi};
+        roi_name = options.stats.firstlvl.ppi.brain.roi_names{roi};
     else
         roi_name = [];
     end
     
-    if options.spinal
-        volume_mask = fullfile(options.path.mridir,'2ndlevel','meanmasks','spinalmask_secondlevel_tfce.nii');
-    else
-        volume_mask = fullfile(options.path.mridir,'2ndlevel','meanmasks',options.stats.secondlvl.mask_name);
-    end
-    
     for con = contrasts
+        
+        if options.spinal && any(con == 1:11) % Tonic contrasts -> Left side mask
+            volume_mask = fullfile(options.path.mridir,'2ndlevel','meanmasks','r_spinalmask_secondlevel_tfce_dorsalhorn_L.nii');
+        elseif options.spinal && any(con == 12:19) % Phasic contrasts -> Right side mask
+            volume_mask = fullfile(options.path.mridir,'2ndlevel','meanmasks','r_spinalmask_secondlevel_tfce_dorsalhorn_R.nii');
+        else
+            volume_mask = fullfile(options.path.mridir,'2ndlevel','meanmasks',options.stats.secondlvl.mask_name);
+        end
         
         %% Christian Gaser TFCE
         

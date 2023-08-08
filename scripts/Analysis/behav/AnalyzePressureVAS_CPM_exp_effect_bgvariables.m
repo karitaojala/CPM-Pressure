@@ -56,6 +56,12 @@ elseif blocks_to_take == 2
     ratings_allsubs_mean_control = nanmean(squeeze(control_ratings(:,2,:)),2); 
 end
 
+exp_first5_mean = nanmean(exp_ratings(:,1,1:5),3);
+exp_last5_mean = nanmean(exp_ratings(:,1,end-4:end),3);
+
+con_first5_mean = nanmean(control_ratings(:,1,1:5),3);
+con_last5_mean = nanmean(control_ratings(:,1,end-4:end),3);
+
 % exp_1stblock_mean = nanmean(exp_ratings(:,1,:),3);
 % exp_2ndblock_mean = nanmean(exp_ratings(:,2,:),3);
 % 
@@ -67,58 +73,73 @@ end
 
 cpm_data = [ratings_allsubs_mean_control ratings_allsubs_mean_exp];
 cpm_diff_data = ratings_allsubs_mean_control-ratings_allsubs_mean_exp;
+
+cpm_data_time = [con_first5_mean con_last5_mean exp_first5_mean exp_last5_mean];
+cpm_diff_data_time = con_last5_mean-exp_last5_mean;
+
+%[~,ttest_p,~,ttest_stats] = ttest(ratings_allsubs_mean_control,ratings_allsubs_mean_exp,'tail','right')
+%addpath(cd,'..','Utils')
+%d = computeCohen_d(ratings_allsubs_mean_exp,ratings_allsubs_mean_exp,'paired')
+
 % cpm_data = [control_1stblock_vs_2ndblock exp_1stblock_vs_2ndblock];
 % cpm_diff_data = control_1stblock_vs_2ndblock-exp_1stblock_vs_2ndblock; % diff per subj for CON-EXP
 
 Subject = [1:2 4:13 15:18 20:27 29:34 37:40 42:49]';
 RatedCPM = cpm_diff_data;
+RatedCPM_First5_CON = con_first5_mean;
+RatedCPM_Last5_CON = con_last5_mean;
+RatedCPM_First5_EXP = exp_first5_mean;
+RatedCPM_Last5_EXP = exp_last5_mean;
+RatedCPM_Diff_CON = con_first5_mean-con_last5_mean;
+RatedCPM_Diff_EXP = exp_first5_mean-exp_last5_mean;
+RatedCPM_Diff_cond = RatedCPM_Diff_CON-RatedCPM_Diff_EXP;
+RatedCPM_DiffLast5_cond = con_last5_mean-exp_last5_mean;
 VerbalCPM = backgroundvar.SubjectiveCPM;
-cpmtable = table(Subject,RatedCPM,VerbalCPM);
-%writetable(cpmtable,'CPM_rated_reported.csv')
+% cpmtable = table(Subject,RatedCPM,VerbalCPM);%writetable(cpmtable,'CPM_rated_reported.csv')
 % writetable(cpmtable,'CPM_rated_reported_block1vs2.csv')
 % Scatterplot CPM effect magnitude vs. backgroundvar
 
 %% Subjective CPM
-cpm_diff_pos = cpm_diff_data(backgroundvar.SubjectiveCPM == 1);
-cpm_diff_zero = cpm_diff_data(backgroundvar.SubjectiveCPM == 0);
-cpm_diff_neg = cpm_diff_data(backgroundvar.SubjectiveCPM == -1);
+% cpm_diff_pos = cpm_diff_data(backgroundvar.SubjectiveCPM == 1);
+% cpm_diff_zero = cpm_diff_data(backgroundvar.SubjectiveCPM == 0);
+% cpm_diff_neg = cpm_diff_data(backgroundvar.SubjectiveCPM == -1);
+% 
+% aligned_resp = sum(cpm_diff_pos > 5) + sum(cpm_diff_neg < -5) + sum(abs(cpm_diff_zero) < 5);
+% conflicting_resp = sum(cpm_diff_pos < 5) + sum(cpm_diff_neg > -5) + sum(abs(cpm_diff_zero) > 5);
+% 
+% % Calculate between-subject error bars (SEM)
+% sem_pos = std(cpm_diff_pos)/sqrt(numel(cpm_diff_pos));
+% sem_zero = std(cpm_diff_zero)/sqrt(numel(cpm_diff_zero));
+% sem_neg = std(cpm_diff_neg)/sqrt(numel(cpm_diff_neg));
+% errorbars = [sem_pos sem_zero sem_neg];
+% 
+% clear bardata
+% bardata = [mean(cpm_diff_pos); mean(cpm_diff_zero); mean(cpm_diff_neg)];
 
-aligned_resp = sum(cpm_diff_pos > 5) + sum(cpm_diff_neg < -5) + sum(abs(cpm_diff_zero) < 5);
-conflicting_resp = sum(cpm_diff_pos < 5) + sum(cpm_diff_neg > -5) + sum(abs(cpm_diff_zero) > 5);
-
-% Calculate between-subject error bars (SEM)
-sem_pos = std(cpm_diff_pos)/sqrt(numel(cpm_diff_pos));
-sem_zero = std(cpm_diff_zero)/sqrt(numel(cpm_diff_zero));
-sem_neg = std(cpm_diff_neg)/sqrt(numel(cpm_diff_neg));
-errorbars = [sem_pos sem_zero sem_neg];
-
-clear bardata
-bardata = [mean(cpm_diff_pos); mean(cpm_diff_zero); mean(cpm_diff_neg)];
-
-figure('Position',[10 10 450 400]);
-
-b = bar(bardata,'LineWidth',1);
-b.FaceColor = 'flat';
-b.CData(1,:) = [0, 102, 204]./255;%[253, 216, 110]./255;
-b.CData(2,:) = [128, 128, 128]./255;
-b.CData(3,:) = [255, 77, 77]./255;%[239, 123, 5]./255;
-hold on
-
-errorbar(1:3,bardata',errorbars,'k','LineStyle','none','LineWidth',2,'CapSize',0)
-
-ylim([-10 10])
-set(gca,'xTickLabel', {sprintf('Hypoalgesia'),sprintf('No difference'),sprintf('Hyperalgesia')},'FontSize',10)
-%set(gca,'yAxisLabel', {'Rated CPM magnitude'},'FontSize',14)
-ylabel('Rated CPM magnitude','FontSize',14)
-set(gca,'yTick',-10:2:10,'FontSize',14)
-box off
-title({'Rated vs. verbally reported CPM'},'FontSize',14)
+% figure('Position',[10 10 450 400]);
+% 
+% b = bar(bardata,'LineWidth',1);
+% b.FaceColor = 'flat';
+% b.CData(1,:) = [0, 102, 204]./255;%[253, 216, 110]./255;
+% b.CData(2,:) = [128, 128, 128]./255;
+% b.CData(3,:) = [255, 77, 77]./255;%[239, 123, 5]./255;
+% hold on
+% 
+% errorbar(1:3,bardata',errorbars,'k','LineStyle','none','LineWidth',2,'CapSize',0)
+% 
+% ylim([-10 10])
+% set(gca,'xTickLabel', {sprintf('Hypoalgesia'),sprintf('No difference'),sprintf('Hyperalgesia')},'FontSize',10)
+% %set(gca,'yAxisLabel', {'Rated CPM magnitude'},'FontSize',14)
+% ylabel('Rated CPM magnitude','FontSize',14)
+% set(gca,'yTick',-10:2:10,'FontSize',14)
+% box off
+% title({'Rated vs. verbally reported CPM'},'FontSize',14)
 %;['N = ' num2str(numel(cpm_diff_pos)) ' - ' ...
 %    num2str(numel(cpm_diff_zero)) ' - ' num2str(numel(cpm_diff_neg))]
 
-[~,ttest_p,~,ttest_stats] = ttest2(cpm_diff_pos,cpm_diff_neg,'tail','right','Vartype','unequal')
-% % addpath(cd,'..','Utils')
-% d = computeCohen_d(cpm_diff_tonic,cpm_diff_phasic)
+%[~,ttest_p,~,ttest_stats] = ttest2(cpm_diff_pos,cpm_diff_neg,'tail','right','Vartype','unequal')
+%addpath(cd,'..','Utils')
+%d = computeCohen_d(cpm_diff_pos,cpm_diff_neg)
 
 %% Calibration order (tonic first vs. phasic first)
 % cpm_diff_tonic = cpm_diff_data(backgroundvar.Calibrationorder == 1);
@@ -204,6 +225,19 @@ title({'Rated vs. verbally reported CPM'},'FontSize',14)
 % [~,ttest_p,~,ttest_stats] = ttest2(cpm_diff_f,cpm_diff_m)
 % % addpath(cd,'..','Utils')
 % d = computeCohen_d(cpm_diff_f,cpm_diff_m)
+
+CalibrationOrder = backgroundvar.Calibrationorder;
+CalibrationOrder(CalibrationOrder == 2) = 0;
+Sex = NaN(size(backgroundvar.Sex));
+Sex(backgroundvar.Sex == 'F') = 1;
+Sex(backgroundvar.Sex == 'M') = 0;
+Age = backgroundvar.Age;
+BMI = backgroundvar.BMI;
+FirstBlock = conditions.Block1(1:no_subjects);
+LastBlock = conditions.Block4(1:no_subjects);
+cpmtable_all = table(Subject,Sex,Age,BMI,CalibrationOrder,FirstBlock,LastBlock,RatedCPM,RatedCPM_First5_CON,RatedCPM_Last5_CON,RatedCPM_First5_EXP,RatedCPM_Last5_EXP, ...
+    RatedCPM_Diff_CON, RatedCPM_Diff_EXP, RatedCPM_Diff_cond, RatedCPM_DiffLast5_cond, VerbalCPM);
+writetable(cpmtable_all,'CPM_rated_verbal_bgvar.csv')
 
 %% Scatterplot correlations
 % scattercolors = [30,129,176; 226,135,67]./255;

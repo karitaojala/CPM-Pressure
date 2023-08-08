@@ -159,3 +159,5 @@ lgd = legend([p_con,p_exp],{'Non-painful conditioning stimulus','Painful conditi
 %lgd.NumColumns = 2;
 legend('boxoff')
 title('Development of conditioned pain modulation over time','FontSize',14)
+
+box off
