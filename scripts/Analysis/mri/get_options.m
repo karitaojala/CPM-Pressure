@@ -1,6 +1,6 @@
 function [options] = get_options()
 
-options.spinal = false; % current analysis volume (spinal/brain)
+options.spinal = true; % current analysis volume (spinal/brain)
 
 % Paths
 hostname = char(getHostName(java.net.InetAddress.getLocalHost));
@@ -170,7 +170,7 @@ options.stats.secondlvl.contrasts.conrepl.fir = 'none';
 options.stats.secondlvl.contrasts.conrepl.fourier = 'none';
 options.stats.secondlvl.contrasts.delete = 0;
 
-options.stats.secondlvl.tfce.permutations = 500;%5000;
+options.stats.secondlvl.tfce.permutations = 5000;
 %options.stats.secondlvl.tfce.analysis = 'onesample'; % 1-sample t-test
 %options.stats.secondlvl.tfce.tails = 2; % 2-tailed
 

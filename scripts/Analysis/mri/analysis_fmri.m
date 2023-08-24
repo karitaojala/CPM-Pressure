@@ -19,9 +19,9 @@ if options.spinal
 %     analysis_version = '20Jun23-spinal';
 else
     analysis_version = '13Apr23-brain';
-    %analysis_version = '20Jun23-brain';
+%     analysis_version = '20Jun23-brain';
 end
-modelNo = 7;
+modelNo = 5;
 [model,options] = get_model(options,modelNo);
 % 1 = HRF - tonic phasic - RETROICOR, full motion (24 brain / 32 spinal)
 % 2 = HRF - tonic phasic - RETROICOR, noise ROI WMxCSF, full motion
@@ -30,19 +30,21 @@ modelNo = 7;
 % 5 = HRF - tonic phasic pmod with time (stimulus index) - concatenated design (EXP/CON different columns) - RETROICOR, noise ROI WM CSF WMxCSF, 24 motion
 
 % Contrast and ROI settings
-contrasts = [1:4 12:16];%[6 7 12 13];%1:2;%13:14;%[7 13];%%1:13;%1:21;%[3 5:7 9 11:13];%17:18];
+contrasts = 16;%15:16;%[6 7 12 13]%%%1:2;%13:14;%[7 13];%%1:13;%1:21;%[3 5:7 9 11:13];%17:18];
 % contrasts = [4:12 15:16 19:21];%[1:2 13:14 17:18];
 compare_cond = true;
 comparison_name = 'TonicPain';
 roitype = 'Anatomical'; % or Anatomical (or PPI)
 plottype = 2; % 1 = bar graph, 2 = raincloud
 if options.spinal
-    rois = 0;%1:6;%1:6;%2:3;%1:3;%1:4;%8;%1:6; % set to 0 if no ROI
+    rois = 0;%1:3;%1:6;%1:6;%2:3;%1:3;%1:4;%8;%1:6; % set to 0 if no ROI
     seeds = 0;%1:3; 
 else
-    rois = 0;%5:8;%1:11;%1:4;%[1 10:11];
+    rois = 0;%1:3;%5:8;%1:11;%1:4;%[1 10:11];
     seeds = 0;%1:4;
 end
+
+targetfolder = fullfile(options.path.basedir,'article_shared\mri\CPM_FigureS2C_covariate_verbalCPM_test_stimulus_by_trial_average_spinalcord\1stlevel_conimages');
 
 % create a pipeline for physio scripts
 
@@ -73,6 +75,8 @@ run_roi_save_roi_hemispheres    = false;
 run_delete_folders              = false;
     folders_level2delete = 1; % 1: first level folders, 2: second level folders
     delete_model_only    = false; % delete only the specific model folder (or entire analysis version folder)
+
+run_copy_cons_1stlvl            = false;
 
 if run_create_onsets
     create_onsets(options,subj,onsets_as_scans,debug_plot)
@@ -158,4 +162,8 @@ end
 
 if run_delete_folders
    delete_folders(options,analysis_version,model,subj,folders_level2delete,delete_model_only)
+end
+
+if run_copy_cons_1stlvl
+    copy_contrasts_1stlevel(options,analysis_version,model,subj,contrasts,rois,targetfolder)
 end

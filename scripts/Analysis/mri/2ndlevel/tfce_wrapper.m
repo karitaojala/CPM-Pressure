@@ -15,10 +15,12 @@ for roi = rois
     
     for con = contrasts
         
-        if options.spinal && any(con == 1:11) % Tonic contrasts -> Left side mask
+        if options.spinal && any(con == 1:11) && ~model.PPI % Tonic contrasts -> Left side mask
             volume_mask = fullfile(options.path.mridir,'2ndlevel','meanmasks','r_spinalmask_secondlevel_tfce_dorsalhorn_L.nii');
-        elseif options.spinal && any(con == 12:19) % Phasic contrasts -> Right side mask
+        elseif options.spinal && any(con == 12:20) && ~model.PPI % Phasic contrasts -> Right side mask
             volume_mask = fullfile(options.path.mridir,'2ndlevel','meanmasks','r_spinalmask_secondlevel_tfce_dorsalhorn_R.nii');
+        elseif options.spinal && model.PPI % dorsal horn mask
+            volume_mask = fullfile(options.path.mridir,'2ndlevel','meanmasks','r_spinalmask_secondlevel_tfce_dorsalhorn.nii');
         else
             volume_mask = fullfile(options.path.mridir,'2ndlevel','meanmasks',options.stats.secondlvl.mask_name);
         end
@@ -49,7 +51,11 @@ for roi = rois
         matlabbatch{1}.spm.tools.tfce_estimate.nproc = 2;
         matlabbatch{1}.spm.tools.tfce_estimate.mask = {volume_mask};
         matlabbatch{1}.spm.tools.tfce_estimate.conspec.titlestr = contrast_name;
-        matlabbatch{1}.spm.tools.tfce_estimate.conspec.contrasts = 1;
+        if model.covariate
+            matlabbatch{1}.spm.tools.tfce_estimate.conspec.contrasts = 3; % covariate contrasts are number 3 and 4, need to do only 1 with TFCE
+        else
+            matlabbatch{1}.spm.tools.tfce_estimate.conspec.contrasts = 1;
+        end
         matlabbatch{1}.spm.tools.tfce_estimate.conspec.n_perm = options.stats.secondlvl.tfce.permutations;
         matlabbatch{1}.spm.tools.tfce_estimate.nuisance_method = 2;
         matlabbatch{1}.spm.tools.tfce_estimate.tbss = 0;
